@@ -1,0 +1,7 @@
+**/*.rs.bk
+bin/
+target/
+.idea/
+.vscode/
+*.lock
+*.txt
