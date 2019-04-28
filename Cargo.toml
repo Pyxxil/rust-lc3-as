@@ -15,7 +15,6 @@ path = "bin/main.rs"
 colored = "1.6"
 clap = "~2.29"
 lazy_static = "1.0"
-drain-while = "0.1.0"
 
 [profile.release]
 lto = true

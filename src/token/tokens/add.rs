@@ -2,7 +2,6 @@ use token::tokens::traits::*;
 
 use token::TokenType;
 
-use drain_while::DrainWhileable;
 use notifier;
 use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
 
@@ -58,7 +57,7 @@ impl Requirements for Add {
                 | TokenType::Hexadecimal(_)
                 | TokenType::Register(_) => {
                     count.set(count.get() + 1);
-                    count.get() < max
+                    count.get() <= max
                 }
                 _ => false,
             })

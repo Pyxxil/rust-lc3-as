@@ -5,9 +5,6 @@ use token::TokenType;
 use notifier;
 use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
 
-extern crate drain_while;
-use drain_while::DrainWhileable;
-
 use std::cell::Cell;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -47,7 +44,7 @@ impl Requirements for And {
     }
 
     fn consume(&mut self, mut tokens: Vec<TokenType>) -> Vec<TokenType> {
-        let (min, _max) = self.require_range();
+        let (min, max) = self.require_range();
         let (column, line, length) = (self.column as usize, self.line as usize, self.token.len());
 
         let count = Cell::new(0);
@@ -60,7 +57,7 @@ impl Requirements for And {
                 | TokenType::Hexadecimal(_)
                 | TokenType::Register(_) => {
                     count.set(count.get() + 1);
-                    true
+                    count.get() <= max
                 }
                 _ => false,
             })

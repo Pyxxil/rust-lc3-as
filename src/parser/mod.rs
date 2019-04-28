@@ -20,8 +20,6 @@ impl Parser {
             tokens = token.consume(tokens);
             self.tokens.push(token);
         }
-
-        println!("{:#?}", self.tokens);
     }
 
     pub fn is_okay(&self) -> bool {

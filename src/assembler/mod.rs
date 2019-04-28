@@ -4,7 +4,7 @@ use parser::Parser;
 use token;
 use token::tokens::traits::Assemble;
 
-extern crate drain_while;
+use notifier::{add_notifier, StdoutNotifier};
 
 pub struct Assembler {
     file: String,
@@ -12,6 +12,7 @@ pub struct Assembler {
 
 impl Assembler {
     pub fn new(file: String) -> Assembler {
+        add_notifier(StdoutNotifier::Colour);
         Assembler { file }
     }
 
@@ -28,10 +29,10 @@ impl Assembler {
                 let tokens = self.do_first_pass(parser);
                 self.do_second_pass(&tokens);
             } else {
-                println!("Assembly failed.")
+                println!("Assembly failed.");
             }
         } else {
-            println!("Assembly failed.")
+            println!("Assembly failed.");
         }
     }
 
@@ -46,9 +47,5 @@ impl Assembler {
             .collect()
     }
 
-    fn do_second_pass(&self, tokens: &[token::TokenType]) {
-        for token in tokens {
-            println!("{:#?}", token);
-        }
-    }
+    fn do_second_pass(&self, tokens: &[token::TokenType]) {}
 }
