@@ -1,9 +1,9 @@
 use token::tokens::traits::*;
 
-use token::TokenType;
+use token::Token;
 
 use notifier;
-use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
+use notifier::{DiagType, Diagnostic, Highlight};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Decimal {
@@ -14,26 +14,25 @@ pub struct Decimal {
 }
 
 impl Decimal {
-    pub fn new(token: String, column: u64, line: u64) -> Decimal {
+    pub fn new(token: String, column: u64, line: u64) -> Self {
         let value = token
             .chars()
             .skip(token.chars().position(|c| c.is_digit(10)).unwrap())
             .collect::<String>()
             .parse::<i16>()
             .unwrap_or_else(|_| {
-            notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                DiagnosticType::Error,
-                column as usize,
-                line as usize,
-                token.len(),
-                format!(
-                    "Value ({}) is too large to represent in two's complement 16 bits\n",
-                    token
-                ),
-            )));
-            0
-            }
-            );
+                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                    DiagType::Error,
+                    column,
+                    line,
+                    token.len(),
+                    format!(
+                        "Value {} is too large to be represented in signed 16 bits\n",
+                        token
+                    ),
+                )));
+                0
+            });
 
         let value = if token.find('-').is_some() {
             -value
@@ -41,7 +40,7 @@ impl Decimal {
             value
         };
 
-        Decimal {
+        Self {
             token,
             column,
             line,
@@ -71,17 +70,17 @@ impl Requirements for Decimal {
         false
     }
 
-    fn consume(&mut self, mut _tokens: Vec<TokenType>) -> Vec<TokenType> {
-        notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-            DiagnosticType::Error,
-            self.column as usize,
-            self.line as usize,
+    fn consume(&mut self, tokens: Vec<Token>) -> Vec<Token> {
+        notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+            DiagType::Error,
+            self.column,
+            self.line,
             self.token.len(),
             format!(
                 "Expected Instruction, Directive, or Label, but found\n{:#?}\n",
                 self
             ),
         )));
-        _tokens
+        tokens
     }
 }

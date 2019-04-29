@@ -4,10 +4,10 @@ use std::str::Chars;
 extern crate colored;
 
 use notifier;
-use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic, PointerDiagnostic};
+use notifier::{Diagnostic, DiagType, Highlight, Pointer};
 
 use token::tokens::*;
-use token::TokenType;
+use token::Token;
 
 macro_rules! err {
     ($tokenizer:expr, $diagnostic:expr) => {
@@ -77,63 +77,63 @@ impl<'a> Tokenizer<'a> {
         ch.is_whitespace() || ch == ':' || ch == ',' || Self::is_comment_character(ch)
     }
 
-    fn tokenize_literal(token: String, column: u64, line: u64) -> Option<TokenType> {
+    fn tokenize_literal(token: String, column: u64, line: u64) -> Option<Token> {
         if token.is_empty() {
             return None;
         }
 
         match token.to_ascii_uppercase().as_ref() {
-            "ADD" => Some(TokenType::Add(add::Add::new(token, column, line))),
-            "AND" => Some(TokenType::And(and::And::new(token, column, line))),
-            "NOT" => Some(TokenType::Not(not::Not::new(token, column, line))),
+            "ADD" => Some(Token::Add(add::Add::new(token, column, line))),
+            "AND" => Some(Token::And(and::And::new(token, column, line))),
+            "NOT" => Some(Token::Not(not::Not::new(token, column, line))),
             "BRNZP" | "BRNPZ" | "BRZPN" | "BRZNP" | "BRPNZ" | "BRPZN" | "BR" => Some(
-                TokenType::Br(br::Br::new(token, column, line, true, true, true)),
+                Token::Br(br::Br::new(token, column, line, true, true, true)),
             ),
-            "BRN" => Some(TokenType::Br(br::Br::new(
+            "BRN" => Some(Token::Br(br::Br::new(
                 token, column, line, true, false, false,
             ))),
-            "BRZ" => Some(TokenType::Br(br::Br::new(
+            "BRZ" => Some(Token::Br(br::Br::new(
                 token, column, line, false, true, false,
             ))),
-            "BRP" => Some(TokenType::Br(br::Br::new(
+            "BRP" => Some(Token::Br(br::Br::new(
                 token, column, line, false, false, true,
             ))),
-            "BRNZ" | "BRZN" => Some(TokenType::Br(br::Br::new(
+            "BRNZ" | "BRZN" => Some(Token::Br(br::Br::new(
                 token, column, line, true, true, false,
             ))),
-            "BRNP" | "BRPN" => Some(TokenType::Br(br::Br::new(
+            "BRNP" | "BRPN" => Some(Token::Br(br::Br::new(
                 token, column, line, true, false, true,
             ))),
-            "BRZP" | "BRPZ" => Some(TokenType::Br(br::Br::new(
+            "BRZP" | "BRPZ" => Some(Token::Br(br::Br::new(
                 token, column, line, false, true, true,
             ))),
-            "JMP" => Some(TokenType::Jmp(jmp::Jmp::new(token, column, line))),
-            "JSR" => Some(TokenType::Jsr(jsr::Jsr::new(token, column, line))),
-            "JSRR" => Some(TokenType::Jsrr(jsrr::Jsrr::new(token, column, line))),
-            "RET" => Some(TokenType::Ret(ret::Ret::new(token, column, line))),
-            "RTI" => Some(TokenType::Rti(rti::Rti::new(token, column, line))),
-            "LD" => Some(TokenType::Ld(ld::Ld::new(token, column, line))),
-            "LDR" => Some(TokenType::Ldr(ldr::Ldr::new(token, column, line))),
-            "LDI" => Some(TokenType::Ldi(ldi::Ldi::new(token, column, line))),
-            "LEA" => Some(TokenType::Lea(lea::Lea::new(token, column, line))),
-            "ST" => Some(TokenType::St(st::St::new(token, column, line))),
-            "STR" => Some(TokenType::Str(str::Str::new(token, column, line))),
-            "STI" => Some(TokenType::Sti(sti::Sti::new(token, column, line))),
-            "R0" | "R1" | "R2" | "R3" | "R4" | "R5" | "R6" | "R7" => Some(TokenType::Register(
+            "JMP" => Some(Token::Jmp(jmp::Jmp::new(token, column, line))),
+            "JSR" => Some(Token::Jsr(jsr::Jsr::new(token, column, line))),
+            "JSRR" => Some(Token::Jsrr(jsrr::Jsrr::new(token, column, line))),
+            "RET" => Some(Token::Ret(ret::Ret::new(token, column, line))),
+            "RTI" => Some(Token::Rti(rti::Rti::new(token, column, line))),
+            "LD" => Some(Token::Ld(ld::Ld::new(token, column, line))),
+            "LDR" => Some(Token::Ldr(ldr::Ldr::new(token, column, line))),
+            "LDI" => Some(Token::Ldi(ldi::Ldi::new(token, column, line))),
+            "LEA" => Some(Token::Lea(lea::Lea::new(token, column, line))),
+            "ST" => Some(Token::St(st::St::new(token, column, line))),
+            "STR" => Some(Token::Str(str::Str::new(token, column, line))),
+            "STI" => Some(Token::Sti(sti::Sti::new(token, column, line))),
+            "R0" | "R1" | "R2" | "R3" | "R4" | "R5" | "R6" | "R7" => Some(Token::Register(
                 register::Register::new(token, column, line),
             )),
-            "HALT" => Some(TokenType::Halt(halt::Halt::new(token, column, line))),
-            "TRAP" => Some(TokenType::Trap(trap::Trap::new(token, column, line))),
-            "PUTS" => Some(TokenType::Puts(puts::Puts::new(token, column, line))),
-            "PUTSP" => Some(TokenType::Putsp(putsp::Putsp::new(token, column, line))),
-            "PUTC" | "OUT" => Some(TokenType::Out(out::Out::new(token, column, line))),
-            "IN" => Some(TokenType::In(_in::In::new(token, column, line))),
-            "GETC" => Some(TokenType::Getc(getc::Getc::new(token, column, line))),
+            "HALT" => Some(Token::Halt(halt::Halt::new(token, column, line))),
+            "TRAP" => Some(Token::Trap(trap::Trap::new(token, column, line))),
+            "PUTS" => Some(Token::Puts(puts::Puts::new(token, column, line))),
+            "PUTSP" => Some(Token::Putsp(putsp::Putsp::new(token, column, line))),
+            "PUTC" | "OUT" => Some(Token::Out(out::Out::new(token, column, line))),
+            "IN" => Some(Token::In(r#in::In::new(token, column, line))),
+            "GETC" => Some(Token::Getc(getc::Getc::new(token, column, line))),
             _ => Self::tokenize_immediate_literal(false, token, column, line),
         }
     }
 
-    fn tokenize_string_literal(&mut self) -> Option<TokenType> {
+    fn tokenize_string_literal(&mut self) -> Option<Token> {
         let mut token = String::new();
         let mut terminated = false;
         let mut previous = '\0';
@@ -150,10 +150,10 @@ impl<'a> Tokenizer<'a> {
                     '0' => token.push('\0'),
                     '\\' => token.push('\\'),
                     _ => {
-                        warn!(Diagnostic::Highlight(HighlightDiagnostic::new(
-                            DiagnosticType::Warning,
-                            (self.column - 2) as usize,
-                            self.line_number as usize,
+                        warn!(Diagnostic::Highlight(Highlight::new(
+                            DiagType::Warning,
+                            self.column - 2,
+                            self.line_number,
                             2,
                             "Unknown escape sequence".to_owned(),
                         )));
@@ -174,24 +174,24 @@ impl<'a> Tokenizer<'a> {
         if !terminated {
             err!(
                 self,
-                Diagnostic::Pointer(PointerDiagnostic::new(
-                    DiagnosticType::Error,
-                    token_start as usize,
-                    self.line_number as usize,
+                Diagnostic::Pointer(Pointer::new(
+                    DiagType::Error,
+                    token_start,
+                    self.line_number,
                     "Unterminated string literal".to_owned()
                 ))
             );
             return None;
         }
 
-        Some(TokenType::String(string::String::new(
+        Some(Token::String(string::String::new(
             token,
             self.line_number,
             token_start,
         )))
     }
 
-    fn tokenize_character_literal(&mut self) -> Option<TokenType> {
+    fn tokenize_character_literal(&mut self) -> Option<Token> {
         let mut character = String::new();
         let token_start = self.column;
 
@@ -225,10 +225,10 @@ impl<'a> Tokenizer<'a> {
         if !terminated {
             err!(
                 self,
-                Diagnostic::Pointer(PointerDiagnostic::new(
-                    DiagnosticType::Error,
-                    token_start as usize,
-                    self.line_number as usize,
+                Diagnostic::Pointer(Pointer::new(
+                    DiagType::Error,
+                    token_start,
+                    self.line_number,
                     "Unterminated character literal".to_owned()
                 ))
             );
@@ -236,17 +236,17 @@ impl<'a> Tokenizer<'a> {
         } else if character.len() > 1 {
             err!(
                 self,
-                Diagnostic::Highlight(HighlightDiagnostic::new(
-                    DiagnosticType::Error,
-                    token_start as usize,
-                    self.line_number as usize,
+                Diagnostic::Highlight(Highlight::new(
+                    DiagType::Error,
+                    token_start,
+                    self.line_number,
                     character.len(),
                     "Invalid character literal".to_owned()
                 ))
             );
             None
         } else {
-            Some(TokenType::Character(character::Character::new(
+            Some(Token::Character(character::Character::new(
                 character,
                 token_start,
                 self.line_number,
@@ -382,23 +382,23 @@ impl<'a> Tokenizer<'a> {
         token: String,
         column: u64,
         line: u64,
-    ) -> Option<TokenType> {
+    ) -> Option<Token> {
         if token.is_empty() {
             return None;
         }
 
         if Self::is_valid_decimal(&token) {
-            Some(TokenType::Decimal(decimal::Decimal::new(
+            Some(Token::Decimal(decimal::Decimal::new(
                 token, column, line,
             )))
         } else if Self::is_valid_hexadecimal(&token) {
-            Some(TokenType::Hexadecimal(hexadecimal::Hexadecimal::new(
+            Some(Token::Hexadecimal(hexadecimal::Hexadecimal::new(
                 token, column, line,
             )))
         } else if Self::is_valid_binary(&token) {
-            Some(TokenType::Binary(binary::Binary::new(token, column, line)))
+            Some(Token::Binary(binary::Binary::new(token, column, line)))
         } else if !its_negative && Self::is_valid_label(&token) {
-            Some(TokenType::Label(label::Label::new(token, column, line)))
+            Some(Token::Label(label::Label::new(token, column, line)))
         } else {
             None
         }
@@ -418,22 +418,22 @@ impl<'a> Tokenizer<'a> {
         word
     }
 
-    fn tokenize_directive(token: String, column: u64, line: u64) -> Option<TokenType> {
+    fn tokenize_directive(token: String, column: u64, line: u64) -> Option<Token> {
         match token.to_ascii_uppercase().as_ref() {
-            ".ORIG" => Some(TokenType::Orig(orig::Orig::new(token, column, line))),
-            ".END" => Some(TokenType::End(end::End::new(token, column, line))),
-            ".STRINGZ" => Some(TokenType::Stringz(stringz::Stringz::new(
+            ".ORIG" => Some(Token::Orig(orig::Orig::new(token, column, line))),
+            ".END" => Some(Token::End(end::End::new(token, column, line))),
+            ".STRINGZ" => Some(Token::Stringz(stringz::Stringz::new(
                 token, column, line,
             ))),
-            ".BLKW" => Some(TokenType::Blkw(blkw::Blkw::new(token, column, line))),
-            ".FILL" => Some(TokenType::Fill(fill::Fill::new(token, column, line))),
-            ".INCLUDE" => Some(TokenType::Include(include::Include::new(
+            ".BLKW" => Some(Token::Blkw(blkw::Blkw::new(token, column, line))),
+            ".FILL" => Some(Token::Fill(fill::Fill::new(token, column, line))),
+            ".INCLUDE" => Some(Token::Include(include::Include::new(
                 token, column, line,
             ))),
-            ".SET" => Some(TokenType::Set(set::Set::new(token, column, line))),
-            ".LSHIFT" => Some(TokenType::Lshift(lshift::Lshift::new(token, column, line))),
-            ".NEG" => Some(TokenType::Neg(neg::Neg::new(token, column, line))),
-            ".SUB" => Some(TokenType::Sub(sub::Sub::new(token, column, line))),
+            ".SET" => Some(Token::Set(set::Set::new(token, column, line))),
+            ".LSHIFT" => Some(Token::Lshift(lshift::Lshift::new(token, column, line))),
+            ".NEG" => Some(Token::Neg(neg::Neg::new(token, column, line))),
+            ".SUB" => Some(Token::Sub(sub::Sub::new(token, column, line))),
             _ => None,
         }
     }
@@ -450,7 +450,7 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
-    fn next_token(&mut self) -> Option<TokenType> {
+    fn next_token(&mut self) -> Option<Token> {
         self.skip_whitespace();
 
         let token_start = self.column;
@@ -460,30 +460,27 @@ impl<'a> Tokenizer<'a> {
                 '/' => {
                     let _ = self.next();
                     if let Some(ch) = self.next() {
-                        match ch {
-                            '/' => {}
-                            _ => {
-                                warn!(Diagnostic::Pointer(PointerDiagnostic::new(
-                                    DiagnosticType::Warning,
-                                    token_start as usize,
-                                    self.line_number as usize,
+                        if let '/' = ch {} else  {
+                                warn!(Diagnostic::Pointer(Pointer::new(
+                                    DiagType::Warning,
+                                    token_start,
+                                    self.line_number,
                                     "Expected another '/' here. Treating it as a comment anyways"
                                         .to_owned()
                                 )));
                             }
-                        }
                     } else {
-                        warn!(Diagnostic::Pointer(PointerDiagnostic::new(
-                            DiagnosticType::Warning,
-                            token_start as usize,
-                            self.line_number as usize,
+                        warn!(Diagnostic::Pointer(Pointer::new(
+                            DiagType::Warning,
+                            token_start,
+                            self.line_number,
                             "Expected another '/' here. Treating it as a comment anyways"
                                 .to_owned()
                         )));
                     }
-                    return Some(TokenType::EOL);
+                    return Some(Token::EOL);
                 }
-                ';' => Some(TokenType::EOL), // Comment
+                ';' => Some(Token::EOL), // Comment
                 ':' | ',' => {
                     self.next();
                     return self.next_token();
@@ -493,7 +490,7 @@ impl<'a> Tokenizer<'a> {
                 '#' => {
                     let token = self.read_word();
                     if Self::is_valid_decimal(&token) {
-                        return Some(TokenType::Decimal(decimal::Decimal::new(
+                        return Some(Token::Decimal(decimal::Decimal::new(
                             token,
                             token_start,
                             self.line_number,
@@ -501,10 +498,10 @@ impl<'a> Tokenizer<'a> {
                     }
                     err!(
                         self,
-                        Diagnostic::Highlight(HighlightDiagnostic::new(
-                            DiagnosticType::Error,
-                            token_start as usize,
-                            self.line_number as usize,
+                        Diagnostic::Highlight(Highlight::new(
+                            DiagType::Error,
+                            token_start,
+                            self.line_number,
                             token.len(),
                             format!("Invalid token '{}'", token),
                         ))
@@ -543,10 +540,10 @@ impl<'a> Tokenizer<'a> {
                     }
                     err!(
                         self,
-                        Diagnostic::Pointer(PointerDiagnostic::new(
-                            DiagnosticType::Error,
-                            token_start as usize,
-                            self.line_number as usize,
+                        Diagnostic::Pointer(Pointer::new(
+                            DiagType::Error,
+                            token_start,
+                            self.line_number,
                             "Unknown character".to_owned(),
                         ))
                     );
@@ -555,7 +552,7 @@ impl<'a> Tokenizer<'a> {
             };
         }
 
-        Some(TokenType::EOL)
+        Some(Token::EOL)
     }
 
     #[inline]
@@ -565,14 +562,14 @@ impl<'a> Tokenizer<'a> {
 }
 
 impl<'a> Iterator for Tokenizer<'a> {
-    type Item = TokenType;
-    fn next(&mut self) -> Option<TokenType> {
+    type Item = Token;
+    fn next(&mut self) -> Option<Token> {
         if self.at_end() {
             None
         } else {
             let token = self.next_token();
             match token {
-                Some(TokenType::EOL) => None,
+                Some(Token::EOL) => None,
                 _ => token,
             }
         }
@@ -649,7 +646,7 @@ mod tokenizer_tests {
         for add in adds {
             if let Some(token) = Tokenizer::tokenize_literal(add.to_string(), 0, 0) {
                 match token {
-                    TokenType::Add(_) => {}
+                    Token::Add(_) => {}
                     _ => panic!("{} is not parsed as an ADD instruction", add),
                 }
             } else {
@@ -660,7 +657,7 @@ mod tokenizer_tests {
         for and in ands {
             if let Some(token) = Tokenizer::tokenize_literal(and.to_string(), 0, 0) {
                 match token {
-                    TokenType::And(_) => {}
+                    Token::And(_) => {}
                     _ => panic!("{} is not parsed as an AND instruction", and),
                 }
             } else {

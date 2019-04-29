@@ -1,19 +1,19 @@
 use notifier;
 use token::traits::Requirements;
-use token::TokenType;
+use token::Token;
 
 #[derive(Debug)]
 pub struct Parser {
-    tokens: Vec<TokenType>,
+    tokens: Vec<Token>,
 }
 
 impl Parser {
-    pub fn new(tokens: Vec<TokenType>) -> Parser {
-        Parser { tokens }
+    pub fn new(tokens: Vec<Token>) -> Self {
+        Self { tokens }
     }
 
     pub fn parse(&mut self) {
-        let mut tokens: Vec<TokenType> = self.tokens.drain(..).collect();
+        let mut tokens: Vec<Token> = self.tokens.drain(..).collect();
 
         while !tokens.is_empty() {
             let mut token = tokens.remove(0);
@@ -26,7 +26,7 @@ impl Parser {
         notifier::error_count() == 0
     }
 
-    pub fn tokens(self) -> Vec<TokenType> {
+    pub fn tokens(self) -> Vec<Token> {
         self.tokens
     }
 }

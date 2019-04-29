@@ -10,98 +10,26 @@ pub trait NoColour {
 }
 
 #[derive(PartialEq, Debug)]
-pub enum DiagnosticType {
+pub enum DiagType {
     Note,
     Warning,
     Error,
 }
 
 pub trait Type {
-    fn diagnostic_type(&self) -> &DiagnosticType;
+    fn diagnostic_type(&self) -> &DiagType;
 }
 
-pub struct NoteDiagnostic {
-    diagnostic_type: DiagnosticType,
-    column: usize,
-    line: usize,
+pub struct Note {
+    diagnostic_type: DiagType,
+    column: u64,
+    line: u64,
     context: String,
 }
 
-impl NoteDiagnostic {
-    pub fn new(
-        diagnostic_type: DiagnosticType,
-        column: usize,
-        line: usize,
-        context: &str,
-    ) -> NoteDiagnostic {
-        NoteDiagnostic {
-            diagnostic_type,
-            column,
-            line,
-            context: context.to_string(),
-        }
-    }
-}
-
-impl Colour for NoteDiagnostic {
-    fn colour(&self) -> String {
-        format!(
-            "{}:{}{} {}",
-            match self.diagnostic_type {
-                DiagnosticType::Note => "Note".bright_white(),
-                DiagnosticType::Warning => "Warning".yellow(),
-                DiagnosticType::Error => "Error".red(),
-            },
-            if self.line > 0 {
-                format!(" Line {}:", self.line)
-            } else {
-                "".to_owned()
-            },
-            if self.column > 0 {
-                format!(" Column {}:", self.column)
-            } else {
-                "".to_owned()
-            },
-            self.context
-        )
-    }
-}
-
-impl NoColour for NoteDiagnostic {
-    fn no_colour(&self) -> String {
-        format!(
-            "{:#?}:{}{} {}",
-            self.diagnostic_type,
-            if self.line > 0 {
-                format!(" Line {}:", self.line)
-            } else {
-                "".to_owned()
-            },
-            if self.column > 0 {
-                format!(" Column {}:", self.column)
-            } else {
-                "".to_owned()
-            },
-            self.context
-        )
-    }
-}
-
-pub struct PointerDiagnostic {
-    diagnostic_type: DiagnosticType,
-    column: usize,
-    line: usize,
-    context: String,
-}
-
-impl PointerDiagnostic {
-    pub fn new(
-        diagnostic_type: DiagnosticType,
-        column: usize,
-        line: usize,
-        context: String,
-    ) -> PointerDiagnostic {
-        PointerDiagnostic {
+impl Note {
+    pub fn new(diagnostic_type: DiagType, column: u64, line: u64, context: String) -> Self {
+        Self {
             diagnostic_type,
             column,
             line,
@@ -110,14 +38,76 @@ impl PointerDiagnostic {
     }
 }
 
-impl Colour for PointerDiagnostic {
+impl Colour for Note {
+    fn colour(&self) -> String {
+        format!(
+            "{}:{}{} {}",
+            match self.diagnostic_type {
+                DiagType::Note => "Note".bright_white(),
+                DiagType::Warning => "Warning".yellow(),
+                DiagType::Error => "Error".red(),
+            },
+            if self.line > 0 {
+                format!(" Line {}:", self.line)
+            } else {
+                String::new()
+            },
+            if self.column > 0 {
+                format!(" Column {}:", self.column)
+            } else {
+                String::new()
+            },
+            self.context
+        )
+    }
+}
+
+impl NoColour for Note {
+    fn no_colour(&self) -> String {
+        format!(
+            "{:#?}:{}{} {}",
+            self.diagnostic_type,
+            if self.line > 0 {
+                format!(" Line {}:", self.line)
+            } else {
+                String::new()
+            },
+            if self.column > 0 {
+                format!(" Column {}:", self.column)
+            } else {
+                String::new()
+            },
+            self.context
+        )
+    }
+}
+
+pub struct Pointer {
+    diagnostic_type: DiagType,
+    column: u64,
+    line: u64,
+    context: String,
+}
+
+impl Pointer {
+    pub fn new(diagnostic_type: DiagType, column: u64, line: u64, context: String) -> Self {
+        Self {
+            diagnostic_type,
+            column,
+            line,
+            context,
+        }
+    }
+}
+
+impl Colour for Pointer {
     fn colour(&self) -> String {
         format!(
             "{}: Line {}: Column {}: {}",
             match self.diagnostic_type {
-                DiagnosticType::Note => "Note".bright_white(),
-                DiagnosticType::Warning => "Warning".yellow(),
-                DiagnosticType::Error => "Error".red(),
+                DiagType::Note => "Note".bright_white(),
+                DiagType::Warning => "Warning".yellow(),
+                DiagType::Error => "Error".red(),
             },
             self.line,
             self.column,
@@ -126,7 +116,7 @@ impl Colour for PointerDiagnostic {
     }
 }
 
-impl NoColour for PointerDiagnostic {
+impl NoColour for Pointer {
     #[inline]
     fn no_colour(&self) -> String {
         format!(
@@ -136,40 +126,40 @@ impl NoColour for PointerDiagnostic {
     }
 }
 
-pub struct HighlightDiagnostic {
-    diagnostic_type: DiagnosticType,
-    column: usize,
-    line: usize,
+pub struct Highlight {
+    diagnostic_type: DiagType,
+    column: u64,
+    line: u64,
     width: usize,
     context: String,
 }
 
-impl HighlightDiagnostic {
+impl Highlight {
     pub fn new(
-        diagnostic_type: DiagnosticType,
-        column: usize,
-        line: usize,
+        diagnostic_type: DiagType,
+        column: u64,
+        line: u64,
         width: usize,
         context: String,
-    ) -> HighlightDiagnostic {
-        HighlightDiagnostic {
+    ) -> Self {
+        Self {
             diagnostic_type,
             column,
             line,
             width,
-            context: context.to_string(),
+            context,
         }
     }
 }
 
-impl Colour for HighlightDiagnostic {
+impl Colour for Highlight {
     fn colour(&self) -> String {
         format!(
             "{}: Line {}: Column {}: {}",
             match self.diagnostic_type {
-                DiagnosticType::Note => "Note".bright_white(),
-                DiagnosticType::Warning => "Warning".yellow(),
-                DiagnosticType::Error => "Error".red(),
+                DiagType::Note => "Note".bright_white(),
+                DiagType::Warning => "Warning".yellow(),
+                DiagType::Error => "Error".red(),
             },
             self.line,
             self.column,
@@ -178,7 +168,7 @@ impl Colour for HighlightDiagnostic {
     }
 }
 
-impl NoColour for HighlightDiagnostic {
+impl NoColour for Highlight {
     #[inline]
     fn no_colour(&self) -> String {
         format!(
@@ -189,13 +179,13 @@ impl NoColour for HighlightDiagnostic {
 }
 
 pub enum Diagnostic {
-    Note(NoteDiagnostic),
-    Pointer(PointerDiagnostic),
-    Highlight(HighlightDiagnostic),
+    Note(Note),
+    Pointer(Pointer),
+    Highlight(Highlight),
 }
 
 impl Type for Diagnostic {
-    fn diagnostic_type(&self) -> &DiagnosticType {
+    fn diagnostic_type(&self) -> &DiagType {
         match *self {
             Diagnostic::Note(ref diagnostic) => &diagnostic.diagnostic_type,
             Diagnostic::Pointer(ref diagnostic) => &diagnostic.diagnostic_type,

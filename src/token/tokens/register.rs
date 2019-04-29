@@ -1,9 +1,9 @@
 use token::tokens::traits::*;
 
-use token::TokenType;
+use token::Token;
 
 use notifier;
-use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
+use notifier::{DiagType, Diagnostic, Highlight};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Register {
@@ -14,9 +14,9 @@ pub struct Register {
 }
 
 impl Register {
-    pub fn new(token: String, column: u64, line: u64) -> Register {
+    pub fn new(token: String, column: u64, line: u64) -> Self {
         let register = token.chars().nth(1).unwrap().to_digit(10).unwrap() as u8;
-        Register {
+        Self {
             token,
             column,
             line,
@@ -46,17 +46,17 @@ impl Requirements for Register {
         false
     }
 
-    fn consume(&mut self, mut _tokens: Vec<TokenType>) -> Vec<TokenType> {
-        notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-            DiagnosticType::Error,
-            self.column as usize,
-            self.line as usize,
+    fn consume(&mut self, tokens: Vec<Token>) -> Vec<Token> {
+        notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+            DiagType::Error,
+            self.column,
+            self.line,
             self.token.len(),
             format!(
                 "Expected Instruction, Directive, or Label, but found\n {:#?}\n",
                 self
             ),
         )));
-        _tokens
+        tokens
     }
 }

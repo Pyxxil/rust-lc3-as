@@ -1,9 +1,9 @@
 use token::tokens::traits::*;
 
-use token::TokenType;
+use token::Token;
 
 use notifier;
-use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
+use notifier::{DiagType, Diagnostic, Highlight};
 
 use std::cell::Cell;
 
@@ -12,12 +12,12 @@ pub struct Add {
     token: String,
     column: u64,
     line: u64,
-    operands: Vec<TokenType>,
+    operands: Vec<Token>,
 }
 
 impl Add {
-    pub fn new(token: String, column: u64, line: u64) -> Add {
-        Add {
+    pub fn new(token: String, column: u64, line: u64) -> Self {
+        Self {
             token,
             column,
             line,
@@ -35,20 +35,20 @@ impl Assemble for Add {
 
     fn assembled(mut self) -> Vec<(u16, String)> {
         let destination_register = u16::from(match self.operands.remove(0) {
-            TokenType::Register(register) => register.register,
-            _ => 0,
+            Token::Register(register) => register.register,
+            _ => unreachable!(),
         });
         let source_one = u16::from(match self.operands.remove(0) {
-            TokenType::Register(register) => register.register,
-            _ => 0,
+            Token::Register(register) => register.register,
+            _ => unreachable!(),
         });
         let source_two = if let Some(token) = self.operands.first() {
             match token {
-                TokenType::Register(register) => i16::from(register.register),
-                TokenType::Decimal(decimal) => 0x20 | (decimal.value & 0x1F),
-                TokenType::Hexadecimal(hexadecimal) => 0x20 | (hexadecimal.value & 0x1F),
-                TokenType::Binary(binary) => 0x20 | (binary.value & 0x1F),
-                _ => 0,
+                Token::Register(register) => i16::from(register.register),
+                Token::Decimal(decimal) => 0x20 | (decimal.value & 0x1F),
+                Token::Hexadecimal(hexadecimal) => 0x20 | (hexadecimal.value & 0x1F),
+                Token::Binary(binary) => 0x20 | (binary.value & 0x1F),
+                _ => unreachable!(),
             }
         } else {
             source_one as i16
@@ -81,19 +81,19 @@ impl Requirements for Add {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<TokenType>) -> Vec<TokenType> {
+    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
         let (min, max) = self.require_range();
-        let (column, line, length) = (self.column as usize, self.line as usize, self.token.len());
+        let (column, line, length) = (self.column, self.line, self.token.len());
 
         let count = Cell::new(0);
 
         self.operands = tokens
             .drain_while(|token| match token {
-                TokenType::Binary(_)
-                | TokenType::Decimal(_)
-                | TokenType::Character(_)
-                | TokenType::Hexadecimal(_)
-                | TokenType::Register(_) => {
+                Token::Binary(_)
+                | Token::Decimal(_)
+                | Token::Character(_)
+                | Token::Hexadecimal(_)
+                | Token::Register(_) => {
                     count.set(count.get() + 1);
                     count.get() <= max
                 }
@@ -102,8 +102,8 @@ impl Requirements for Add {
             .collect();
 
         if count.get() < min {
-            notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                DiagnosticType::Error,
+            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                DiagType::Error,
                 column,
                 line,
                 length,

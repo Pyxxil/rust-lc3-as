@@ -24,10 +24,10 @@ fn main() {
     let files: Vec<&str> = args.values_of("files").unwrap().collect();
     let should_print_ast = args.is_present("print-ast");
 
-    notifier::add_notifier(if !args.is_present("quiet") {
-        notifier::StdoutNotifier::Colour
+    notifier::push(if args.is_present("quiet") {
+        notifier::Stdout::Quiet
     } else {
-        notifier::StdoutNotifier::Quiet
+        notifier::Stdout::Colour
     });
 
     for file in files {

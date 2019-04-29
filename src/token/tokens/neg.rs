@@ -1,21 +1,21 @@
 use token::tokens::traits::*;
 
-use token::TokenType;
+use token::Token;
 
 use notifier;
-use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
+use notifier::{DiagType, Diagnostic, Highlight};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Neg {
     token: String,
     column: u64,
     line: u64,
-    operands: Vec<TokenType>,
+    operands: Vec<Token>,
 }
 
 impl Neg {
-    pub fn new(token: String, column: u64, line: u64) -> Neg {
-        Neg {
+    pub fn new(token: String, column: u64, line: u64) -> Self {
+        Self {
             token,
             column,
             line,
@@ -45,30 +45,30 @@ impl Requirements for Neg {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<TokenType>) -> Vec<TokenType> {
+    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
         if let Some(token) = tokens.first() {
             match token {
-                TokenType::Register(_) => {
+                Token::Register(_) => {
                     self.operands.push(tokens.remove(0));
-                    if let TokenType::Register(_) = tokens.first().unwrap() {
+                    if let Token::Register(_) = tokens.first().unwrap() {
                         self.operands.push(tokens.remove(0))
                     }
                 }
                 ref token => {
-                    notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                        DiagnosticType::Error,
-                        self.column as usize,
-                        self.line as usize,
+                    notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                        DiagType::Error,
+                        self.column,
+                        self.line,
                         self.token.len(),
                         format!("Expected an Immediate Literal, but found\n {:#?}", token),
                     )));
                 }
             }
         } else {
-            notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                DiagnosticType::Error,
-                self.column as usize,
-                self.line as usize,
+            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                DiagType::Error,
+                self.column,
+                self.line,
                 self.token.len(),
                 "Expected an argument, but found nothing".to_owned(),
             )));

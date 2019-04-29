@@ -1,6 +1,6 @@
 use token::tokens::traits::*;
 
-use token::TokenType;
+use token::Token;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct In {
@@ -10,8 +10,8 @@ pub struct In {
 }
 
 impl In {
-    pub fn new(token: String, column: u64, line: u64) -> In {
-        In {
+    pub fn new(token: String, column: u64, line: u64) -> Self {
+        Self {
             token,
             column,
             line,
@@ -41,7 +41,7 @@ impl Requirements for In {
     }
 
     // As IN takes no operands, do nothing here.
-    fn consume(&mut self, mut _tokens: Vec<TokenType>) -> Vec<TokenType> {
-        _tokens
+    fn consume(&mut self, tokens: Vec<Token>) -> Vec<Token> {
+        tokens
     }
 }

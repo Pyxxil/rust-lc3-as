@@ -1,9 +1,9 @@
 use token::tokens::traits::*;
 
-use token::TokenType;
+use token::Token;
 
 use notifier;
-use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
+use notifier::{DiagType, Diagnostic, Highlight};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Character {
@@ -13,8 +13,8 @@ pub struct Character {
 }
 
 impl Character {
-    pub fn new(token: String, column: u64, line: u64) -> Character {
-        Character {
+    pub fn new(token: String, column: u64, line: u64) -> Self {
+        Self {
             token,
             column,
             line,
@@ -43,17 +43,17 @@ impl Requirements for Character {
         false
     }
 
-    fn consume(&mut self, mut _tokens: Vec<TokenType>) -> Vec<TokenType> {
-        notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-            DiagnosticType::Error,
-            self.column as usize,
-            self.line as usize,
+    fn consume(&mut self, tokens: Vec<Token>) -> Vec<Token> {
+        notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+            DiagType::Error,
+            self.column,
+            self.line,
             self.token.len(),
             format!(
                 "Expected Instruction, Directive, or Label, but found\n {:#?}\n",
                 self
             ),
         )));
-        _tokens
+        tokens
     }
 }

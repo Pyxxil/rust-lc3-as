@@ -1,21 +1,21 @@
 use token::tokens::traits::*;
 
-use token::TokenType;
+use token::Token;
 
 use notifier;
-use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
+use notifier::{DiagType, Diagnostic, Highlight};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Not {
     token: String,
     column: u64,
     line: u64,
-    operands: Vec<TokenType>,
+    operands: Vec<Token>,
 }
 
 impl Not {
-    pub fn new(token: String, column: u64, line: u64) -> Not {
-        Not {
+    pub fn new(token: String, column: u64, line: u64) -> Self {
+        Self {
             token,
             column,
             line,
@@ -45,14 +45,14 @@ impl Requirements for Not {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<TokenType>) -> Vec<TokenType> {
+    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
         let (min, _) = self.require_range();
 
         if (min) >= tokens.len() as u64 {
-            notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                DiagnosticType::Error,
-                self.column as usize,
-                self.line as usize,
+            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                DiagType::Error,
+                self.column,
+                self.line,
                 self.token.len(),
                     "Expected at least one argument for NOT instruction, but found end of file instead.".to_owned()
             )));
@@ -63,14 +63,14 @@ impl Requirements for Not {
         let mut consumed = 0;
 
         match &tokens[0] {
-            &TokenType::Register(_) => {
+            &Token::Register(_) => {
                 consumed += 1;
             }
             token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                    DiagnosticType::Error,
-                    self.column as usize,
-                    self.line as usize,
+                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                    DiagType::Error,
+                    self.column,
+                    self.line,
                     self.token.len(),
                     format!(
                         "Expected to find argument of type Register, but found\n{:#?}",
@@ -83,7 +83,7 @@ impl Requirements for Not {
         };
 
         if 1 < tokens.len() as u64 {
-            if let TokenType::Register(_) = tokens[1] {
+            if let Token::Register(_) = tokens[1] {
                 consumed += 1;
             }
         }

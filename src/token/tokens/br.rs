@@ -1,9 +1,9 @@
 use token::tokens::traits::*;
 
-use token::TokenType;
+use token::Token;
 
 use notifier;
-use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
+use notifier::{DiagType, Diagnostic, Highlight};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Br {
@@ -13,12 +13,12 @@ pub struct Br {
     n: bool,
     z: bool,
     p: bool,
-    operands: Vec<TokenType>,
+    operands: Vec<Token>,
 }
 
 impl Br {
-    pub fn new(token: String, column: u64, line: u64, n: bool, z: bool, p: bool) -> Br {
-        Br {
+    pub fn new(token: String, column: u64, line: u64, n: bool, z: bool, p: bool) -> Self {
+        Self {
             token,
             column,
             line,
@@ -51,14 +51,14 @@ impl Requirements for Br {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<TokenType>) -> Vec<TokenType> {
+    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
         let (min, _) = self.require_range();
 
         if (min) > (tokens.len() as u64) {
-            notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                DiagnosticType::Error,
-                self.column as usize,
-                self.line as usize,
+            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                DiagType::Error,
+                self.column,
+                self.line,
                 self.token.len(),
                 format!(
                     "Expected {} arguments, found {}, for BR Instruction.",
@@ -73,18 +73,18 @@ impl Requirements for Br {
         let mut consumed = 0;
 
         match &tokens[0] {
-            &TokenType::Binary(_)
-            | &TokenType::Character(_)
-            | &TokenType::Decimal(_)
-            | &TokenType::Hexadecimal(_)
-            | &TokenType::Label(_) => {
+            &Token::Binary(_)
+            | &Token::Character(_)
+            | &Token::Decimal(_)
+            | &Token::Hexadecimal(_)
+            | &Token::Label(_) => {
                 consumed += 1;
             }
             token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                    DiagnosticType::Error,
-                    self.column as usize,
-                    self.line as usize,
+                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                    DiagType::Error,
+                    self.column,
+                    self.line,
                     self.token.len(),
                     format!(
                         "Expected an Immediate Literal or Label, but found\n {:#?}",
@@ -95,10 +95,10 @@ impl Requirements for Br {
         }
 
         if consumed < min {
-            notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                DiagnosticType::Error,
-                self.column as usize,
-                self.line as usize,
+            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                DiagType::Error,
+                self.column,
+                self.line,
                 self.token.len(),
                 format!(
                     "Expected atleast {} argument(s), found {}, for BR instruction.",

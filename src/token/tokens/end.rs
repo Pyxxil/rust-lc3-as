@@ -1,6 +1,6 @@
 use token::tokens::traits::*;
 
-use token::TokenType;
+use token::Token;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct End {
@@ -10,8 +10,8 @@ pub struct End {
 }
 
 impl End {
-    pub fn new(token: String, column: u64, line: u64) -> End {
-        End {
+    pub fn new(token: String, column: u64, line: u64) -> Self {
+        Self {
             token,
             column,
             line,
@@ -41,7 +41,7 @@ impl Requirements for End {
     }
 
     // As .END takes not arguments, just do nothing here.
-    fn consume(&mut self, mut _tokens: Vec<TokenType>) -> Vec<TokenType> {
-        _tokens
+    fn consume(&mut self, tokens: Vec<Token>) -> Vec<Token> {
+        tokens
     }
 }

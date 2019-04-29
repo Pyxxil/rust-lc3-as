@@ -9,8 +9,8 @@ pub struct Assembler {
 }
 
 impl Assembler {
-    pub fn new(file: String) -> Assembler {
-        Assembler { file }
+    pub fn new(file: String) -> Self {
+        Self { file }
     }
 
     pub fn assemble(&self, _do_print_ast: bool) {
@@ -33,15 +33,11 @@ impl Assembler {
         }
     }
 
-    fn do_first_pass(&self, parser: Parser) -> Vec<token::TokenType> {
+    fn do_first_pass(&self, parser: Parser) -> Vec<token::Token> {
         parser.tokens()
     }
 
-    fn do_second_pass(&self, tokens: Vec<token::TokenType>) -> Vec<(u16, String)> {
-        tokens
-            .into_iter()
-            .map(Assemble::assembled)
-            .flatten()
-            .collect()
+    fn do_second_pass(&self, tokens: Vec<token::Token>) -> Vec<(u16, String)> {
+        tokens.into_iter().flat_map(Assemble::assembled).collect()
     }
 }

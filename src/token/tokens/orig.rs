@@ -1,21 +1,21 @@
 use token::tokens::traits::*;
 
-use token::TokenType;
+use token::Token;
 
 use notifier;
-use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
+use notifier::{DiagType, Diagnostic, Highlight};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Orig {
     token: String,
     column: u64,
     line: u64,
-    operands: Vec<TokenType>,
+    operands: Vec<Token>,
 }
 
 impl Orig {
-    pub fn new(token: String, column: u64, line: u64) -> Orig {
-        Orig {
+    pub fn new(token: String, column: u64, line: u64) -> Self {
+        Self {
             token,
             column,
             line,
@@ -31,8 +31,22 @@ impl Orig {
 impl Assemble for Orig {
     fn assemble(&mut self) {}
 
-    fn assembled(self) -> Vec<(u16, String)> {
-        Vec::new()
+    fn assembled(mut self) -> Vec<(u16, String)> {
+        let instruction = match self.operands.remove(0) {
+            Token::Register(register) => i16::from(register.register),
+            Token::Decimal(decimal) => decimal.value,
+            Token::Hexadecimal(hexadecimal) => hexadecimal.value,
+            Token::Binary(binary) => binary.value,
+            _ => unreachable!(),
+        } as u16;
+
+        vec![(
+            instruction,
+            format!(
+                "{0} {0:4X} {0:016b} ({1}) .ORIG {0:#4X}",
+                instruction, self.line,
+            ),
+        )]
     }
 }
 
@@ -45,18 +59,18 @@ impl Requirements for Orig {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<TokenType>) -> Vec<TokenType> {
+    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
         let (min, _) = self.require_range();
         if let Some(token) = tokens.first() {
             match token {
-                TokenType::Decimal(_) | TokenType::Hexadecimal(_) | TokenType::Binary(_) => {
+                Token::Decimal(_) | Token::Hexadecimal(_) | Token::Binary(_) => {
                     self.operands.push(tokens.remove(0))
                 }
                 token => {
-                    notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                        DiagnosticType::Error,
-                        self.column as usize,
-                        self.line as usize,
+                    notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                        DiagType::Error,
+                        self.column,
+                        self.line,
                         self.token.len(),
                         format!(
                             "Expected to find argument of type Immediate, but found {:#?}",
@@ -66,10 +80,10 @@ impl Requirements for Orig {
                 }
             }
         } else {
-            notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                DiagnosticType::Error,
-                self.column as usize,
-                self.line as usize,
+            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                DiagType::Error,
+                self.column,
+                self.line,
                 self.token.len(),
                 format!(
                     "Expected {} arguments, found {}, for ADD instruction.",

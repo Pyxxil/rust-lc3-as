@@ -1,11 +1,11 @@
-pub mod token_type;
+pub mod r#type;
 
-pub use self::token_type::TokenType;
+pub use self::r#type::Token;
 pub use self::tokens::traits;
 
 pub mod tokens;
 
-pub use self::tokens::_in;
+pub use self::tokens::r#in;
 pub use self::tokens::add;
 pub use self::tokens::and;
 pub use self::tokens::binary;

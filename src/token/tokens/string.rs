@@ -1,9 +1,9 @@
 use token::tokens::traits::*;
 
-use token::TokenType;
+use token::Token;
 
 use notifier;
-use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
+use notifier::{DiagType, Diagnostic, Highlight};
 
 use std::string;
 
@@ -15,8 +15,8 @@ pub struct String {
 }
 
 impl String {
-    pub fn new(token: string::String, column: u64, line: u64) -> String {
-        String {
+    pub fn new(token: string::String, column: u64, line: u64) -> Self {
+        Self {
             token,
             column,
             line,
@@ -45,17 +45,17 @@ impl Requirements for String {
         false
     }
 
-    fn consume(&mut self, mut _tokens: Vec<TokenType>) -> Vec<TokenType> {
-        notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-            DiagnosticType::Error,
-            self.column as usize,
-            self.line as usize,
+    fn consume(&mut self, tokens: Vec<Token>) -> Vec<Token> {
+        notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+            DiagType::Error,
+            self.column,
+            self.line,
             self.token.len(),
             format!(
                 "Expected Instruction, Directive, or Label, but found\n {:#?}\n",
                 self
             ),
         )));
-        _tokens
+        tokens
     }
 }

@@ -1,21 +1,21 @@
 use token::tokens::traits::*;
 
-use token::TokenType;
+use token::Token;
 
 use notifier;
-use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
+use notifier::{DiagType, Diagnostic, Highlight};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Str {
     token: String,
     column: u64,
     line: u64,
-    operands: Vec<TokenType>,
+    operands: Vec<Token>,
 }
 
 impl Str {
-    pub fn new(token: String, column: u64, line: u64) -> Str {
-        Str {
+    pub fn new(token: String, column: u64, line: u64) -> Self {
+        Self {
             token,
             column,
             line,
@@ -45,14 +45,14 @@ impl Requirements for Str {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<TokenType>) -> Vec<TokenType> {
+    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
         let (min, _) = self.require_range();
 
         if (min) >= tokens.len() as u64 {
-            notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                DiagnosticType::Error,
-                self.column as usize,
-                self.line as usize,
+            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                DiagType::Error,
+                self.column,
+                self.line,
                 self.token.len(),
                 format!(
                     "Expected two arguments to STR instruction, but only {} were found",
@@ -64,12 +64,12 @@ impl Requirements for Str {
         }
 
         match &tokens[0] {
-            &TokenType::Register(_) => {}
+            &Token::Register(_) => {}
             token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                    DiagnosticType::Error,
-                    self.column as usize,
-                    self.line as usize,
+                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                    DiagType::Error,
+                    self.column,
+                    self.line,
                     self.token.len(),
                     format!(
                         "Expected to find argument of type Register, but found\n{:#?}",
@@ -81,12 +81,12 @@ impl Requirements for Str {
         }
 
         match &tokens[1] {
-            &TokenType::Register(_) => {}
+            &Token::Register(_) => {}
             token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                    DiagnosticType::Error,
-                    self.column as usize,
-                    self.line as usize,
+                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                    DiagType::Error,
+                    self.column,
+                    self.line,
                     self.token.len(),
                     format!(
                         "Expected to find argument of type Register, but found\n{:#?}",
@@ -98,12 +98,12 @@ impl Requirements for Str {
         }
 
         match &tokens[2] {
-            &TokenType::Decimal(_) | &TokenType::Hexadecimal(_) | &TokenType::Binary(_) => {}
+            &Token::Decimal(_) | &Token::Hexadecimal(_) | &Token::Binary(_) => {}
             token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                    DiagnosticType::Error,
-                    self.column as usize,
-                    self.line as usize,
+                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                    DiagType::Error,
+                    self.column,
+                    self.line,
                     self.token.len(),
                     format!(
                         "Expected to find argument of type Immediate, but found\n{:#?}",

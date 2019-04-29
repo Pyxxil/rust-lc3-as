@@ -1,9 +1,9 @@
 use token::tokens::traits::*;
 
-use token::TokenType;
+use token::Token;
 
 use notifier;
-use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
+use notifier::{DiagType, Diagnostic, Highlight};
 
 use std::iter;
 
@@ -12,12 +12,12 @@ pub struct Blkw {
     token: String,
     column: u64,
     line: u64,
-    operands: Vec<TokenType>,
+    operands: Vec<Token>,
 }
 
 impl Blkw {
-    pub fn new(token: String, column: u64, line: u64) -> Blkw {
-        Blkw {
+    pub fn new(token: String, column: u64, line: u64) -> Self {
+        Self {
             token,
             column,
             line,
@@ -35,9 +35,9 @@ impl Assemble for Blkw {
 
     fn assembled(self) -> Vec<(u16, String)> {
         let value = match self.operands.last().unwrap() {
-            TokenType::Binary(binary) => binary.value,
-            TokenType::Decimal(decimal) => decimal.value,
-            TokenType::Hexadecimal(hexadecimal) => hexadecimal.value,
+            Token::Binary(binary) => binary.value,
+            Token::Decimal(decimal) => decimal.value,
+            Token::Hexadecimal(hexadecimal) => hexadecimal.value,
             _ => 0,
         } as u16;
         iter::repeat(if self.operands.len() == 1 {
@@ -52,9 +52,9 @@ impl Assemble for Blkw {
             )
         })
         .take(match self.operands.first().unwrap() {
-            TokenType::Binary(binary) => binary.value,
-            TokenType::Decimal(decimal) => decimal.value,
-            TokenType::Hexadecimal(hexadecimal) => hexadecimal.value,
+            Token::Binary(binary) => binary.value,
+            Token::Decimal(decimal) => decimal.value,
+            Token::Hexadecimal(hexadecimal) => hexadecimal.value,
             _ => 0,
         } as usize)
         .collect()
@@ -70,40 +70,40 @@ impl Requirements for Blkw {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<TokenType>) -> Vec<TokenType> {
+    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
         if let Some(token) = tokens.first() {
             match token {
-                TokenType::Binary(_)
-                | TokenType::Character(_)
-                | TokenType::Decimal(_)
-                | TokenType::Hexadecimal(_) => {
+                Token::Binary(_)
+                | Token::Character(_)
+                | Token::Decimal(_)
+                | Token::Hexadecimal(_) => {
                     self.operands.push(tokens.remove(0));
                     if let Some(second) = tokens.first() {
                         match second {
-                            TokenType::Binary(_)
-                            | TokenType::Character(_)
-                            | TokenType::Decimal(_)
-                            | TokenType::Hexadecimal(_)
-                            | TokenType::Label(_) => self.operands.push(tokens.remove(0)),
+                            Token::Binary(_)
+                            | Token::Character(_)
+                            | Token::Decimal(_)
+                            | Token::Hexadecimal(_)
+                            | Token::Label(_) => self.operands.push(tokens.remove(0)),
                             _ => {}
                         };
                     }
                 }
                 ref token => {
-                    notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                        DiagnosticType::Error,
-                        self.column as usize,
-                        self.line as usize,
+                    notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                        DiagType::Error,
+                        self.column,
+                        self.line,
                         self.token.len(),
                         format!("Expected an Immediate Literal, but found\n {:#?}", token),
                     )));
                 }
             }
         } else {
-            notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                DiagnosticType::Error,
-                self.column as usize,
-                self.line as usize,
+            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                DiagType::Error,
+                self.column,
+                self.line,
                 self.token.len(),
                 "Expected an argument, but found nothing.".to_owned(),
             )));

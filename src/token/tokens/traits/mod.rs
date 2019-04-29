@@ -1,4 +1,4 @@
-use token::TokenType;
+use token::Token;
 
 use std::vec::Drain;
 
@@ -24,7 +24,7 @@ pub trait Requirements {
      *
      * @return The number of consumed tokens (TODO: This might not be required, as Vec::remove does update the length).
      */
-    fn consume(&mut self, tokens: Vec<TokenType>) -> Vec<TokenType>;
+    fn consume(&mut self, tokens: Vec<Token>) -> Vec<Token>;
 }
 
 // Copyright (c) 2017 Alex Sayers

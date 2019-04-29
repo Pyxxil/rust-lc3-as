@@ -1,9 +1,9 @@
 use token::tokens::traits::*;
 
-use token::TokenType;
+use token::Token;
 
 use notifier;
-use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
+use notifier::{DiagType, Diagnostic, Highlight};
 
 use std::cell::Cell;
 
@@ -12,12 +12,12 @@ pub struct Sub {
     token: String,
     column: u64,
     line: u64,
-    operands: Vec<TokenType>,
+    operands: Vec<Token>,
 }
 
 impl Sub {
-    pub fn new(token: String, column: u64, line: u64) -> Sub {
-        Sub {
+    pub fn new(token: String, column: u64, line: u64) -> Self {
+        Self {
             token,
             column,
             line,
@@ -47,15 +47,15 @@ impl Requirements for Sub {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<TokenType>) -> Vec<TokenType> {
+    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
         let (min, max) = self.require_range();
-        let (column, line, length) = (self.column as usize, self.line as usize, self.token.len());
+        let (column, line, length) = (self.column, self.line, self.token.len());
 
         let count = Cell::new(0);
 
         self.operands = tokens
             .drain_while(|token| match token {
-                TokenType::Register(_) => {
+                Token::Register(_) => {
                     count.set(count.get() + 1);
                     count.get() <= max
                 }
@@ -64,8 +64,8 @@ impl Requirements for Sub {
             .collect();
 
         if count.get() < min {
-            notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                DiagnosticType::Error,
+            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                DiagType::Error,
                 column,
                 line,
                 length,

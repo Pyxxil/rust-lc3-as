@@ -1,21 +1,21 @@
 use token::tokens::traits::*;
 
-use token::TokenType;
+use token::Token;
 
 use notifier;
-use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
+use notifier::{DiagType, Diagnostic, Highlight};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Include {
     token: String,
     column: u64,
     line: u64,
-    operands: Vec<TokenType>,
+    operands: Vec<Token>,
 }
 
 impl Include {
-    pub fn new(token: String, column: u64, line: u64) -> Include {
-        Include {
+    pub fn new(token: String, column: u64, line: u64) -> Self {
+        Self {
             token,
             column,
             line,
@@ -45,14 +45,14 @@ impl Requirements for Include {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<TokenType>) -> Vec<TokenType> {
+    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
         let (min, _) = self.require_range();
 
         if (min) > (tokens.len() as u64) {
-            notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                DiagnosticType::Error,
-                self.column as usize,
-                self.line as usize,
+            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                DiagType::Error,
+                self.column,
+                self.line,
                 self.token.len(),
                 "Expected an argument to .INCLUDE directive, but found the end of file instead."
                     .to_owned(),
@@ -62,12 +62,12 @@ impl Requirements for Include {
         }
 
         match &tokens[0] {
-            &TokenType::String(_) => {}
+            &Token::String(_) => {}
             token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                    DiagnosticType::Error,
-                    self.column as usize,
-                    self.line as usize,
+                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                    DiagType::Error,
+                    self.column,
+                    self.line,
                     self.token.len(),
                     format!(
                         "Expected to find argument of type String, but found\n{:#?}",

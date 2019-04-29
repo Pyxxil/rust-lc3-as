@@ -1,21 +1,21 @@
 use token::tokens::traits::*;
 
-use token::TokenType;
+use token::Token;
 
 use notifier;
-use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
+use notifier::{DiagType, Diagnostic, Highlight};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Stringz {
     token: String,
     column: u64,
     line: u64,
-    operands: Vec<TokenType>,
+    operands: Vec<Token>,
 }
 
 impl Stringz {
-    pub fn new(token: String, column: u64, line: u64) -> Stringz {
-        Stringz {
+    pub fn new(token: String, column: u64, line: u64) -> Self {
+        Self {
             token,
             column,
             line,
@@ -45,14 +45,14 @@ impl Requirements for Stringz {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<TokenType>) -> Vec<TokenType> {
+    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
         let (min, _) = self.require_range();
 
         if (min) > (tokens.len() as u64) {
-            notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                DiagnosticType::Error,
-                self.column as usize,
-                self.line as usize,
+            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                DiagType::Error,
+                self.column,
+                self.line,
                 self.token.len(),
                 "Expected an argument to .STRINGZ directive, but found the end of file instead."
                     .to_owned(),
@@ -61,17 +61,17 @@ impl Requirements for Stringz {
             return tokens;
         }
 
-        let mut consumed = 0;
+        let mut consumed: usize = 0;
 
         match &tokens[0] {
-            &TokenType::String(_) => {
+            &Token::String(_) => {
                 consumed += 1;
             }
             token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                    DiagnosticType::Error,
-                    self.column as usize,
-                    self.line as usize,
+                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                    DiagType::Error,
+                    self.column,
+                    self.line,
                     self.token.len(),
                     format!(
                         "Expected to find argument of type Immediate, or Label, but found {:#?}",
@@ -83,9 +83,9 @@ impl Requirements for Stringz {
             }
         };
 
-        while consumed < tokens.len() as u64 {
-            match tokens[consumed as usize] {
-                TokenType::String(_) => consumed += 1,
+        while consumed < tokens.len() {
+            match tokens[consumed] {
+                Token::String(_) => consumed += 1,
                 _ => break,
             }
         }

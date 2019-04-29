@@ -1,54 +1,52 @@
 pub mod diagnostic;
 pub use self::diagnostic::{Colour, NoColour};
-pub use self::diagnostic::{
-    Diagnostic, DiagnosticType, HighlightDiagnostic, NoteDiagnostic, PointerDiagnostic, Type,
-};
+pub use self::diagnostic::{DiagType, Diagnostic, Highlight, Note, Pointer, Type};
 use std::sync::Mutex;
 
 trait Notify {
     fn notify(&self, diagnostic: &Diagnostic);
 }
 
-pub enum StdoutNotifier {
+pub enum Stdout {
     NoColour,
     Colour,
     Quiet,
 }
 
-// TODO: At the moment, notifications will only work for StdoutNotifier. This
+// TODO: At the moment, notifications will only work for Stdout. This
 //       should be changed to be more similar to how the C++ version does it
 //       i.e. with Callbacks.
 
 /**
- * The `StdoutNotifier` will simply push the diagnostic to stdout, with
+ * The `Stdout` will simply push the diagnostic to stdout, with
  * optional colouring.
  */
-impl Notify for StdoutNotifier {
+impl Notify for Stdout {
     fn notify(&self, diagnostic: &Diagnostic) {
         match *self {
-            StdoutNotifier::NoColour => match *diagnostic {
+            Stdout::NoColour => match *diagnostic {
                 Diagnostic::Note(ref d) => println!("{}", d.no_colour()),
                 Diagnostic::Highlight(ref d) => println!("{}", d.no_colour()),
                 Diagnostic::Pointer(ref d) => println!("{}", d.no_colour()),
             },
-            StdoutNotifier::Colour => match *diagnostic {
+            Stdout::Colour => match *diagnostic {
                 Diagnostic::Note(ref d) => println!("{}", d.colour()),
                 Diagnostic::Highlight(ref d) => println!("{}", d.colour()),
                 Diagnostic::Pointer(ref d) => println!("{}", d.colour()),
             },
-            StdoutNotifier::Quiet => {}
+            Stdout::Quiet => {}
         }
     }
 }
 
 #[derive(Default)]
 pub struct NotificationController {
-    notifiers: Vec<StdoutNotifier>,
+    notifiers: Vec<Stdout>,
     diagnostics: Vec<Diagnostic>,
 }
 
 #[inline]
-pub fn add_notifier(notifier: StdoutNotifier) {
+pub fn push(notifier: Stdout) {
     let mut guard = NOTIFICATION_CONTROLLER.lock().unwrap();
     guard.register(notifier);
 }
@@ -65,7 +63,7 @@ pub fn error_count() -> u64 {
     guard
         .diagnostics()
         .iter()
-        .filter(|diag| diag.diagnostic_type() == &DiagnosticType::Error)
+        .filter(|diag| diag.diagnostic_type() == &DiagType::Error)
         .count() as u64
 }
 
@@ -87,7 +85,7 @@ impl NotificationController {
     }
 
     #[inline]
-    fn register(&mut self, notification: StdoutNotifier) {
+    fn register(&mut self, notification: Stdout) {
         self.notifiers.push(notification);
     }
 

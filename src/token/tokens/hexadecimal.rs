@@ -1,9 +1,9 @@
 use token::tokens::traits::*;
 
-use token::TokenType;
+use token::Token;
 
 use notifier;
-use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
+use notifier::{DiagType, Diagnostic, Highlight};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Hexadecimal {
@@ -14,7 +14,7 @@ pub struct Hexadecimal {
 }
 
 impl Hexadecimal {
-    pub fn new(token: String, column: u64, line: u64) -> Hexadecimal {
+    pub fn new(token: String, column: u64, line: u64) -> Self {
         let value = u16::from_str_radix(
             token
                 .chars()
@@ -29,19 +29,19 @@ impl Hexadecimal {
             16,
         )
         .unwrap_or_else(|_| {
-            notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                DiagnosticType::Error,
-                column as usize,
-                line as usize,
+            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                DiagType::Error,
+                column,
+                line,
                 token.len(),
                 format!(
-                    "Value ({}) is too large to represent in two's complement 16 bits\n",
+                    "Value {} is too large to be represented in signed 16 bits\n",
                     token
                 ),
             )));
             0
         }) as i16;
-        Hexadecimal {
+        Self {
             token,
             column,
             line,
@@ -72,17 +72,17 @@ impl Requirements for Hexadecimal {
     }
 
     // As a Hexadecimal Immediate shouldn't be consumed from, throw an error at the user.
-    fn consume(&mut self, mut _tokens: Vec<TokenType>) -> Vec<TokenType> {
-        notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-            DiagnosticType::Error,
-            self.column as usize,
-            self.line as usize,
+    fn consume(&mut self, tokens: Vec<Token>) -> Vec<Token> {
+        notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+            DiagType::Error,
+            self.column,
+            self.line,
             self.token.len(),
             format!(
                 "Expected Instruction, Directive, or Label, but found\n {:#?}\n",
                 self
             ),
         )));
-        _tokens
+        tokens
     }
 }
