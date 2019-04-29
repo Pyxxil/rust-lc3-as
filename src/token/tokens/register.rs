@@ -10,14 +10,17 @@ pub struct Register {
     token: String,
     column: u64,
     line: u64,
+    pub register: u8,
 }
 
 impl Register {
     pub fn new(token: String, column: u64, line: u64) -> Register {
+        let register = token.chars().nth(1).unwrap().to_digit(10).unwrap() as u8;
         Register {
             token,
             column,
             line,
+            register,
         }
     }
 
@@ -28,6 +31,10 @@ impl Register {
 
 impl Assemble for Register {
     fn assemble(&mut self) {}
+
+    fn assembled(self) -> Vec<(u16, String)> {
+        Vec::new()
+    }
 }
 
 impl Requirements for Register {

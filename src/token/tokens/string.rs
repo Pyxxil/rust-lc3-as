@@ -30,6 +30,10 @@ impl String {
 
 impl Assemble for String {
     fn assemble(&mut self) {}
+
+    fn assembled(self) -> Vec<(u16, std::string::String)> {
+        Vec::new()
+    }
 }
 
 impl Requirements for String {

@@ -30,6 +30,10 @@ impl Not {
 
 impl Assemble for Not {
     fn assemble(&mut self) {}
+
+    fn assembled(self) -> Vec<(u16, String)> {
+        Vec::new()
+    }
 }
 
 impl Requirements for Not {

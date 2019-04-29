@@ -25,6 +25,10 @@ impl Ret {
 
 impl Assemble for Ret {
     fn assemble(&mut self) {}
+
+    fn assembled(self) -> Vec<(u16, String)> {
+        Vec::new()
+    }
 }
 
 impl Requirements for Ret {

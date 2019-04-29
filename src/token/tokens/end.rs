@@ -25,6 +25,10 @@ impl End {
 
 impl Assemble for End {
     fn assemble(&mut self) {}
+
+    fn assembled(self) -> Vec<(u16, String)> {
+        Vec::new()
+    }
 }
 
 impl Requirements for End {

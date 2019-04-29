@@ -4,15 +4,12 @@ use parser::Parser;
 use token;
 use token::tokens::traits::Assemble;
 
-use notifier::{add_notifier, StdoutNotifier};
-
 pub struct Assembler {
     file: String,
 }
 
 impl Assembler {
     pub fn new(file: String) -> Assembler {
-        add_notifier(StdoutNotifier::Colour);
         Assembler { file }
     }
 
@@ -27,7 +24,7 @@ impl Assembler {
             parser.parse();
             if parser.is_okay() {
                 let tokens = self.do_first_pass(parser);
-                self.do_second_pass(&tokens);
+                println!("{:#?}", self.do_second_pass(tokens));
             } else {
                 println!("Assembly failed.");
             }
@@ -37,15 +34,14 @@ impl Assembler {
     }
 
     fn do_first_pass(&self, parser: Parser) -> Vec<token::TokenType> {
-        parser
-            .tokens()
-            .into_iter()
-            .map(|mut token| {
-                token.assemble();
-                token
-            })
-            .collect()
+        parser.tokens()
     }
 
-    fn do_second_pass(&self, tokens: &[token::TokenType]) {}
+    fn do_second_pass(&self, tokens: Vec<token::TokenType>) -> Vec<(u16, String)> {
+        tokens
+            .into_iter()
+            .map(Assemble::assembled)
+            .flatten()
+            .collect()
+    }
 }

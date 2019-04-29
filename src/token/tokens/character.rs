@@ -28,6 +28,10 @@ impl Character {
 
 impl Assemble for Character {
     fn assemble(&mut self) {}
+
+    fn assembled(self) -> Vec<(u16, String)> {
+        Vec::new()
+    }
 }
 
 impl Requirements for Character {

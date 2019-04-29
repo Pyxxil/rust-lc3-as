@@ -32,6 +32,44 @@ impl Add {
 
 impl Assemble for Add {
     fn assemble(&mut self) {}
+
+    fn assembled(mut self) -> Vec<(u16, String)> {
+        let destination_register = u16::from(match self.operands.remove(0) {
+            TokenType::Register(register) => register.register,
+            _ => 0,
+        });
+        let source_one = u16::from(match self.operands.remove(0) {
+            TokenType::Register(register) => register.register,
+            _ => 0,
+        });
+        let source_two = if let Some(token) = self.operands.first() {
+            match token {
+                TokenType::Register(register) => i16::from(register.register),
+                TokenType::Decimal(decimal) => 0x20 | (decimal.value & 0x1F),
+                TokenType::Hexadecimal(hexadecimal) => 0x20 | (hexadecimal.value & 0x1F),
+                TokenType::Binary(binary) => 0x20 | (binary.value & 0x1F),
+                _ => 0,
+            }
+        } else {
+            source_one as i16
+        } as u16;
+
+        let instruction: u16 = 0x1000 | destination_register << 9 | source_one << 6 | source_two;
+
+        vec![(
+            instruction,
+            format!(
+                "{0} {1:4X} {1:016b} ({2}) ADD R{3} R{4} {5}{6}",
+                0,
+                instruction,
+                self.line,
+                destination_register,
+                source_one,
+                if (instruction & 0x20) == 0 { 'R' } else { '#' },
+                ((source_two & 0x1F) << 11) as i16 >> 11
+            ),
+        )]
+    }
 }
 
 impl Requirements for Add {

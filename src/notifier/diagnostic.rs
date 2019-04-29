@@ -165,7 +165,7 @@ impl HighlightDiagnostic {
 impl Colour for HighlightDiagnostic {
     fn colour(&self) -> String {
         format!(
-            "{}: Line {}: Column {}: {}  (Width: {})",
+            "{}: Line {}: Column {}: {}",
             match self.diagnostic_type {
                 DiagnosticType::Note => "Note".bright_white(),
                 DiagnosticType::Warning => "Warning".yellow(),
@@ -174,7 +174,6 @@ impl Colour for HighlightDiagnostic {
             self.line,
             self.column,
             self.context,
-            self.width
         )
     }
 }

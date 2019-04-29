@@ -30,6 +30,10 @@ impl Stringz {
 
 impl Assemble for Stringz {
     fn assemble(&mut self) {}
+
+    fn assembled(self) -> Vec<(u16, String)> {
+        Vec::new()
+    }
 }
 
 impl Requirements for Stringz {

@@ -30,6 +30,10 @@ impl Ldr {
 
 impl Assemble for Ldr {
     fn assemble(&mut self) {}
+
+    fn assembled(self) -> Vec<(u16, String)> {
+        Vec::new()
+    }
 }
 
 impl Requirements for Ldr {

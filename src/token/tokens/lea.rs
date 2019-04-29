@@ -30,6 +30,10 @@ impl Lea {
 
 impl Assemble for Lea {
     fn assemble(&mut self) {}
+
+    fn assembled(self) -> Vec<(u16, String)> {
+        Vec::new()
+    }
 }
 
 impl Requirements for Lea {

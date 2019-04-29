@@ -5,6 +5,8 @@ use token::TokenType;
 use notifier;
 use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
 
+use std::iter;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Blkw {
     token: String,
@@ -30,6 +32,33 @@ impl Blkw {
 
 impl Assemble for Blkw {
     fn assemble(&mut self) {}
+
+    fn assembled(self) -> Vec<(u16, String)> {
+        let value = match self.operands.last().unwrap() {
+            TokenType::Binary(binary) => binary.value,
+            TokenType::Decimal(decimal) => decimal.value,
+            TokenType::Hexadecimal(hexadecimal) => hexadecimal.value,
+            _ => 0,
+        } as u16;
+        iter::repeat(if self.operands.len() == 1 {
+            (value, "".to_owned())
+        } else {
+            (
+                value,
+                format!(
+                    "{0} {1:4X} {1:016b} ({2}) .FILL #{1}",
+                    0, value as i16, self.line,
+                ),
+            )
+        })
+        .take(match self.operands.first().unwrap() {
+            TokenType::Binary(binary) => binary.value,
+            TokenType::Decimal(decimal) => decimal.value,
+            TokenType::Hexadecimal(hexadecimal) => hexadecimal.value,
+            _ => 0,
+        } as usize)
+        .collect()
+    }
 }
 
 impl Requirements for Blkw {
@@ -42,73 +71,42 @@ impl Requirements for Blkw {
     }
 
     fn consume(&mut self, mut tokens: Vec<TokenType>) -> Vec<TokenType> {
-        let (min, _) = self.require_range();
-
-        if min > (tokens.len() as u64) {
-            notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                DiagnosticType::Error,
-                self.column as usize,
-                self.line as usize,
-                self.token.len(),
-                format!(
-                    "Expected {} arguments, found {}, for BLKW Directive.",
-                    min,
-                    tokens.len() as u64
-                ),
-            )));
-
-            return tokens;
-        }
-
-        let mut consumed = 0;
-
-        match tokens[0] {
-            TokenType::Binary(_)
-            | TokenType::Character(_)
-            | TokenType::Decimal(_)
-            | TokenType::Hexadecimal(_) => {
-                consumed += 1;
-                if 1 < tokens.len() as u64 {
-                    match tokens[0] {
-                        TokenType::Binary(_)
-                        | TokenType::Character(_)
-                        | TokenType::Decimal(_)
-                        | TokenType::Hexadecimal(_)
-                        | TokenType::Label(_) => {
-                            consumed += 1;
-                        }
-                        _ => {}
-                    };
+        if let Some(token) = tokens.first() {
+            match token {
+                TokenType::Binary(_)
+                | TokenType::Character(_)
+                | TokenType::Decimal(_)
+                | TokenType::Hexadecimal(_) => {
+                    self.operands.push(tokens.remove(0));
+                    if let Some(second) = tokens.first() {
+                        match second {
+                            TokenType::Binary(_)
+                            | TokenType::Character(_)
+                            | TokenType::Decimal(_)
+                            | TokenType::Hexadecimal(_)
+                            | TokenType::Label(_) => self.operands.push(tokens.remove(0)),
+                            _ => {}
+                        };
+                    }
+                }
+                ref token => {
+                    notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
+                        DiagnosticType::Error,
+                        self.column as usize,
+                        self.line as usize,
+                        self.token.len(),
+                        format!("Expected an Immediate Literal, but found\n {:#?}", token),
+                    )));
                 }
             }
-            ref token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                    DiagnosticType::Error,
-                    self.column as usize,
-                    self.line as usize,
-                    self.token.len(),
-                    format!("Expected an Immediate Literal, but found\n {:#?}", token),
-                )));
-            }
-        }
-
-        if consumed < min {
+        } else {
             notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
                 DiagnosticType::Error,
                 self.column as usize,
                 self.line as usize,
                 self.token.len(),
-                format!(
-                    "Expected atleast {} argument(s), found {}, for BLKW Directive.",
-                    min, consumed
-                ),
+                "Expected an argument, but found nothing.".to_owned(),
             )));
-
-            return tokens;
-        }
-
-        for _ in 0..consumed {
-            self.operands.push(tokens.remove(0));
         }
 
         tokens

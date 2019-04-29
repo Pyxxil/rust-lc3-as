@@ -211,4 +211,50 @@ impl Assemble for TokenType {
             TokenType::EOL => {}
         }
     }
+
+    fn assembled(self) -> Vec<(u16, String)> {
+        match self {
+            TokenType::Add(token) => token.assembled(),
+            TokenType::And(token) => token.assembled(),
+            TokenType::Br(token) => token.assembled(),
+            TokenType::Jmp(token) => token.assembled(),
+            TokenType::Jsr(token) => token.assembled(),
+            TokenType::Jsrr(token) => token.assembled(),
+            TokenType::Ld(token) => token.assembled(),
+            TokenType::Ldi(token) => token.assembled(),
+            TokenType::Ldr(token) => token.assembled(),
+            TokenType::Lea(token) => token.assembled(),
+            TokenType::Not(token) => token.assembled(),
+            TokenType::Ret(token) => token.assembled(),
+            TokenType::Rti(token) => token.assembled(),
+            TokenType::St(token) => token.assembled(),
+            TokenType::Sti(token) => token.assembled(),
+            TokenType::Str(token) => token.assembled(),
+            TokenType::Trap(token) => token.assembled(),
+            TokenType::Getc(token) => token.assembled(),
+            TokenType::Halt(token) => token.assembled(),
+            TokenType::In(token) => token.assembled(),
+            TokenType::Out(token) => token.assembled(),
+            TokenType::Puts(token) => token.assembled(),
+            TokenType::Putsp(token) => token.assembled(),
+            TokenType::Binary(token) => token.assembled(),
+            TokenType::Character(token) => token.assembled(),
+            TokenType::Decimal(token) => token.assembled(),
+            TokenType::Hexadecimal(token) => token.assembled(),
+            TokenType::Label(token) => token.assembled(),
+            TokenType::Register(token) => token.assembled(),
+            TokenType::String(token) => token.assembled(),
+            TokenType::Blkw(token) => token.assembled(),
+            TokenType::End(token) => token.assembled(),
+            TokenType::Fill(token) => token.assembled(),
+            TokenType::Include(token) => token.assembled(),
+            TokenType::Lshift(token) => token.assembled(),
+            TokenType::Orig(token) => token.assembled(),
+            TokenType::Neg(token) => token.assembled(),
+            TokenType::Set(token) => token.assembled(),
+            TokenType::Stringz(token) => token.assembled(),
+            TokenType::Sub(token) => token.assembled(),
+            TokenType::EOL => Vec::new(),
+        }
+    }
 }

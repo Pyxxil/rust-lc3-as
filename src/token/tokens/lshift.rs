@@ -30,6 +30,10 @@ impl Lshift {
 
 impl Assemble for Lshift {
     fn assemble(&mut self) {}
+
+    fn assembled(self) -> Vec<(u16, String)> {
+        Vec::new()
+    }
 }
 
 impl Requirements for Lshift {
@@ -44,7 +48,7 @@ impl Requirements for Lshift {
     fn consume(&mut self, mut tokens: Vec<TokenType>) -> Vec<TokenType> {
         let (min, _) = self.require_range();
 
-        if (min) > (tokens.len() as u64) {
+        if min > (tokens.len() as u64) {
             notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
                 DiagnosticType::Error,
                 self.column as usize,
@@ -60,8 +64,9 @@ impl Requirements for Lshift {
             return tokens;
         }
 
-        match &tokens[0] {
-            &TokenType::Register(_) => {}
+        let destination = tokens.first().unwrap();
+        match destination {
+            TokenType::Register(_) => self.operands.push(tokens.remove(0)),
             token => {
                 notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
                     DiagnosticType::Error,
@@ -73,11 +78,16 @@ impl Requirements for Lshift {
                         token
                     ),
                 )));
-            }
-        };
 
-        match &tokens[1] {
-            &TokenType::Decimal(_) | &TokenType::Hexadecimal(_) | &TokenType::Binary(_) => {}
+                return tokens;
+            }
+        }
+
+        let value = tokens.first().unwrap();
+        match value {
+            TokenType::Decimal(_) | TokenType::Hexadecimal(_) | TokenType::Binary(_) => {
+                self.operands.push(tokens.remove(0))
+            }
             token => {
                 notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
                     DiagnosticType::Error,
@@ -90,10 +100,6 @@ impl Requirements for Lshift {
                     ),
                 )));
             }
-        };
-
-        for _ in 0..min {
-            self.operands.push(tokens.remove(0));
         }
 
         tokens

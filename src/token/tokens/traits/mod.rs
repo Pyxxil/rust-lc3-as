@@ -4,6 +4,8 @@ use std::vec::Drain;
 
 pub trait Assemble {
     fn assemble(&mut self);
+
+    fn assembled(self) -> Vec<(u16, String)>;
 }
 
 pub trait Requirements {

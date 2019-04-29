@@ -216,7 +216,7 @@ impl<'a> Tokenizer<'a> {
             } else if ch == '\'' {
                 terminated = true;
                 break;
-            } else {
+            } else if ch != '\\' {
                 character.push(ch);
             }
             previous_character = ch;
@@ -261,12 +261,9 @@ impl<'a> Tokenizer<'a> {
                 'B' => return token.len() > 1 && characters.all(|c| c.is_digit(2)),
                 '0' => {
                     if let Some(c) = characters.next() {
-                        match c.to_ascii_uppercase() {
-                            'B' => return token.len() > 2 && characters.all(|c| c.is_digit(2)),
-                            _ => return false,
-                        }
-                    } else {
-                        return false;
+                        return 'B' == c.to_ascii_uppercase()
+                            && token.len() > 2
+                            && characters.all(|c| c.is_digit(2));
                     }
                 }
                 '-' => {
@@ -275,22 +272,16 @@ impl<'a> Tokenizer<'a> {
                             'B' => return token.len() > 2 && characters.all(|c| c.is_digit(2)),
                             '0' => {
                                 if let Some(c) = characters.next() {
-                                    match c.to_ascii_uppercase() {
-                                        'B' => {
-                                            return token.len() > 3
-                                                && characters.all(|c| c.is_digit(2))
-                                        }
-                                        _ => return false,
-                                    }
-                                } else {
-                                    return false;
+                                    return 'B' == c.to_ascii_uppercase()
+                                        && token.len() > 3
+                                        && characters.all(|c| c.is_digit(2));
                                 }
                             }
-                            _ => return false,
+                            _ => {}
                         }
                     }
                 }
-                _ => return false,
+                _ => {}
             }
         }
         false

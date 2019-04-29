@@ -30,11 +30,15 @@ impl Fill {
 
 impl Assemble for Fill {
     fn assemble(&mut self) {}
+
+    fn assembled(self) -> Vec<(u16, String)> {
+        Vec::new()
+    }
 }
 
 impl Requirements for Fill {
     fn require_range(&self) -> (u64, u64) {
-        (0, 0)
+        (1, 0)
     }
 
     fn is_satisfied(&self) -> bool {
@@ -42,9 +46,27 @@ impl Requirements for Fill {
     }
 
     fn consume(&mut self, mut tokens: Vec<TokenType>) -> Vec<TokenType> {
-        let (min, _) = self.require_range();
-
-        if min > tokens.len() as u64 {
+        if let Some(token) = tokens.first() {
+            match token {
+                TokenType::Binary(_)
+                | TokenType::Decimal(_)
+                | TokenType::Hexadecimal(_)
+                | TokenType::Character(_)
+                | TokenType::Label(_) => self.operands.push(tokens.remove(0)),
+                ref token => {
+                    notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
+                        DiagnosticType::Error,
+                        self.column as usize,
+                        self.line as usize,
+                        self.token.len(),
+                        format!(
+                            "Expected to find argument of type Immediate, or Label, but found {:#?}",
+                            token
+                        ),
+                    )));
+                }
+            }
+        } else {
             notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
                 DiagnosticType::Error,
                 self.column as usize,
@@ -53,32 +75,8 @@ impl Requirements for Fill {
                 "Expected an argument to .FILL directive, but found the end of file instead."
                     .to_owned(),
             )));
-
-            return tokens;
         }
 
-        match &tokens[0] {
-            &TokenType::Binary(_)
-            | &TokenType::Decimal(_)
-            | &TokenType::Hexadecimal(_)
-            | &TokenType::Character(_)
-            | &TokenType::Label(_) => {}
-            token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                    DiagnosticType::Error,
-                    self.column as usize,
-                    self.line as usize,
-                    self.token.len(),
-                    format!(
-                        "Expected to find argument of type Immediate, or Label, but found {:#?}",
-                        token
-                    ),
-                )));
-                return tokens;
-            }
-        };
-
-        self.operands.push(tokens.remove(0));
         tokens
     }
 }

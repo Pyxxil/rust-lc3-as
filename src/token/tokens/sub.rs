@@ -5,6 +5,8 @@ use token::TokenType;
 use notifier;
 use notifier::{Diagnostic, DiagnosticType, HighlightDiagnostic};
 
+use std::cell::Cell;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Sub {
     token: String,
@@ -30,6 +32,10 @@ impl Sub {
 
 impl Assemble for Sub {
     fn assemble(&mut self) {}
+
+    fn assembled(self) -> Vec<(u16, String)> {
+        Vec::new()
+    }
 }
 
 impl Requirements for Sub {
@@ -42,57 +48,36 @@ impl Requirements for Sub {
     }
 
     fn consume(&mut self, mut tokens: Vec<TokenType>) -> Vec<TokenType> {
-        let (min, _) = self.require_range();
+        let (min, max) = self.require_range();
+        let (column, line, length) = (self.column as usize, self.line as usize, self.token.len());
 
-        if (min) >= tokens.len() as u64 {
+        let count = Cell::new(0);
+
+        self.operands = tokens
+            .drain_while(|token| match token {
+                TokenType::Register(_) => {
+                    count.set(count.get() + 1);
+                    count.get() <= max
+                }
+                _ => false,
+            })
+            .collect();
+
+        if count.get() < min {
             notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
                 DiagnosticType::Error,
-                self.column as usize,
-                self.line as usize,
-                self.token.len(),
-                "Expected at least one argument for .SUB directive, but found end of file instead."
-                    .to_owned(),
-            )));
-
-            return tokens;
-        }
-
-        let mut consumed = 0;
-
-        match &tokens[0] {
-            &TokenType::Register(_) => {
-                consumed += 1;
-            }
-            token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                    DiagnosticType::Error,
-                    self.column as usize,
-                    self.line as usize,
-                    self.token.len(),
+                column,
+                line,
+                length,
+                if tokens.is_empty() {
+                    "Expected to find argument of type Register, but found nothing".to_owned()
+                } else {
                     format!(
                         "Expected to find argument of type Register, but found\n{:#?}",
-                        token
-                    ),
-                )));
-
-                return tokens;
-            }
-        };
-
-        if 1 < tokens.len() as u64 {
-            if let TokenType::Register(_) = tokens[1] {
-                consumed += 1;
-            }
-
-            if 2 < tokens.len() as u64 {
-                if let TokenType::Register(_) = tokens[2] {
-                    consumed += 1;
-                };
-            }
-        }
-
-        for _ in 0..consumed {
-            self.operands.push(tokens.remove(0));
+                        tokens.first().unwrap()
+                    )
+                },
+            )));
         }
 
         tokens

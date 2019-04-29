@@ -30,6 +30,10 @@ impl Orig {
 
 impl Assemble for Orig {
     fn assemble(&mut self) {}
+
+    fn assembled(self) -> Vec<(u16, String)> {
+        Vec::new()
+    }
 }
 
 impl Requirements for Orig {
@@ -43,8 +47,25 @@ impl Requirements for Orig {
 
     fn consume(&mut self, mut tokens: Vec<TokenType>) -> Vec<TokenType> {
         let (min, _) = self.require_range();
-
-        if (min) > tokens.len() as u64 {
+        if let Some(token) = tokens.first() {
+            match token {
+                TokenType::Decimal(_) | TokenType::Hexadecimal(_) | TokenType::Binary(_) => {
+                    self.operands.push(tokens.remove(0))
+                }
+                token => {
+                    notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
+                        DiagnosticType::Error,
+                        self.column as usize,
+                        self.line as usize,
+                        self.token.len(),
+                        format!(
+                            "Expected to find argument of type Immediate, but found {:#?}",
+                            token
+                        ),
+                    )));
+                }
+            }
+        } else {
             notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
                 DiagnosticType::Error,
                 self.column as usize,
@@ -56,29 +77,8 @@ impl Requirements for Orig {
                     tokens.len() as u64
                 ),
             )));
-
-            return tokens;
-        };
-
-        match &tokens[0] {
-            &TokenType::Decimal(_) | &TokenType::Hexadecimal(_) | &TokenType::Binary(_) => {}
-            token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(HighlightDiagnostic::new(
-                    DiagnosticType::Error,
-                    self.column as usize,
-                    self.line as usize,
-                    self.token.len(),
-                    format!(
-                        "Expected to find argument of type Immediate, but found {:#?}",
-                        token
-                    ),
-                )));
-
-                return tokens;
-            }
         }
 
-        self.operands.push(tokens.remove(0));
         tokens
     }
 }
