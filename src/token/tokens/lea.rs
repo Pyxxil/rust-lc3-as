@@ -31,8 +31,6 @@ impl Lea {
 }
 
 impl Assemble for Lea {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         Vec::new()
     }
@@ -41,10 +39,6 @@ impl Assemble for Lea {
 impl Requirements for Lea {
     fn require_range(&self) -> (u64, u64) {
         (2, 2)
-    }
-
-    fn is_satisfied(&self) -> bool {
-        false
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {

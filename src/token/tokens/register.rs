@@ -32,8 +32,6 @@ impl Register {
 }
 
 impl Assemble for Register {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         Vec::new()
     }
@@ -42,10 +40,6 @@ impl Assemble for Register {
 impl Requirements for Register {
     fn require_range(&self) -> (u64, u64) {
         (0, 0)
-    }
-
-    fn is_satisfied(&self) -> bool {
-        false
     }
 
     fn consume(&mut self, tokens: VecDeque<Token>) -> VecDeque<Token> {

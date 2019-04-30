@@ -2,9 +2,6 @@ use token::tokens::traits::*;
 
 use token::Token;
 
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
-
 use std::collections::VecDeque;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -31,8 +28,6 @@ impl Stringz {
 }
 
 impl Assemble for Stringz {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         Vec::new()
     }
@@ -43,58 +38,33 @@ impl Requirements for Stringz {
         (1, 1)
     }
 
-    fn is_satisfied(&self) -> bool {
-        false
-    }
-
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        let (min, _) = self.require_range();
-
-        if (min) > (tokens.len() as u64) {
-            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                DiagType::Error,
-                self.column,
-                self.line,
-                self.token.len(),
-                "Expected an argument to .STRINGZ directive, but found the end of file instead."
-                    .to_owned(),
-            )));
-
-            return tokens;
+        if let Some(token) = tokens.front() {
+            match token {
+                Token::String(_) => self.operands.push(tokens.pop_front().unwrap()),
+                tok => expected(
+                    &["String"],
+                    &tok,
+                    (self.column, self.line, self.token().len()),
+                ),
+            }
+        } else {
+            expected(
+                &["String"],
+                &Token::EOL,
+                (self.column, self.line, self.token().len()),
+            );
         }
 
-        let mut consumed: usize = 0;
+        let mut extra_strings = tokens
+            .drain_while(|token| match token {
+                Token::String(_) => true,
+                _ => false,
+            })
+            .collect::<Vec<_>>();
 
-        match &tokens[0] {
-            &Token::String(_) => {
-                consumed += 1;
-            }
-            token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                    DiagType::Error,
-                    self.column,
-                    self.line,
-                    self.token.len(),
-                    format!(
-                        "Expected to find argument of type Immediate, or Label, but found {:#?}",
-                        token
-                    ),
-                )));
+        self.operands.append(&mut extra_strings);
 
-                return tokens;
-            }
-        };
-
-        while consumed < tokens.len() {
-            match tokens[consumed] {
-                Token::String(_) => consumed += 1,
-                _ => break,
-            }
-        }
-
-        for _ in 0..consumed {
-            self.operands.push(tokens.pop_front().unwrap());
-        }
         tokens
     }
 }

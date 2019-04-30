@@ -31,8 +31,6 @@ impl String {
 }
 
 impl Assemble for String {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, std::string::String)> {
         Vec::new()
     }
@@ -41,10 +39,6 @@ impl Assemble for String {
 impl Requirements for String {
     fn require_range(&self) -> (u64, u64) {
         (0, 0)
-    }
-
-    fn is_satisfied(&self) -> bool {
-        false
     }
 
     fn consume(&mut self, tokens: VecDeque<Token>) -> VecDeque<Token> {

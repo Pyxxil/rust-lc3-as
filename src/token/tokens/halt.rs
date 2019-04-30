@@ -26,8 +26,6 @@ impl Halt {
 }
 
 impl Assemble for Halt {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         *program_counter += 1;
         vec![(
@@ -44,10 +42,6 @@ impl Assemble for Halt {
 impl Requirements for Halt {
     fn require_range(&self) -> (u64, u64) {
         (0, 0)
-    }
-
-    fn is_satisfied(&self) -> bool {
-        false
     }
 
     // As HALT takes no operands, just do nothing here.

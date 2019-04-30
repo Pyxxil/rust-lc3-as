@@ -37,8 +37,6 @@ impl Br {
 }
 
 impl Assemble for Br {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         Vec::new()
     }
@@ -47,10 +45,6 @@ impl Assemble for Br {
 impl Requirements for Br {
     fn require_range(&self) -> (u64, u64) {
         (1, 1)
-    }
-
-    fn is_satisfied(&self) -> bool {
-        false
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
@@ -75,11 +69,7 @@ impl Requirements for Br {
         let mut consumed = 0;
 
         match &tokens[0] {
-            &Token::Binary(_)
-            | &Token::Character(_)
-            | &Token::Decimal(_)
-            | &Token::Hexadecimal(_)
-            | &Token::Label(_) => {
+            &Token::Immediate(_) | &Token::Character(_) | &Token::Label(_) => {
                 consumed += 1;
             }
             token => {

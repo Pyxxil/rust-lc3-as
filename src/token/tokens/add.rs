@@ -2,9 +2,6 @@ use token::tokens::traits::*;
 
 use token::Token;
 
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
-
 use std::cell::Cell;
 
 use std::collections::VecDeque;
@@ -33,8 +30,6 @@ impl Add {
 }
 
 impl Assemble for Add {
-    fn assemble(&mut self) {}
-
     fn assembled(mut self, program_counter: &mut i16) -> Vec<(u16, String)> {
         let destination_register = u16::from(match self.operands.remove(0) {
             Token::Register(register) => register.register,
@@ -47,9 +42,7 @@ impl Assemble for Add {
         let source_two = if let Some(token) = self.operands.first() {
             match token {
                 Token::Register(register) => i16::from(register.register),
-                Token::Decimal(decimal) => 0x20 | (decimal.value & 0x1F),
-                Token::Hexadecimal(hexadecimal) => 0x20 | (hexadecimal.value & 0x1F),
-                Token::Binary(binary) => 0x20 | (binary.value & 0x1F),
+                Token::Immediate(imm) => 0x20 | (imm.value & 0x1F),
                 _ => unreachable!(),
             }
         } else {
@@ -81,23 +74,14 @@ impl Requirements for Add {
         (1, 3)
     }
 
-    fn is_satisfied(&self) -> bool {
-        false
-    }
-
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         let (min, max) = self.require_range();
-        let (column, line, length) = (self.column, self.line, self.token.len());
 
         let count = Cell::new(0);
 
         self.operands = tokens
             .drain_while(|token| match token {
-                Token::Binary(_)
-                | Token::Decimal(_)
-                | Token::Character(_)
-                | Token::Hexadecimal(_)
-                | Token::Register(_) => {
+                Token::Immediate(_) | Token::Character(_) | Token::Register(_) => {
                     count.set(count.get() + 1);
                     count.get() <= max
                 }
@@ -106,21 +90,12 @@ impl Requirements for Add {
             .collect();
 
         if count.get() < min {
-            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                DiagType::Error,
-                column,
-                line,
-                length,
-                if tokens.is_empty() {
-                    "Expected to find argument of type Immediate or Register, but found nothing"
-                        .to_owned()
-                } else {
-                    format!(
-                        "Expected to find argument of type Immediate or Register, but found\n{:#?}",
-                        tokens.back().unwrap()
-                    )
-                },
-            )));
+            too_few_operands(
+                min,
+                count.get(),
+                self.token(),
+                (self.column, self.line, self.token().len()),
+            );
         }
 
         tokens

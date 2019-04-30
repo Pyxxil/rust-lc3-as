@@ -31,8 +31,6 @@ impl Set {
 }
 
 impl Assemble for Set {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         Vec::new()
     }
@@ -41,10 +39,6 @@ impl Assemble for Set {
 impl Requirements for Set {
     fn require_range(&self) -> (u64, u64) {
         (2, 2)
-    }
-
-    fn is_satisfied(&self) -> bool {
-        false
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
@@ -83,11 +77,7 @@ impl Requirements for Set {
         };
 
         match &tokens[1] {
-            &Token::Decimal(_)
-            | &Token::Hexadecimal(_)
-            | &Token::Binary(_)
-            | &Token::Register(_)
-            | &Token::Label(_) => {}
+            &Token::Immediate(_) | &Token::Register(_) | &Token::Label(_) => {}
             token => {
                 notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
                     DiagType::Error,

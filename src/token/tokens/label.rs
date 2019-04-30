@@ -26,8 +26,6 @@ impl Label {
 }
 
 impl Assemble for Label {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         Vec::new()
     }
@@ -36,10 +34,6 @@ impl Assemble for Label {
 impl Requirements for Label {
     fn require_range(&self) -> (u64, u64) {
         (0, 0)
-    }
-
-    fn is_satisfied(&self) -> bool {
-        false
     }
 
     // As a Label takes no operands, just do nothing here.

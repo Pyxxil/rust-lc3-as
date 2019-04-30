@@ -26,8 +26,6 @@ impl End {
 }
 
 impl Assemble for End {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         Vec::new()
     }
@@ -36,10 +34,6 @@ impl Assemble for End {
 impl Requirements for End {
     fn require_range(&self) -> (u64, u64) {
         (0, 0)
-    }
-
-    fn is_satisfied(&self) -> bool {
-        false
     }
 
     // As .END takes not arguments, just do nothing here.

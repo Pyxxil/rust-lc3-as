@@ -259,17 +259,21 @@ impl<'a> Tokenizer<'a> {
 
         if let Some(ch) = characters.next() {
             match ch.to_ascii_uppercase() {
-                'B' => return token.len() > 1 && characters.all(|c| c.is_digit(2)),
+                'B' => token.len() > 1 && characters.all(|c| c.is_digit(2)),
                 '0' => {
                     if let Some(c) = characters.next() {
-                        return 'B' == c.to_ascii_uppercase()
-                            && !characters.any(|c| c != '0' && c != '1');
+                        'B' == c.to_ascii_uppercase()
+                            && token.len() > 2
+                            && characters.all(|c| c.is_digit(2))
+                    } else {
+                        false
                     }
                 }
-                _ => {}
+                _ => false,
             }
+        } else {
+            false
         }
-        false
     }
 
     pub fn is_valid_decimal(token: &str) -> bool {
@@ -291,17 +295,16 @@ impl<'a> Tokenizer<'a> {
     }
 
     pub fn is_valid_hexadecimal(token: &str) -> bool {
-        let mut characters = token.chars().peekable();
+        let mut characters = token.chars();
 
         if let Some(ch) = characters.next() {
             match ch.to_ascii_uppercase() {
-                'X' => !characters.any(|c| !c.is_digit(16)),
+                'X' => token.len() > 1 && characters.all(|c| c.is_digit(16)),
                 '0' => {
                     if let Some(c) = characters.next() {
-                        match c.to_ascii_uppercase() {
-                            'X' => !characters.any(|c| !c.is_digit(16)),
-                            _ => false,
-                        }
+                        'X' == c.to_ascii_uppercase()
+                            && token.len() > 2
+                            && characters.all(|c| c.is_digit(16))
                     } else {
                         false
                     }
@@ -333,13 +336,17 @@ impl<'a> Tokenizer<'a> {
         }
 
         if Self::is_valid_decimal(&token) {
-            Some(Token::Decimal(decimal::Decimal::new(token, column, line)))
+            Some(Token::Immediate(immediate::Immediate::from_decimal(
+                token, column, line,
+            )))
         } else if Self::is_valid_hexadecimal(&token) {
-            Some(Token::Hexadecimal(hexadecimal::Hexadecimal::new(
+            Some(Token::Immediate(immediate::Immediate::from_hexadecimal(
                 token, column, line,
             )))
         } else if Self::is_valid_binary(&token) {
-            Some(Token::Binary(binary::Binary::new(token, column, line)))
+            Some(Token::Immediate(immediate::Immediate::from_binary(
+                token, column, line,
+            )))
         } else if Self::is_valid_label(&token) {
             Some(Token::Label(label::Label::new(token, column, line)))
         } else {
@@ -430,7 +437,7 @@ impl<'a> Tokenizer<'a> {
                 '#' => {
                     let token = self.read_word();
                     if Self::is_valid_decimal(&token) {
-                        return Some(Token::Decimal(decimal::Decimal::new(
+                        return Some(Token::Immediate(immediate::Immediate::from_decimal(
                             token,
                             token_start,
                             self.line_number,
@@ -451,7 +458,7 @@ impl<'a> Tokenizer<'a> {
                 '-' => {
                     let token = self.read_word();
                     if Self::is_valid_decimal(&token) {
-                        return Some(Token::Decimal(decimal::Decimal::new(
+                        return Some(Token::Immediate(immediate::Immediate::from_decimal(
                             token,
                             token_start,
                             self.line_number,
@@ -524,97 +531,6 @@ impl<'a> Iterator for Tokenizer<'a> {
             match token {
                 Some(Token::EOL) => None,
                 _ => token,
-            }
-        }
-    }
-}
-
-#[cfg(test)]
-mod tokenizer_tests {
-    use super::*;
-
-    #[test]
-    fn valid_decimals() {
-        let decimals = &["1234", "0000000", "#0001001", "#-232323", "0", "-1", "#-2"];
-
-        for decimal in decimals {
-            let s = decimal.to_string();
-            assert!(Tokenizer::is_valid_decimal(&s));
-        }
-    }
-
-    #[test]
-    fn invalid_decimals() {
-        let decimals = &["a1234", "000b0000", "##0001001", "-#232323", "#-", "-"];
-
-        for decimal in decimals {
-            let s = decimal.to_string();
-            assert!(!Tokenizer::is_valid_decimal(&s));
-        }
-    }
-
-    #[test]
-    fn valid_binary() {
-        let binarys = &["0b0", "b0", "-b1", "-B0", "-0B0", "-0B1"];
-
-        for binary in binarys {
-            let s = binary.to_string();
-            assert!(Tokenizer::is_valid_binary(&s));
-        }
-    }
-
-    #[test]
-    fn invalid_binary() {
-        let binarys = &["00", "0b2", "0b", "0", "0B", "-0b", "-0B", "-0", "-B", "B"];
-
-        for binary in binarys {
-            let s = binary.to_string();
-            assert!(!Tokenizer::is_valid_binary(&s));
-        }
-    }
-
-    #[test]
-    fn valid_hexadecimal() {
-        let hexadecimals = &["0x0", "x0", "-x1", "-X0"];
-
-        for hexadecimal in hexadecimals {
-            let s = hexadecimal.to_string();
-            assert!(Tokenizer::is_valid_hexadecimal(&s));
-        }
-    }
-
-    #[test]
-    fn invalid_hexadecimal() {
-        let hexadecimals = &["00", "0xg", "0x", "0", "0X", "-0x", "-0X", "-0", "-X", "X"];
-
-        for hexadecimal in hexadecimals {
-            let s = hexadecimal.to_string();
-            assert!(!Tokenizer::is_valid_hexadecimal(&s));
-        }
-    }
-
-    #[test]
-    fn valid_tokens() {
-        let adds = &["add", "adD", "aDd", "aDD", "Add", "AdD", "ADd", "ADD"];
-        for add in adds {
-            if let Some(token) = Tokenizer::tokenize_literal(add.to_string(), 0, 0) {
-                match token {
-                    Token::Add(_) => {}
-                    _ => panic!("{} is not parsed as an ADD instruction", add),
-                }
-            } else {
-                panic!("{} is not parsed as an ADD instruction", add);
-            }
-        }
-        let ands = &["and", "anD", "aNd", "aND", "And", "AnD", "ANd", "AND"];
-        for and in ands {
-            if let Some(token) = Tokenizer::tokenize_literal(and.to_string(), 0, 0) {
-                match token {
-                    Token::And(_) => {}
-                    _ => panic!("{} is not parsed as an AND instruction", and),
-                }
-            } else {
-                panic!("{} is not parsed as an AND instruction", and);
             }
         }
     }

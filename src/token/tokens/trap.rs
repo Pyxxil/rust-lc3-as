@@ -31,16 +31,12 @@ impl Trap {
 }
 
 impl Assemble for Trap {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         *program_counter += 1;
 
         let instruction = 0xF000
             | (match self.operands.first().unwrap() {
-                Token::Decimal(decimal) => decimal.value,
-                Token::Hexadecimal(hexadecimal) => hexadecimal.value,
-                Token::Binary(binary) => binary.value,
+                Token::Immediate(imm) => imm.value,
                 _ => unreachable!(),
             } & 0xFF) as u16;
 
@@ -62,10 +58,6 @@ impl Requirements for Trap {
         (1, 1)
     }
 
-    fn is_satisfied(&self) -> bool {
-        false
-    }
-
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         let (min, _) = self.require_range();
 
@@ -83,7 +75,7 @@ impl Requirements for Trap {
         }
 
         match &tokens[0] {
-            &Token::Binary(_) | &Token::Decimal(_) | &Token::Hexadecimal(_) => {}
+            &Token::Immediate(_) => {}
             token => {
                 notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
                     DiagType::Error,

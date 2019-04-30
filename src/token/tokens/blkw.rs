@@ -33,21 +33,16 @@ impl Blkw {
 }
 
 impl Assemble for Blkw {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         let value = match self.operands.last().unwrap() {
-            Token::Binary(binary) => binary.value,
-            Token::Decimal(decimal) => decimal.value,
-            Token::Hexadecimal(hexadecimal) => hexadecimal.value,
-            _ => 0,
+            Token::Immediate(imm) => imm.value,
+            Token::Label(_) => 0,
+            _ => unreachable!(),
         } as u16;
         iter::repeat(value)
             .take(match self.operands.first().unwrap() {
-                Token::Binary(binary) => binary.value,
-                Token::Decimal(decimal) => decimal.value,
-                Token::Hexadecimal(hexadecimal) => hexadecimal.value,
-                _ => 0,
+                Token::Immediate(imm) => imm.value,
+                _ => unreachable!(),
             } as usize)
             .map(|val| {
                 *program_counter += 1;
@@ -68,25 +63,16 @@ impl Requirements for Blkw {
         (1, 2)
     }
 
-    fn is_satisfied(&self) -> bool {
-        false
-    }
-
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         if let Some(token) = tokens.front() {
             match token {
-                Token::Binary(_)
-                | Token::Character(_)
-                | Token::Decimal(_)
-                | Token::Hexadecimal(_) => {
+                Token::Immediate(_) | Token::Character(_) => {
                     self.operands.push(tokens.pop_front().unwrap());
                     if let Some(second) = tokens.front() {
                         match second {
-                            Token::Binary(_)
-                            | Token::Character(_)
-                            | Token::Decimal(_)
-                            | Token::Hexadecimal(_)
-                            | Token::Label(_) => self.operands.push(tokens.pop_front().unwrap()),
+                            Token::Immediate(_) | Token::Label(_) => {
+                                self.operands.push(tokens.pop_front().unwrap())
+                            }
                             _ => {}
                         };
                     }

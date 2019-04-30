@@ -31,8 +31,6 @@ impl Ld {
 }
 
 impl Assemble for Ld {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         Vec::new()
     }
@@ -41,10 +39,6 @@ impl Assemble for Ld {
 impl Requirements for Ld {
     fn require_range(&self) -> (u64, u64) {
         (1, 1)
-    }
-
-    fn is_satisfied(&self) -> bool {
-        false
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {

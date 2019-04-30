@@ -31,8 +31,6 @@ impl Fill {
 }
 
 impl Assemble for Fill {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         Vec::new()
     }
@@ -43,18 +41,12 @@ impl Requirements for Fill {
         (1, 0)
     }
 
-    fn is_satisfied(&self) -> bool {
-        false
-    }
-
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         if let Some(token) = tokens.front() {
             match token {
-                Token::Binary(_)
-                | Token::Decimal(_)
-                | Token::Hexadecimal(_)
-                | Token::Character(_)
-                | Token::Label(_) => self.operands.push(tokens.pop_front().unwrap()),
+                Token::Immediate(_) | Token::Character(_) | Token::Label(_) => {
+                    self.operands.push(tokens.pop_front().unwrap())
+                }
                 ref token => {
                     notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
                         DiagType::Error,

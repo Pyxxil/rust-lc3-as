@@ -31,8 +31,6 @@ impl Lshift {
 }
 
 impl Assemble for Lshift {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         Vec::new()
     }
@@ -41,10 +39,6 @@ impl Assemble for Lshift {
 impl Requirements for Lshift {
     fn require_range(&self) -> (u64, u64) {
         (2, 2)
-    }
-
-    fn is_satisfied(&self) -> bool {
-        false
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
@@ -87,9 +81,7 @@ impl Requirements for Lshift {
 
         let value = tokens.front().unwrap();
         match value {
-            Token::Decimal(_) | Token::Hexadecimal(_) | Token::Binary(_) => {
-                self.operands.push(tokens.pop_front().unwrap())
-            }
+            Token::Immediate(_) => self.operands.push(tokens.pop_front().unwrap()),
             token => {
                 notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
                     DiagType::Error,

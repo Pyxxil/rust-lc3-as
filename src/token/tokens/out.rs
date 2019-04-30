@@ -26,8 +26,6 @@ impl Out {
 }
 
 impl Assemble for Out {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         Vec::new()
     }
@@ -36,10 +34,6 @@ impl Assemble for Out {
 impl Requirements for Out {
     fn require_range(&self) -> (u64, u64) {
         (0, 0)
-    }
-
-    fn is_satisfied(&self) -> bool {
-        false
     }
 
     // As OUT takes no operands, just do nothing here.

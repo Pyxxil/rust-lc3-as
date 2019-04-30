@@ -1,12 +1,43 @@
 use token::Token;
 
+use notifier;
+use notifier::{DiagType, Diagnostic, Highlight};
+
 use std::collections::vec_deque::Drain;
 
 use std::collections::VecDeque;
 
-pub trait Assemble {
-    fn assemble(&mut self);
+pub fn expected(expect: &[&str], found: &Token, at: (u64, u64, usize)) {
+    notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+        DiagType::Error,
+        at.0,
+        at.1,
+        at.2,
+        format!(
+            "Expected to find argument of type {}, but found\n{:#?}",
+            expect.to_vec().join(", "),
+            found
+        ),
+    )));
+}
 
+pub fn too_few_operands(required: u64, found: u64, token: &str, at: (u64, u64, usize)) {
+    notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+        DiagType::Error,
+        at.0,
+        at.1,
+        at.2,
+        format!(
+            "{} expects {} operands, but only {} {} found",
+            token,
+            required,
+            found,
+            if found == 1 { "was" } else { "were" }
+        ),
+    )));
+}
+
+pub trait Assemble {
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)>;
 }
 
@@ -15,16 +46,12 @@ pub trait Requirements {
      */
     fn require_range(&self) -> (u64, u64);
 
-    /* Whether or not the token's requirements have been satisfied.
-     */
-    fn is_satisfied(&self) -> bool;
-
     /* Consume a range of tokens corresponding to Requirements::require_amount (at most).
      *
-     * @param: from The vector containing the tokens we can consume from.
+     * @param: tokens The vector containing the tokens we can consume from.
      * @param at The index to begin consuming from
      *
-     * @return The number of consumed tokens (TODO: This might not be required, as Vec::remove does update the length).
+     * @return The tokens not consumed
      */
     fn consume(&mut self, tokens: VecDeque<Token>) -> VecDeque<Token>;
 }
@@ -56,36 +83,10 @@ pub trait Requirements {
 // DEALINGS IN THE SOFTWARE.
 
 pub trait DrainWhileable<T> {
-    /// Take the elements of a vector, left-to-right, stopping at the first non-matching element.
+    /// Take the elements of a VecDeque, left-to-right, stopping at the first non-matching element.
     ///
     /// The returned `DrainWhile` iterates over the longest prefex in which all elements satisfy
     /// `pred`; when the iterator is dropped, the prefix is removed from `vec`.
-    ///
-    /// ```
-    /// # use drain_while::*;
-    /// let mut orig: Vec<usize> = vec![0,1,2,3,4,5];
-    /// let none: Vec<usize> = orig.drain_while(|_| false).collect();
-    /// let some: Vec<usize> = orig.drain_while(|x| *x < 3).collect();
-    /// let rest: Vec<usize> = orig.drain_while(|_| true).collect();
-    ///
-    /// assert_eq!(none, vec![]);
-    /// assert_eq!(some, vec![0,1,2]);
-    /// assert_eq!(rest, vec![3,4,5]);
-    /// assert_eq!(orig, vec![]);
-    /// ```
-    ///
-    /// The behaviour of `drain_while()` differs from `drain().take_while()` in the final state of
-    /// the original vector, as illustrated here:
-    ///
-    /// ```
-    /// # use drain_while::*;
-    /// let mut v1 = vec![1,2,3,4,5];
-    /// let mut v2 = vec![1,2,3,4,5];
-    /// v1.drain(..).take_while(|x| *x < 3);
-    /// v2.drain_while(|x| *x < 3);
-    /// assert_eq!(v1, vec![]);
-    /// assert_eq!(v2, vec![3,4,5]);
-    /// ```
     ///
     /// The same caveats which apply to `drain` also apply to `drain_while`:
     ///

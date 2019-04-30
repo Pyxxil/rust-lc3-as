@@ -31,10 +31,26 @@ impl Jmp {
 }
 
 impl Assemble for Jmp {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
-        Vec::new()
+        *program_counter += 1;
+
+        let register = match self.operands.first().unwrap() {
+            Token::Register(register) => register.register,
+            _ => unreachable!(),
+        } as u16;
+
+        let instruction = 0xC000 | register << 6;
+
+        vec![(
+            instruction,
+            format!(
+                "{0:4X} {1:04X} {1:016b} ({2}) JMP R{3}",
+                *program_counter - 1,
+                instruction,
+                self.line,
+                register,
+            ),
+        )]
     }
 }
 
@@ -43,26 +59,15 @@ impl Requirements for Jmp {
         (1, 1)
     }
 
-    fn is_satisfied(&self) -> bool {
-        false
-    }
-
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        let (min, _) = self.require_range();
-
         if let Some(token) = tokens.front() {
             match token {
                 Token::Register(_) => self.operands.push(tokens.pop_front().unwrap()),
-                _ => notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                    DiagType::Error,
-                    self.column,
-                    self.line,
-                    self.token.len(),
-                    format!(
-                        "Expected to find argument of type Register, but found {:#?}",
-                        token
-                    ),
-                ))),
+                tok => expected(
+                    &["Register"],
+                    &tok,
+                    (self.column, self.line, self.token().len()),
+                ),
             }
         } else {
             notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
@@ -75,7 +80,6 @@ impl Requirements for Jmp {
             )));
         }
 
-        self.operands.push(tokens.pop_front().unwrap());
         tokens
     }
 }

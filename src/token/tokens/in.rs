@@ -26,8 +26,6 @@ impl In {
 }
 
 impl Assemble for In {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         *program_counter += 1;
         vec![(
@@ -44,10 +42,6 @@ impl Assemble for In {
 impl Requirements for In {
     fn require_range(&self) -> (u64, u64) {
         (0, 0)
-    }
-
-    fn is_satisfied(&self) -> bool {
-        false
     }
 
     // As IN takes no operands, do nothing here.

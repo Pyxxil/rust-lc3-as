@@ -26,10 +26,8 @@ pub mod puts;
 pub mod putsp;
 
 // Types
-pub mod binary;
 pub mod character;
-pub mod decimal;
-pub mod hexadecimal;
+pub mod immediate;
 pub mod label;
 pub mod register;
 pub mod string;

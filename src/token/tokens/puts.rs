@@ -26,8 +26,6 @@ impl Puts {
 }
 
 impl Assemble for Puts {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         *program_counter += 1;
         vec![(
@@ -44,10 +42,6 @@ impl Assemble for Puts {
 impl Requirements for Puts {
     fn require_range(&self) -> (u64, u64) {
         (0, 0)
-    }
-
-    fn is_satisfied(&self) -> bool {
-        false
     }
 
     // As PUTS takes no operands, just do nothing here.

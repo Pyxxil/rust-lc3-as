@@ -31,8 +31,6 @@ impl Jsr {
 }
 
 impl Assemble for Jsr {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         Vec::new()
     }
@@ -41,10 +39,6 @@ impl Assemble for Jsr {
 impl Requirements for Jsr {
     fn require_range(&self) -> (u64, u64) {
         (1, 1)
-    }
-
-    fn is_satisfied(&self) -> bool {
-        false
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
@@ -66,7 +60,7 @@ impl Requirements for Jsr {
         }
 
         match &tokens[0] {
-            &Token::Label(_) | &Token::Decimal(_) | &Token::Hexadecimal(_) | &Token::Binary(_) => {}
+            &Token::Label(_) | &Token::Immediate(_) => {}
             token => {
                 notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
                     DiagType::Error,

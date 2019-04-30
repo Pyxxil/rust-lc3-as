@@ -33,14 +33,9 @@ impl Orig {
 }
 
 impl Assemble for Orig {
-    fn assemble(&mut self) {}
-
     fn assembled(mut self, program_counter: &mut i16) -> Vec<(u16, String)> {
         let instruction = match self.operands.remove(0) {
-            Token::Register(register) => i16::from(register.register),
-            Token::Decimal(decimal) => decimal.value,
-            Token::Hexadecimal(hexadecimal) => hexadecimal.value,
-            Token::Binary(binary) => binary.value,
+            Token::Immediate(imm) => imm.value,
             _ => unreachable!(),
         } as u16;
 
@@ -61,24 +56,12 @@ impl Requirements for Orig {
         (1, 1)
     }
 
-    fn is_satisfied(&self) -> bool {
-        false
-    }
-
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         let (min, _) = self.require_range();
         if let Some(token) = tokens.front() {
             match token {
-                Token::Decimal(decimal) => {
-                    self.starting_address = decimal.value as u16;
-                    self.operands.push(tokens.pop_front().unwrap());
-                }
-                Token::Hexadecimal(hexadecimal) => {
-                    self.starting_address = hexadecimal.value as u16;
-                    self.operands.push(tokens.pop_front().unwrap());
-                }
-                Token::Binary(binary) => {
-                    self.starting_address = binary.value as u16;
+                Token::Immediate(imm) => {
+                    self.starting_address = imm.value as u16;
                     self.operands.push(tokens.pop_front().unwrap());
                 }
                 token => {

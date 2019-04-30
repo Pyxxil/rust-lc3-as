@@ -29,8 +29,6 @@ impl Character {
 }
 
 impl Assemble for Character {
-    fn assemble(&mut self) {}
-
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         Vec::new()
     }
@@ -39,10 +37,6 @@ impl Assemble for Character {
 impl Requirements for Character {
     fn require_range(&self) -> (u64, u64) {
         (0, 0)
-    }
-
-    fn is_satisfied(&self) -> bool {
-        false
     }
 
     fn consume(&mut self, tokens: VecDeque<Token>) -> VecDeque<Token> {

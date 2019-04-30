@@ -25,12 +25,11 @@ impl Assembler {
             if parser.is_okay() {
                 let tokens = self.do_first_pass(parser);
                 println!("{:#?}", self.do_second_pass(tokens));
-            } else {
-                println!("Assembly failed.");
+                return;
             }
-        } else {
-            println!("Assembly failed.");
         }
+
+        println!("Assembly failed for {}", self.file);
     }
 
     fn do_first_pass(&self, parser: Parser) -> Vec<token::Token> {
