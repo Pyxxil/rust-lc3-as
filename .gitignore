@@ -6,3 +6,8 @@ target/
 *.txt
 benches/
 tests/
+*.obj
+*.lst
+*.bin
+*.hex
+*.sym
