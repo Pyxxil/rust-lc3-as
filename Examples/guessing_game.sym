@@ -1,0 +1,14 @@
+// Symbol table
+// Scope Level 0:
+//	Symbol Name          Page Address
+//	-------------------- ------------
+//	ASCII_OFFSET         305F
+//	CORRECT              3046
+//	FINISH               301D
+//	GREATER              3056
+//	GREATER_THAN         301A
+//	LESS                 3050
+//	LESS_THAN            3017
+//	LOOP                 3002
+//	NUMBER               3020
+//	PROMPT               3021

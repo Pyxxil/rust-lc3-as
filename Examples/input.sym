@@ -1,0 +1,12 @@
+// Symbol table
+// Scope Level 0:
+//	Symbol Name          Page Address
+//	-------------------- ------------
+//	BEGIN_PROMPT         3017
+//	COUNT                3063
+//	EARLY_FINISH         300D
+//	END_PROMPT           304C
+//	FINISH               3010
+//	LOOP                 3004
+//	PROMPT               3028
+//	STRING               304E
