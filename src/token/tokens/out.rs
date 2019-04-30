@@ -26,7 +26,7 @@ impl Out {
 impl Assemble for Out {
     fn assemble(&mut self) {}
 
-    fn assembled(self) -> Vec<(u16, String)> {
+    fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         Vec::new()
     }
 }

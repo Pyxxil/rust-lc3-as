@@ -4,7 +4,7 @@ use std::str::Chars;
 extern crate colored;
 
 use notifier;
-use notifier::{Diagnostic, DiagType, Highlight, Pointer};
+use notifier::{DiagType, Diagnostic, Highlight, Pointer};
 
 use token::tokens::*;
 use token::Token;
@@ -86,9 +86,9 @@ impl<'a> Tokenizer<'a> {
             "ADD" => Some(Token::Add(add::Add::new(token, column, line))),
             "AND" => Some(Token::And(and::And::new(token, column, line))),
             "NOT" => Some(Token::Not(not::Not::new(token, column, line))),
-            "BRNZP" | "BRNPZ" | "BRZPN" | "BRZNP" | "BRPNZ" | "BRPZN" | "BR" => Some(
-                Token::Br(br::Br::new(token, column, line, true, true, true)),
-            ),
+            "BRNZP" | "BRNPZ" | "BRZPN" | "BRZNP" | "BRPNZ" | "BRPZN" | "BR" => Some(Token::Br(
+                br::Br::new(token, column, line, true, true, true),
+            )),
             "BRN" => Some(Token::Br(br::Br::new(
                 token, column, line, true, false, false,
             ))),
@@ -129,7 +129,7 @@ impl<'a> Tokenizer<'a> {
             "PUTC" | "OUT" => Some(Token::Out(out::Out::new(token, column, line))),
             "IN" => Some(Token::In(r#in::In::new(token, column, line))),
             "GETC" => Some(Token::Getc(getc::Getc::new(token, column, line))),
-            _ => Self::tokenize_immediate_literal(false, token, column, line),
+            _ => Self::tokenize_immediate_literal(token, column, line),
         }
     }
 
@@ -256,29 +256,14 @@ impl<'a> Tokenizer<'a> {
 
     pub fn is_valid_binary(token: &str) -> bool {
         let mut characters = token.chars();
+
         if let Some(ch) = characters.next() {
             match ch.to_ascii_uppercase() {
                 'B' => return token.len() > 1 && characters.all(|c| c.is_digit(2)),
                 '0' => {
                     if let Some(c) = characters.next() {
                         return 'B' == c.to_ascii_uppercase()
-                            && token.len() > 2
-                            && characters.all(|c| c.is_digit(2));
-                    }
-                }
-                '-' => {
-                    if let Some(c) = characters.next() {
-                        match c.to_ascii_uppercase() {
-                            'B' => return token.len() > 2 && characters.all(|c| c.is_digit(2)),
-                            '0' => {
-                                if let Some(c) = characters.next() {
-                                    return 'B' == c.to_ascii_uppercase()
-                                        && token.len() > 3
-                                        && characters.all(|c| c.is_digit(2));
-                                }
-                            }
-                            _ => {}
-                        }
+                            && !characters.any(|c| c != '0' && c != '1');
                     }
                 }
                 _ => {}
@@ -289,79 +274,43 @@ impl<'a> Tokenizer<'a> {
 
     pub fn is_valid_decimal(token: &str) -> bool {
         let mut characters = token.chars().peekable();
+
+        if let Some(&'#') = characters.peek() {
+            let _ = characters.next();
+        }
+
         if let Some(ch) = characters.next() {
             match ch {
-                '0'...'9' => return characters.all(|c| c.is_digit(10)),
-                '-' => {
-                    if characters.peek().is_some() {
-                        return characters.all(|x| x.is_digit(10));
-                    } else {
-                        return false;
-                    }
-                }
-                '#' => {
-                    if let Some(c) = characters.next() {
-                        match c {
-                            '0'...'9' => return characters.all(|c| c.is_digit(10)),
-                            '-' => {
-                                if characters.peek().is_some() {
-                                    return characters.all(|x| x.is_digit(10));
-                                } else {
-                                    return false;
-                                }
-                            }
-                            _ => return false,
-                        }
-                    } else {
-                        return false;
-                    }
-                }
-                _ => return false,
+                '0'...'9' => characters.all(|c| c.is_digit(10)),
+                '-' => characters.peek().is_some() && !characters.any(|x| !x.is_digit(10)),
+                _ => false,
             }
+        } else {
+            false
         }
-        false
     }
 
     pub fn is_valid_hexadecimal(token: &str) -> bool {
-        let mut characters = token.chars();
+        let mut characters = token.chars().peekable();
+
         if let Some(ch) = characters.next() {
             match ch.to_ascii_uppercase() {
-                'X' => return token.len() > 1 && characters.all(|c| c.is_digit(16)),
+                'X' => !characters.any(|c| !c.is_digit(16)),
                 '0' => {
                     if let Some(c) = characters.next() {
                         match c.to_ascii_uppercase() {
-                            'X' => return token.len() > 2 && characters.all(|c| c.is_digit(16)),
-                            _ => return false,
+                            'X' => !characters.any(|c| !c.is_digit(16)),
+                            _ => false,
                         }
                     } else {
-                        return false;
+                        false
                     }
                 }
-                '-' => {
-                    if let Some(c) = characters.next() {
-                        match c.to_ascii_uppercase() {
-                            'X' => return token.len() > 2 && characters.all(|c| c.is_digit(16)),
-                            '0' => {
-                                if let Some(c) = characters.next() {
-                                    match c.to_ascii_uppercase() {
-                                        'X' => {
-                                            return token.len() > 3
-                                                && characters.all(|c| c.is_digit(16))
-                                        }
-                                        _ => return false,
-                                    }
-                                } else {
-                                    return false;
-                                }
-                            }
-                            _ => return false,
-                        }
-                    }
-                }
-                _ => return false,
+                _ => false,
             }
+        } else {
+            false
         }
-        false
     }
 
     pub fn is_valid_label(token: &str) -> bool {
@@ -369,35 +318,29 @@ impl<'a> Tokenizer<'a> {
         if let Some(ch) = characters.next() {
             match ch {
                 '.' | '_' | 'a'...'z' | 'A'...'Z' => {
-                    return characters.all(|c| c.is_alphanumeric() || c == '_')
+                    characters.all(|c| c.is_alphanumeric() || c == '_')
                 }
-                _ => return false,
+                _ => false,
             }
+        } else {
+            false
         }
-        false
     }
 
-    fn tokenize_immediate_literal(
-        its_negative: bool,
-        token: String,
-        column: u64,
-        line: u64,
-    ) -> Option<Token> {
+    fn tokenize_immediate_literal(token: String, column: u64, line: u64) -> Option<Token> {
         if token.is_empty() {
             return None;
         }
 
         if Self::is_valid_decimal(&token) {
-            Some(Token::Decimal(decimal::Decimal::new(
-                token, column, line,
-            )))
+            Some(Token::Decimal(decimal::Decimal::new(token, column, line)))
         } else if Self::is_valid_hexadecimal(&token) {
             Some(Token::Hexadecimal(hexadecimal::Hexadecimal::new(
                 token, column, line,
             )))
         } else if Self::is_valid_binary(&token) {
             Some(Token::Binary(binary::Binary::new(token, column, line)))
-        } else if !its_negative && Self::is_valid_label(&token) {
+        } else if Self::is_valid_label(&token) {
             Some(Token::Label(label::Label::new(token, column, line)))
         } else {
             None
@@ -422,14 +365,10 @@ impl<'a> Tokenizer<'a> {
         match token.to_ascii_uppercase().as_ref() {
             ".ORIG" => Some(Token::Orig(orig::Orig::new(token, column, line))),
             ".END" => Some(Token::End(end::End::new(token, column, line))),
-            ".STRINGZ" => Some(Token::Stringz(stringz::Stringz::new(
-                token, column, line,
-            ))),
+            ".STRINGZ" => Some(Token::Stringz(stringz::Stringz::new(token, column, line))),
             ".BLKW" => Some(Token::Blkw(blkw::Blkw::new(token, column, line))),
             ".FILL" => Some(Token::Fill(fill::Fill::new(token, column, line))),
-            ".INCLUDE" => Some(Token::Include(include::Include::new(
-                token, column, line,
-            ))),
+            ".INCLUDE" => Some(Token::Include(include::Include::new(token, column, line))),
             ".SET" => Some(Token::Set(set::Set::new(token, column, line))),
             ".LSHIFT" => Some(Token::Lshift(lshift::Lshift::new(token, column, line))),
             ".NEG" => Some(Token::Neg(neg::Neg::new(token, column, line))),
@@ -460,15 +399,16 @@ impl<'a> Tokenizer<'a> {
                 '/' => {
                     let _ = self.next();
                     if let Some(ch) = self.next() {
-                        if let '/' = ch {} else  {
-                                warn!(Diagnostic::Pointer(Pointer::new(
-                                    DiagType::Warning,
-                                    token_start,
-                                    self.line_number,
-                                    "Expected another '/' here. Treating it as a comment anyways"
-                                        .to_owned()
-                                )));
-                            }
+                        if let '/' = ch {
+                        } else {
+                            warn!(Diagnostic::Pointer(Pointer::new(
+                                DiagType::Warning,
+                                token_start,
+                                self.line_number,
+                                "Expected another '/' here. Treating it as a comment anyways"
+                                    .to_owned()
+                            )));
+                        }
                     } else {
                         warn!(Diagnostic::Pointer(Pointer::new(
                             DiagType::Warning,
@@ -509,12 +449,26 @@ impl<'a> Tokenizer<'a> {
                     return self.next_token();
                 }
                 '-' => {
-                    return Self::tokenize_immediate_literal(
-                        true,
-                        self.read_word(),
-                        token_start,
-                        self.line_number,
-                    )
+                    let token = self.read_word();
+                    if Self::is_valid_decimal(&token) {
+                        return Some(Token::Decimal(decimal::Decimal::new(
+                            token,
+                            token_start,
+                            self.line_number,
+                        )));
+                    } else {
+                        err!(
+                            self,
+                            Diagnostic::Highlight(Highlight::new(
+                                DiagType::Error,
+                                token_start,
+                                self.line_number,
+                                token.len(),
+                                format!("Invalid token '{}'", token),
+                            ))
+                        );
+                        return None;
+                    }
                 }
                 '.' => {
                     return Self::tokenize_directive(
@@ -526,7 +480,6 @@ impl<'a> Tokenizer<'a> {
                 ch => {
                     if ch.is_digit(10) {
                         return Self::tokenize_immediate_literal(
-                            false,
                             self.read_word(),
                             token_start,
                             self.line_number,

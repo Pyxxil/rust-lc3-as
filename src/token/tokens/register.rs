@@ -32,7 +32,7 @@ impl Register {
 impl Assemble for Register {
     fn assemble(&mut self) {}
 
-    fn assembled(self) -> Vec<(u16, String)> {
+    fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         Vec::new()
     }
 }

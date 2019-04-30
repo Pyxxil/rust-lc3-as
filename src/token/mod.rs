@@ -5,7 +5,6 @@ pub use self::tokens::traits;
 
 pub mod tokens;
 
-pub use self::tokens::r#in;
 pub use self::tokens::add;
 pub use self::tokens::and;
 pub use self::tokens::binary;
@@ -33,6 +32,7 @@ pub use self::tokens::not;
 pub use self::tokens::orig;
 pub use self::tokens::puts;
 pub use self::tokens::putsp;
+pub use self::tokens::r#in;
 pub use self::tokens::register;
 pub use self::tokens::ret;
 pub use self::tokens::rti;

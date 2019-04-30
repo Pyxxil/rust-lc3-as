@@ -38,6 +38,10 @@ impl Assembler {
     }
 
     fn do_second_pass(&self, tokens: Vec<token::Token>) -> Vec<(u16, String)> {
-        tokens.into_iter().flat_map(Assemble::assembled).collect()
+        let mut program_counter = 0;
+        tokens
+            .into_iter()
+            .flat_map(|token| token.assembled(&mut program_counter))
+            .collect()
     }
 }

@@ -31,7 +31,7 @@ impl Orig {
 impl Assemble for Orig {
     fn assemble(&mut self) {}
 
-    fn assembled(mut self) -> Vec<(u16, String)> {
+    fn assembled(mut self, program_counter: &mut i16) -> Vec<(u16, String)> {
         let instruction = match self.operands.remove(0) {
             Token::Register(register) => i16::from(register.register),
             Token::Decimal(decimal) => decimal.value,
@@ -40,10 +40,12 @@ impl Assemble for Orig {
             _ => unreachable!(),
         } as u16;
 
+        *program_counter = instruction as i16;
+
         vec![(
             instruction,
             format!(
-                "{0} {0:4X} {0:016b} ({1}) .ORIG {0:#4X}",
+                "0000 {0:4X} {0:016b} ({1}) .ORIG {0:#4X}",
                 instruction, self.line,
             ),
         )]

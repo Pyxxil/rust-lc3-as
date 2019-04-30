@@ -33,7 +33,7 @@ impl Blkw {
 impl Assemble for Blkw {
     fn assemble(&mut self) {}
 
-    fn assembled(self) -> Vec<(u16, String)> {
+    fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         let value = match self.operands.last().unwrap() {
             Token::Binary(binary) => binary.value,
             Token::Decimal(decimal) => decimal.value,

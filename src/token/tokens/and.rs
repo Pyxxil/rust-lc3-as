@@ -33,7 +33,7 @@ impl And {
 impl Assemble for And {
     fn assemble(&mut self) {}
 
-    fn assembled(mut self) -> Vec<(u16, String)> {
+    fn assembled(mut self, program_counter: &mut i16) -> Vec<(u16, String)> {
         let destination_register = u16::from(match self.operands.remove(0) {
             Token::Register(register) => register.register,
             _ => 0,
@@ -56,11 +56,13 @@ impl Assemble for And {
 
         let instruction: u16 = 0x5000 | destination_register << 9 | source_one << 6 | source_two;
 
+        *program_counter += 1;
+
         vec![(
             instruction,
             format!(
-                "{0} {1:4X} {1:016b} ({2}) AND R{3} R{4} {5}{6}",
-                0,
+                "{0:4X} {1:4X} {1:016b} ({2}) AND R{3} R{4} {5}{6}",
+                *program_counter - 1,
                 instruction,
                 self.line,
                 destination_register,

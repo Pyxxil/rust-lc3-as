@@ -18,9 +18,9 @@ pub mod str;
 pub mod trap;
 
 // Traps
-pub mod r#in;
 pub mod getc;
 pub mod halt;
+pub mod r#in;
 pub mod out;
 pub mod puts;
 pub mod putsp;

@@ -1,10 +1,10 @@
 use token::tokens::traits::*;
-use token::tokens::{r#in, getc, halt, out, puts, putsp};
 use token::tokens::{
     add, and, br, jmp, jsr, jsrr, ld, ldi, ldr, lea, not, ret, rti, st, sti, str, trap,
 };
 use token::tokens::{binary, character, decimal, hexadecimal, label, register, string};
 use token::tokens::{blkw, end, fill, include, lshift, neg, orig, set, stringz, sub};
+use token::tokens::{getc, halt, out, puts, putsp, r#in};
 
 use std::fmt;
 
@@ -212,48 +212,48 @@ impl Assemble for Token {
         }
     }
 
-    fn assembled(self) -> Vec<(u16, String)> {
+    fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         match self {
-            Token::Add(token) => token.assembled(),
-            Token::And(token) => token.assembled(),
-            Token::Br(token) => token.assembled(),
-            Token::Jmp(token) => token.assembled(),
-            Token::Jsr(token) => token.assembled(),
-            Token::Jsrr(token) => token.assembled(),
-            Token::Ld(token) => token.assembled(),
-            Token::Ldi(token) => token.assembled(),
-            Token::Ldr(token) => token.assembled(),
-            Token::Lea(token) => token.assembled(),
-            Token::Not(token) => token.assembled(),
-            Token::Ret(token) => token.assembled(),
-            Token::Rti(token) => token.assembled(),
-            Token::St(token) => token.assembled(),
-            Token::Sti(token) => token.assembled(),
-            Token::Str(token) => token.assembled(),
-            Token::Trap(token) => token.assembled(),
-            Token::Getc(token) => token.assembled(),
-            Token::Halt(token) => token.assembled(),
-            Token::In(token) => token.assembled(),
-            Token::Out(token) => token.assembled(),
-            Token::Puts(token) => token.assembled(),
-            Token::Putsp(token) => token.assembled(),
-            Token::Binary(token) => token.assembled(),
-            Token::Character(token) => token.assembled(),
-            Token::Decimal(token) => token.assembled(),
-            Token::Hexadecimal(token) => token.assembled(),
-            Token::Label(token) => token.assembled(),
-            Token::Register(token) => token.assembled(),
-            Token::String(token) => token.assembled(),
-            Token::Blkw(token) => token.assembled(),
-            Token::End(token) => token.assembled(),
-            Token::Fill(token) => token.assembled(),
-            Token::Include(token) => token.assembled(),
-            Token::Lshift(token) => token.assembled(),
-            Token::Orig(token) => token.assembled(),
-            Token::Neg(token) => token.assembled(),
-            Token::Set(token) => token.assembled(),
-            Token::Stringz(token) => token.assembled(),
-            Token::Sub(token) => token.assembled(),
+            Token::Add(token) => token.assembled(program_counter),
+            Token::And(token) => token.assembled(program_counter),
+            Token::Br(token) => token.assembled(program_counter),
+            Token::Jmp(token) => token.assembled(program_counter),
+            Token::Jsr(token) => token.assembled(program_counter),
+            Token::Jsrr(token) => token.assembled(program_counter),
+            Token::Ld(token) => token.assembled(program_counter),
+            Token::Ldi(token) => token.assembled(program_counter),
+            Token::Ldr(token) => token.assembled(program_counter),
+            Token::Lea(token) => token.assembled(program_counter),
+            Token::Not(token) => token.assembled(program_counter),
+            Token::Ret(token) => token.assembled(program_counter),
+            Token::Rti(token) => token.assembled(program_counter),
+            Token::St(token) => token.assembled(program_counter),
+            Token::Sti(token) => token.assembled(program_counter),
+            Token::Str(token) => token.assembled(program_counter),
+            Token::Trap(token) => token.assembled(program_counter),
+            Token::Getc(token) => token.assembled(program_counter),
+            Token::Halt(token) => token.assembled(program_counter),
+            Token::In(token) => token.assembled(program_counter),
+            Token::Out(token) => token.assembled(program_counter),
+            Token::Puts(token) => token.assembled(program_counter),
+            Token::Putsp(token) => token.assembled(program_counter),
+            Token::Binary(token) => token.assembled(program_counter),
+            Token::Character(token) => token.assembled(program_counter),
+            Token::Decimal(token) => token.assembled(program_counter),
+            Token::Hexadecimal(token) => token.assembled(program_counter),
+            Token::Label(token) => token.assembled(program_counter),
+            Token::Register(token) => token.assembled(program_counter),
+            Token::String(token) => token.assembled(program_counter),
+            Token::Blkw(token) => token.assembled(program_counter),
+            Token::End(token) => token.assembled(program_counter),
+            Token::Fill(token) => token.assembled(program_counter),
+            Token::Include(token) => token.assembled(program_counter),
+            Token::Lshift(token) => token.assembled(program_counter),
+            Token::Orig(token) => token.assembled(program_counter),
+            Token::Neg(token) => token.assembled(program_counter),
+            Token::Set(token) => token.assembled(program_counter),
+            Token::Stringz(token) => token.assembled(program_counter),
+            Token::Sub(token) => token.assembled(program_counter),
             Token::EOL => Vec::new(),
         }
     }
