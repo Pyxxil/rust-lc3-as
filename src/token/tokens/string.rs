@@ -7,6 +7,8 @@ use notifier::{DiagType, Diagnostic, Highlight};
 
 use std::string;
 
+use std::collections::VecDeque;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct String {
     token: string::String,
@@ -45,7 +47,7 @@ impl Requirements for String {
         false
     }
 
-    fn consume(&mut self, tokens: Vec<Token>) -> Vec<Token> {
+    fn consume(&mut self, tokens: VecDeque<Token>) -> VecDeque<Token> {
         notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
             DiagType::Error,
             self.column,

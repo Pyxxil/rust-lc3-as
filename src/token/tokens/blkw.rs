@@ -5,6 +5,8 @@ use token::Token;
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight};
 
+use std::collections::VecDeque;
+
 use std::iter;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -40,24 +42,24 @@ impl Assemble for Blkw {
             Token::Hexadecimal(hexadecimal) => hexadecimal.value,
             _ => 0,
         } as u16;
-        iter::repeat(if self.operands.len() == 1 {
-            (value, "".to_owned())
-        } else {
-            (
-                value,
-                format!(
-                    "{0} {1:4X} {1:016b} ({2}) .FILL #{1}",
-                    0, value as i16, self.line,
-                ),
-            )
-        })
-        .take(match self.operands.first().unwrap() {
-            Token::Binary(binary) => binary.value,
-            Token::Decimal(decimal) => decimal.value,
-            Token::Hexadecimal(hexadecimal) => hexadecimal.value,
-            _ => 0,
-        } as usize)
-        .collect()
+        iter::repeat(value)
+            .take(match self.operands.first().unwrap() {
+                Token::Binary(binary) => binary.value,
+                Token::Decimal(decimal) => decimal.value,
+                Token::Hexadecimal(hexadecimal) => hexadecimal.value,
+                _ => 0,
+            } as usize)
+            .map(|val| {
+                *program_counter += 1;
+                (
+                    val,
+                    format!(
+                        "{0:4X} {1:04X} {1:016b} ({2}) .FILL #{1}",
+                        program_counter, value as i16, self.line,
+                    ),
+                )
+            })
+            .collect()
     }
 }
 
@@ -70,21 +72,21 @@ impl Requirements for Blkw {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
-        if let Some(token) = tokens.first() {
+    fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
+        if let Some(token) = tokens.front() {
             match token {
                 Token::Binary(_)
                 | Token::Character(_)
                 | Token::Decimal(_)
                 | Token::Hexadecimal(_) => {
-                    self.operands.push(tokens.remove(0));
-                    if let Some(second) = tokens.first() {
+                    self.operands.push(tokens.pop_front().unwrap());
+                    if let Some(second) = tokens.front() {
                         match second {
                             Token::Binary(_)
                             | Token::Character(_)
                             | Token::Decimal(_)
                             | Token::Hexadecimal(_)
-                            | Token::Label(_) => self.operands.push(tokens.remove(0)),
+                            | Token::Label(_) => self.operands.push(tokens.pop_front().unwrap()),
                             _ => {}
                         };
                     }

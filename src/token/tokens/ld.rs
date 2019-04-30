@@ -5,6 +5,8 @@ use token::Token;
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight};
 
+use std::collections::VecDeque;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Ld {
     token: String,
@@ -45,7 +47,7 @@ impl Requirements for Ld {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
+    fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         let (min, _) = self.require_range();
 
         if (min) >= tokens.len() as u64 {
@@ -100,7 +102,7 @@ impl Requirements for Ld {
         };
 
         for _ in 0..2 {
-            self.operands.push(tokens.remove(0));
+            self.operands.push(tokens.pop_front().unwrap());
         }
 
         tokens

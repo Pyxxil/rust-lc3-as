@@ -7,6 +7,8 @@ use notifier::{DiagType, Diagnostic, Highlight};
 
 use std::cell::Cell;
 
+use std::collections::VecDeque;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Sub {
     token: String,
@@ -47,7 +49,7 @@ impl Requirements for Sub {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
+    fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         let (min, max) = self.require_range();
         let (column, line, length) = (self.column, self.line, self.token.len());
 
@@ -74,7 +76,7 @@ impl Requirements for Sub {
                 } else {
                     format!(
                         "Expected to find argument of type Register, but found\n{:#?}",
-                        tokens.first().unwrap()
+                        tokens.front().unwrap()
                     )
                 },
             )));

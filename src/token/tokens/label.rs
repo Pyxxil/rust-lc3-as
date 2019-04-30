@@ -2,6 +2,8 @@ use token::tokens::traits::*;
 
 use token::Token;
 
+use std::collections::VecDeque;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Label {
     token: String,
@@ -41,7 +43,7 @@ impl Requirements for Label {
     }
 
     // As a Label takes no operands, just do nothing here.
-    fn consume(&mut self, tokens: Vec<Token>) -> Vec<Token> {
+    fn consume(&mut self, tokens: VecDeque<Token>) -> VecDeque<Token> {
         tokens
     }
 }

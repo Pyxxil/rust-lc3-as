@@ -5,6 +5,8 @@ use token::Token;
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight};
 
+use std::collections::VecDeque;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Neg {
     token: String,
@@ -45,13 +47,13 @@ impl Requirements for Neg {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
-        if let Some(token) = tokens.first() {
+    fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
+        if let Some(token) = tokens.front() {
             match token {
                 Token::Register(_) => {
-                    self.operands.push(tokens.remove(0));
-                    if let Token::Register(_) = tokens.first().unwrap() {
-                        self.operands.push(tokens.remove(0))
+                    self.operands.push(tokens.pop_front().unwrap());
+                    if let Token::Register(_) = tokens.front().unwrap() {
+                        self.operands.push(tokens.pop_front().unwrap())
                     }
                 }
                 ref token => {

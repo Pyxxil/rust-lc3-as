@@ -5,6 +5,8 @@ use token::Token;
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight};
 
+use std::collections::VecDeque;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Fill {
     token: String,
@@ -45,14 +47,14 @@ impl Requirements for Fill {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
-        if let Some(token) = tokens.first() {
+    fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
+        if let Some(token) = tokens.front() {
             match token {
                 Token::Binary(_)
                 | Token::Decimal(_)
                 | Token::Hexadecimal(_)
                 | Token::Character(_)
-                | Token::Label(_) => self.operands.push(tokens.remove(0)),
+                | Token::Label(_) => self.operands.push(tokens.pop_front().unwrap()),
                 ref token => {
                     notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
                         DiagType::Error,

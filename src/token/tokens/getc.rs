@@ -2,6 +2,8 @@ use token::tokens::traits::*;
 
 use token::Token;
 
+use std::collections::VecDeque;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Getc {
     token: String,
@@ -27,7 +29,15 @@ impl Assemble for Getc {
     fn assemble(&mut self) {}
 
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
-        Vec::new()
+        *program_counter += 1;
+        vec![(
+            0xF020,
+            format!(
+                "{:04X} F020 1111000000100000 ({}) TRAP 0x20",
+                *program_counter - 1,
+                self.line
+            ),
+        )]
     }
 }
 
@@ -41,7 +51,7 @@ impl Requirements for Getc {
     }
 
     // As GETC takes no operands, just do nothing here.
-    fn consume(&mut self, tokens: Vec<Token>) -> Vec<Token> {
+    fn consume(&mut self, tokens: VecDeque<Token>) -> VecDeque<Token> {
         tokens
     }
 }

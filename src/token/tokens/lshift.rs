@@ -5,6 +5,8 @@ use token::Token;
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight};
 
+use std::collections::VecDeque;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Lshift {
     token: String,
@@ -45,7 +47,7 @@ impl Requirements for Lshift {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
+    fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         let (min, _) = self.require_range();
 
         if min > (tokens.len() as u64) {
@@ -64,9 +66,9 @@ impl Requirements for Lshift {
             return tokens;
         }
 
-        let destination = tokens.first().unwrap();
+        let destination = tokens.front().unwrap();
         match destination {
-            Token::Register(_) => self.operands.push(tokens.remove(0)),
+            Token::Register(_) => self.operands.push(tokens.pop_front().unwrap()),
             token => {
                 notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
                     DiagType::Error,
@@ -83,10 +85,10 @@ impl Requirements for Lshift {
             }
         }
 
-        let value = tokens.first().unwrap();
+        let value = tokens.front().unwrap();
         match value {
             Token::Decimal(_) | Token::Hexadecimal(_) | Token::Binary(_) => {
-                self.operands.push(tokens.remove(0))
+                self.operands.push(tokens.pop_front().unwrap())
             }
             token => {
                 notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(

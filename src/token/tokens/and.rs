@@ -7,6 +7,8 @@ use notifier::{DiagType, Diagnostic, Highlight};
 
 use std::cell::Cell;
 
+use std::collections::VecDeque;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct And {
     token: String,
@@ -61,7 +63,7 @@ impl Assemble for And {
         vec![(
             instruction,
             format!(
-                "{0:4X} {1:4X} {1:016b} ({2}) AND R{3} R{4} {5}{6}",
+                "{0:4X} {1:04X} {1:016b} ({2}) AND R{3} R{4} {5}{6}",
                 *program_counter - 1,
                 instruction,
                 self.line,
@@ -83,7 +85,7 @@ impl Requirements for And {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
+    fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         let (min, max) = self.require_range();
         let (column, line, length) = (self.column, self.line, self.token.len());
 
@@ -115,7 +117,7 @@ impl Requirements for And {
                 } else {
                     format!(
                         "Expected to find argument of type Immediate or Register, but found\n{:#?}",
-                        tokens.first().unwrap()
+                        tokens.front().unwrap()
                     )
                 },
             )));

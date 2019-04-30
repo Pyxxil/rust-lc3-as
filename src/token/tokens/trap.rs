@@ -5,6 +5,8 @@ use token::Token;
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight};
 
+use std::collections::VecDeque;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Trap {
     token: String,
@@ -32,7 +34,26 @@ impl Assemble for Trap {
     fn assemble(&mut self) {}
 
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
-        Vec::new()
+        *program_counter += 1;
+
+        let instruction = 0xF000
+            | (match self.operands.first().unwrap() {
+                Token::Decimal(decimal) => decimal.value,
+                Token::Hexadecimal(hexadecimal) => hexadecimal.value,
+                Token::Binary(binary) => binary.value,
+                _ => unreachable!(),
+            } & 0xFF) as u16;
+
+        vec![(
+            instruction,
+            format!(
+                "{0:04X} {1:4X} {1:016b} ({2}) TRAP 0x{3:02X}",
+                *program_counter - 1,
+                instruction,
+                instruction & 0xFF,
+                self.line
+            ),
+        )]
     }
 }
 
@@ -45,7 +66,7 @@ impl Requirements for Trap {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
+    fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         let (min, _) = self.require_range();
 
         if (min) > (tokens.len() as u64) {
@@ -78,7 +99,7 @@ impl Requirements for Trap {
             }
         };
 
-        self.operands.push(tokens.remove(0));
+        self.operands.push(tokens.pop_front().unwrap());
         tokens
     }
 }

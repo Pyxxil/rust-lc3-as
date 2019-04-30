@@ -2,6 +2,8 @@ use token::tokens::traits::*;
 
 use token::Token;
 
+use std::collections::VecDeque;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Putsp {
     token: String,
@@ -27,7 +29,15 @@ impl Assemble for Putsp {
     fn assemble(&mut self) {}
 
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
-        Vec::new()
+        *program_counter += 1;
+        vec![(
+            0xF024,
+            format!(
+                "{:04X} F024 1111000000100100 ({}) TRAP 0x24",
+                *program_counter - 1,
+                self.line
+            ),
+        )]
     }
 }
 
@@ -41,7 +51,7 @@ impl Requirements for Putsp {
     }
 
     // As PUTSP takes no operands, just do nothing here.
-    fn consume(&mut self, tokens: Vec<Token>) -> Vec<Token> {
+    fn consume(&mut self, tokens: VecDeque<Token>) -> VecDeque<Token> {
         tokens
     }
 }

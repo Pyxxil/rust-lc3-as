@@ -5,12 +5,15 @@ use token::Token;
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight};
 
+use std::collections::VecDeque;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Orig {
     token: String,
     column: u64,
     line: u64,
     operands: Vec<Token>,
+    pub starting_address: u16,
 }
 
 impl Orig {
@@ -20,6 +23,7 @@ impl Orig {
             column,
             line,
             operands: Vec::with_capacity(1),
+            starting_address: 0,
         }
     }
 
@@ -61,12 +65,21 @@ impl Requirements for Orig {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
+    fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         let (min, _) = self.require_range();
-        if let Some(token) = tokens.first() {
+        if let Some(token) = tokens.front() {
             match token {
-                Token::Decimal(_) | Token::Hexadecimal(_) | Token::Binary(_) => {
-                    self.operands.push(tokens.remove(0))
+                Token::Decimal(decimal) => {
+                    self.starting_address = decimal.value as u16;
+                    self.operands.push(tokens.pop_front().unwrap());
+                }
+                Token::Hexadecimal(hexadecimal) => {
+                    self.starting_address = hexadecimal.value as u16;
+                    self.operands.push(tokens.pop_front().unwrap());
+                }
+                Token::Binary(binary) => {
+                    self.starting_address = binary.value as u16;
+                    self.operands.push(tokens.pop_front().unwrap());
                 }
                 token => {
                     notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(

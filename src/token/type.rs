@@ -8,6 +8,8 @@ use token::tokens::{getc, halt, out, puts, putsp, r#in};
 
 use std::fmt;
 
+pub use std::collections::VecDeque;
+
 #[derive(PartialEq, Clone)]
 pub enum Token {
     // Instructions
@@ -118,7 +120,7 @@ impl Requirements for Token {
         false
     }
 
-    fn consume(&mut self, tokens: Vec<Token>) -> Vec<Token> {
+    fn consume(&mut self, tokens: VecDeque<Token>) -> VecDeque<Token> {
         match *self {
             Token::Add(ref mut token) => token.consume(tokens),
             Token::And(ref mut token) => token.consume(tokens),

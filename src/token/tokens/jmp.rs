@@ -5,6 +5,8 @@ use token::Token;
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight};
 
+use std::collections::VecDeque;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Jmp {
     token: String,
@@ -45,26 +47,13 @@ impl Requirements for Jmp {
         false
     }
 
-    fn consume(&mut self, mut tokens: Vec<Token>) -> Vec<Token> {
+    fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         let (min, _) = self.require_range();
 
-        if (min) > (tokens.len() as u64) {
-            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                DiagType::Error,
-                self.column,
-                self.line,
-                self.token.len(),
-                "Expected an argument to JMP instruction, but found the end of file instead."
-                    .to_owned(),
-            )));
-
-            return tokens;
-        }
-
-        match &tokens[0] {
-            &Token::Register(_) => {}
-            token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+        if let Some(token) = tokens.front() {
+            match token {
+                Token::Register(_) => self.operands.push(tokens.pop_front().unwrap()),
+                _ => notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
                     DiagType::Error,
                     self.column,
                     self.line,
@@ -73,12 +62,20 @@ impl Requirements for Jmp {
                         "Expected to find argument of type Register, but found {:#?}",
                         token
                     ),
-                )));
-                return tokens;
+                ))),
             }
-        };
+        } else {
+            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                DiagType::Error,
+                self.column,
+                self.line,
+                self.token.len(),
+                "Expected an argument to JMP instruction, but found the end of file instead."
+                    .to_owned(),
+            )));
+        }
 
-        self.operands.push(tokens.remove(0));
+        self.operands.push(tokens.pop_front().unwrap());
         tokens
     }
 }

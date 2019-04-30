@@ -1,6 +1,8 @@
 use token::Token;
 
-use std::vec::Drain;
+use std::collections::vec_deque::Drain;
+
+use std::collections::VecDeque;
 
 pub trait Assemble {
     fn assemble(&mut self);
@@ -24,7 +26,7 @@ pub trait Requirements {
      *
      * @return The number of consumed tokens (TODO: This might not be required, as Vec::remove does update the length).
      */
-    fn consume(&mut self, tokens: Vec<Token>) -> Vec<Token>;
+    fn consume(&mut self, tokens: VecDeque<Token>) -> VecDeque<Token>;
 }
 
 // Copyright (c) 2017 Alex Sayers
@@ -99,7 +101,7 @@ pub trait DrainWhileable<T> {
         P: Fn(&T) -> bool;
 }
 
-/// A draining iterator for `Vec<T>`.
+/// A draining iterator for `VecDeque<T>`.
 ///
 /// See [`Vec::drain_while`](trait.DrainWhileable.html#tymethod.drain_while) for more.
 //
@@ -112,13 +114,12 @@ impl<'a, T> Iterator for DrainWhile<'a, T> {
     }
 }
 
-impl<T> DrainWhileable<T> for Vec<T> {
+impl<T> DrainWhileable<T> for VecDeque<T> {
     // TODO: Surely this can be implemented more efficiently, but it may not be worth the effort...
     fn drain_while<P>(&mut self, mut pred: P) -> DrainWhile<T>
     where
         P: FnMut(&T) -> bool,
     {
-        // This is purely a performance optimisation for the 0-matching case.
         match self.iter().position(|x| !pred(x)) {
             None =>
             /* they all matched pred */
