@@ -31,7 +31,7 @@ impl Assemble for Putsp {
         vec![(
             0xF024,
             format!(
-                "{:04X} F024 1111000000100100 ({}) TRAP 0x24",
+                "({:04X}) F024 1111000000100100 ({: >4}) PUTSP",
                 *program_counter - 1,
                 self.line
             ),

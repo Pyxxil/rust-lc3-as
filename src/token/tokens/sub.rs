@@ -45,7 +45,6 @@ impl Requirements for Sub {
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         let (min, max) = self.require_range();
-        let (column, line, length) = (self.column, self.line, self.token.len());
 
         let count = Cell::new(0);
 
@@ -60,20 +59,12 @@ impl Requirements for Sub {
             .collect();
 
         if count.get() < min {
-            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                DiagType::Error,
-                column,
-                line,
-                length,
-                if tokens.is_empty() {
-                    "Expected to find argument of type Register, but found nothing".to_owned()
-                } else {
-                    format!(
-                        "Expected to find argument of type Register, but found\n{:#?}",
-                        tokens.front().unwrap()
-                    )
-                },
-            )));
+            too_few_operands(
+                min,
+                count.get(),
+                self.token(),
+                (self.column, self.line, self.token().len()),
+            );
         }
 
         tokens

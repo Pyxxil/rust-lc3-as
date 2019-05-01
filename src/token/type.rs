@@ -132,11 +132,6 @@ impl Requirements for Token {
             Token::Out(ref mut token) => token.consume(tokens),
             Token::Puts(ref mut token) => token.consume(tokens),
             Token::Putsp(ref mut token) => token.consume(tokens),
-            Token::Immediate(ref mut token) => token.consume(tokens),
-            Token::Character(ref mut token) => token.consume(tokens),
-            Token::Label(ref mut token) => token.consume(tokens),
-            Token::Register(ref mut token) => token.consume(tokens),
-            Token::String(ref mut token) => token.consume(tokens),
             Token::Blkw(ref mut token) => token.consume(tokens),
             Token::End(ref mut token) => token.consume(tokens),
             Token::Fill(ref mut token) => token.consume(tokens),
@@ -147,6 +142,39 @@ impl Requirements for Token {
             Token::Set(ref mut token) => token.consume(tokens),
             Token::Stringz(ref mut token) => token.consume(tokens),
             Token::Sub(ref mut token) => token.consume(tokens),
+            Token::Label(ref mut token) => tokens,
+            Token::Immediate(ref token) => {
+                expected(
+                    &["Instruction", "Directive", "Label"],
+                    self,
+                    (token.column(), token.line(), token.token().len()),
+                );
+                tokens
+            }
+            Token::Character(ref token) => {
+                expected(
+                    &["Instruction", "Directive", "Label"],
+                    self,
+                    (token.column(), token.line(), token.token().len()),
+                );
+                tokens
+            }
+            Token::Register(ref token) => {
+                expected(
+                    &["Instruction", "Directive", "Label"],
+                    self,
+                    (token.column(), token.line(), token.token().len()),
+                );
+                tokens
+            }
+            Token::String(ref token) => {
+                expected(
+                    &["Instruction", "Directive", "Label"],
+                    self,
+                    (token.column(), token.line(), token.token().len()),
+                );
+                tokens
+            }
             Token::EOL => tokens,
         }
     }
@@ -188,10 +216,7 @@ impl Assemble for Token {
             Token::Stringz(token) => token.assembled(program_counter),
             Token::Sub(token) => token.assembled(program_counter),
             Token::Label(_) | Token::End(_) => Vec::new(),
-            token => {
-                println!("Token {:#?}", token);
-                unreachable!()
-            }
+            token => unreachable!(),
         }
     }
 }

@@ -27,7 +27,15 @@ impl Out {
 
 impl Assemble for Out {
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
-        Vec::new()
+        *program_counter += 1;
+        vec![(
+            0xF022,
+            format!(
+                "({:04X}) F021 1111000000100001 ({: >4}) OUT",
+                *program_counter - 1,
+                self.line
+            ),
+        )]
     }
 }
 

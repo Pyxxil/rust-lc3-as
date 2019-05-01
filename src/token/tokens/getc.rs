@@ -31,7 +31,7 @@ impl Assemble for Getc {
         vec![(
             0xF020,
             format!(
-                "{:04X} F020 1111000000100000 ({}) TRAP 0x20",
+                "({:04X}) F020 1111000000100000 ({: >4}) GETC",
                 *program_counter - 1,
                 self.line
             ),

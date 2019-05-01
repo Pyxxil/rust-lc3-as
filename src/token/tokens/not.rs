@@ -2,8 +2,7 @@ use token::tokens::traits::*;
 
 use token::Token;
 
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
+use std::cell::Cell;
 
 use std::collections::VecDeque;
 
@@ -31,8 +30,33 @@ impl Not {
 }
 
 impl Assemble for Not {
-    fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
-        Vec::new()
+    fn assembled(mut self, program_counter: &mut i16) -> Vec<(u16, String)> {
+        let destination_register = match self.operands.remove(0) {
+            Token::Register(register) => register.register,
+            _ => unreachable!(),
+        } as u16;
+
+        let source_register = match self.operands.first() {
+            Some(token) => match token {
+                Token::Register(register) => u16::from(register.register),
+                _ => unreachable!(),
+            },
+            None => destination_register,
+        } as u16;
+
+        let instruction = 0x901F | destination_register << 9 | source_register << 6;
+
+        vec![(
+            instruction,
+            format!(
+                "({0:4X}) {1:04X} {1:016b} ({2: >4}) NOT R{3} R{4}",
+                *program_counter - 1,
+                instruction,
+                self.line,
+                destination_register,
+                source_register,
+            ),
+        )]
     }
 }
 
@@ -42,50 +66,27 @@ impl Requirements for Not {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        let (min, _) = self.require_range();
+        let (min, max) = self.require_range();
 
-        if (min) >= tokens.len() as u64 {
-            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                DiagType::Error,
-                self.column,
-                self.line,
-                self.token.len(),
-                    "Expected at least one argument for NOT instruction, but found end of file instead.".to_owned()
-            )));
+        let count = Cell::new(0);
 
-            return tokens;
-        }
+        self.operands = tokens
+            .drain_while(|token| match token {
+                Token::Register(_) => {
+                    count.set(count.get() + 1);
+                    count.get() <= max
+                }
+                _ => false,
+            })
+            .collect();
 
-        let mut consumed = 0;
-
-        match &tokens[0] {
-            &Token::Register(_) => {
-                consumed += 1;
-            }
-            token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                    DiagType::Error,
-                    self.column,
-                    self.line,
-                    self.token.len(),
-                    format!(
-                        "Expected to find argument of type Register, but found\n{:#?}",
-                        token
-                    ),
-                )));
-
-                return tokens;
-            }
-        };
-
-        if 1 < tokens.len() as u64 {
-            if let Token::Register(_) = tokens[1] {
-                consumed += 1;
-            }
-        }
-
-        for _ in 0..consumed {
-            self.operands.push(tokens.pop_front().unwrap());
+        if count.get() < min {
+            too_few_operands(
+                min,
+                count.get(),
+                self.token(),
+                (self.column, self.line, self.token().len()),
+            );
         }
 
         tokens

@@ -31,7 +31,7 @@ impl Assemble for In {
         vec![(
             0xF023,
             format!(
-                "{:04X} F023 1111000000100011 ({}) TRAP 0x23",
+                "({:04X}) F023 1111000000100011 ({: >4}) TRAP 0x23",
                 *program_counter - 1,
                 self.line
             ),

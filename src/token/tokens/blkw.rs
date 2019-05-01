@@ -49,7 +49,7 @@ impl Assemble for Blkw {
                 (
                     val,
                     format!(
-                        "{0:4X} {1:04X} {1:016b} ({2}) .FILL #{1}",
+                        "({0:4X}) {1:04X} {1:016b} ({2: >4}) .FILL #{1}",
                         program_counter, value as i16, self.line,
                     ),
                 )

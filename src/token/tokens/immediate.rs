@@ -130,30 +130,12 @@ impl Immediate {
     pub fn token(&self) -> &String {
         &self.token
     }
-}
 
-impl Assemble for Immediate {
-    fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
-        Vec::new()
-    }
-}
-
-impl Requirements for Immediate {
-    fn require_range(&self) -> (u64, u64) {
-        (0, 0)
+    pub fn column(&self) -> u64 {
+        self.column
     }
 
-    fn consume(&mut self, tokens: VecDeque<Token>) -> VecDeque<Token> {
-        notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-            DiagType::Error,
-            self.column,
-            self.line,
-            self.token.len(),
-            format!(
-                "Expected Instruction, Directive, or Label, but found\n{:#?}\n",
-                self
-            ),
-        )));
-        tokens
+    pub fn line(&self) -> u64 {
+        self.line
     }
 }

@@ -2,9 +2,6 @@ use token::tokens::traits::*;
 
 use token::Token;
 
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
-
 use std::collections::VecDeque;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -46,28 +43,25 @@ impl Requirements for Neg {
             match token {
                 Token::Register(_) => {
                     self.operands.push(tokens.pop_front().unwrap());
-                    if let Token::Register(_) = tokens.front().unwrap() {
+                    if let Some(Token::Register(_)) = tokens.front() {
                         self.operands.push(tokens.pop_front().unwrap())
                     }
                 }
-                ref token => {
-                    notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                        DiagType::Error,
-                        self.column,
-                        self.line,
-                        self.token.len(),
-                        format!("Expected an Immediate Literal, but found\n {:#?}", token),
-                    )));
+                token => {
+                    expected(
+                        &["Immediate value"],
+                        token,
+                        (self.column, self.line, self.token().len()),
+                    );
                 }
             }
         } else {
-            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                DiagType::Error,
-                self.column,
-                self.line,
-                self.token.len(),
-                "Expected an argument, but found nothing".to_owned(),
-            )));
+            too_few_operands(
+                1,
+                0,
+                self.token(),
+                (self.column, self.line, self.token().len()),
+            );
         }
 
         tokens

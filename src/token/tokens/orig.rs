@@ -44,7 +44,7 @@ impl Assemble for Orig {
         vec![(
             instruction,
             format!(
-                "0000 {0:4X} {0:016b} ({1}) .ORIG {0:#4X}",
+                "(0000) {0:4X} {0:016b} ({1: >4}) .ORIG {0:#4X}",
                 instruction, self.line,
             ),
         )]

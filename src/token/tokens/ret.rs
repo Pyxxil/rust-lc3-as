@@ -27,7 +27,16 @@ impl Ret {
 
 impl Assemble for Ret {
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
-        Vec::new()
+        *program_counter += 1;
+
+        vec![(
+            0xC1C0,
+            format!(
+                "({:04X}) C1C0 1100000111000000 ({: >4}) RET",
+                *program_counter - 1,
+                self.line
+            ),
+        )]
     }
 }
 

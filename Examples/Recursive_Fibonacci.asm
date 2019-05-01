@@ -30,7 +30,7 @@ OUT_PROMPT:
         PUTS                            ; Put it to the display.
 
         ; Initialise Registers for the first part of the program.
-        AND R5, R5;, #0                  ; Reset R5.
+        AND R5, R5, #0                  ; Reset R5.
         ADD R5, R5, #10                 ; Set R5 to ten, its our character counter.
         LD R1, NUMBER                   ; Load the number into R1.
         JSR CLEAR_FLAG                  ; Clear any flags added.

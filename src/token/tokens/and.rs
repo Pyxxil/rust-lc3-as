@@ -56,7 +56,7 @@ impl Assemble for And {
         vec![(
             instruction,
             format!(
-                "{0:4X} {1:04X} {1:016b} ({2}) AND R{3} R{4} {5}{6}",
+                "({0:4X}) {1:04X} {1:016b} ({2: >4}) AND R{3} R{4} {5}{6}",
                 *program_counter - 1,
                 instruction,
                 self.line,

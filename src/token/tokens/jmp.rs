@@ -44,7 +44,7 @@ impl Assemble for Jmp {
         vec![(
             instruction,
             format!(
-                "{0:4X} {1:04X} {1:016b} ({2}) JMP R{3}",
+                "({0:4X}) {1:04X} {1:016b} ({2: >4}) JMP R{3}",
                 *program_counter - 1,
                 instruction,
                 self.line,

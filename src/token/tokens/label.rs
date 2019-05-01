@@ -24,20 +24,3 @@ impl Label {
         &self.token
     }
 }
-
-impl Assemble for Label {
-    fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
-        Vec::new()
-    }
-}
-
-impl Requirements for Label {
-    fn require_range(&self) -> (u64, u64) {
-        (0, 0)
-    }
-
-    // As a Label takes no operands, just do nothing here.
-    fn consume(&mut self, tokens: VecDeque<Token>) -> VecDeque<Token> {
-        tokens
-    }
-}

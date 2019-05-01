@@ -43,7 +43,7 @@ impl Assemble for Trap {
         vec![(
             instruction,
             format!(
-                "{0:04X} {1:4X} {1:016b} ({2}) TRAP 0x{3:02X}",
+                "({0:4X}) {1:04X} {1:016b} ({2: >4}) TRAP 0x{3:02X}",
                 *program_counter - 1,
                 instruction,
                 instruction & 0xFF,

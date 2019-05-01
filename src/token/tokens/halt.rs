@@ -31,7 +31,7 @@ impl Assemble for Halt {
         vec![(
             0xF025,
             format!(
-                "{:04X} F025 1111000000100101 ({}) TRAP 0x25",
+                "({:04X}) F025 1111000000100101 ({: >4}) HALT",
                 *program_counter - 1,
                 self.line
             ),

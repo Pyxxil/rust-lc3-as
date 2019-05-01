@@ -31,7 +31,7 @@ impl Assemble for Puts {
         vec![(
             0xF022,
             format!(
-                "{:04X} F022 1111000000100010 ({}) TRAP 0x22",
+                "({:04X}) F022 1111000000100010 ({: >4}) PUTS",
                 *program_counter - 1,
                 self.line
             ),
