@@ -142,7 +142,7 @@ impl Requirements for Token {
             Token::Set(ref mut token) => token.consume(tokens),
             Token::Stringz(ref mut token) => token.consume(tokens),
             Token::Sub(ref mut token) => token.consume(tokens),
-            Token::Label(ref mut token) => tokens,
+            Token::Label(_) => tokens,
             Token::Immediate(ref token) => {
                 expected(
                     &["Instruction", "Directive", "Label"],

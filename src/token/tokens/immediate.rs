@@ -1,11 +1,5 @@
-use token::tokens::traits::*;
-
-use token::Token;
-
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight};
-
-use std::collections::VecDeque;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Immediate {

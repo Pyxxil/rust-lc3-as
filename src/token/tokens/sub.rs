@@ -1,9 +1,6 @@
 use token::tokens::traits::*;
 
-use token::Token;
-
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
+use token::r#type::Token;
 
 use std::cell::Cell;
 

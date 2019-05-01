@@ -1,9 +1,3 @@
-use token::tokens::traits::*;
-
-use token::Token;
-
-use std::collections::VecDeque;
-
 #[derive(Debug, PartialEq, Clone)]
 pub struct Label {
     token: String,
