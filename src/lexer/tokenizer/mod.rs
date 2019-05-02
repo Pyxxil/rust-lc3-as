@@ -155,7 +155,7 @@ impl<'a> Tokenizer<'a> {
                             self.column - 2,
                             self.line_number,
                             2,
-                            "Unknown escape sequence".to_owned(),
+                            format!("Unknown escape sequence '\\{}'", ch),
                         )));
                         token.push('\\');
                         token.push(ch);
@@ -370,7 +370,7 @@ impl<'a> Tokenizer<'a> {
 
     fn tokenize_directive(token: String, column: u64, line: u64) -> Option<Token> {
         match token.to_ascii_uppercase().as_ref() {
-            ".ORIG" => Some(Token::Orig(orig::Orig::new(token, column, line))),
+            ".ORIG" => Some(Token::Orig(orig::Orig::new(token, column, line, 0))),
             ".END" => Some(Token::End(end::End::new(token, column, line))),
             ".STRINGZ" => Some(Token::Stringz(stringz::Stringz::new(token, column, line))),
             ".BLKW" => Some(Token::Blkw(blkw::Blkw::new(token, column, line))),
@@ -527,10 +527,9 @@ impl<'a> Iterator for Tokenizer<'a> {
         if self.at_end() {
             None
         } else {
-            let token = self.next_token();
-            match token {
+            match self.next_token() {
                 Some(Token::EOL) => None,
-                _ => token,
+                token => token,
             }
         }
     }

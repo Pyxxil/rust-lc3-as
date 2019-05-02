@@ -1,10 +1,12 @@
-use notifier;
 use token::traits::Requirements;
 use token::Symbol;
 use token::Token;
 
 use std::collections::HashMap;
 use std::collections::VecDeque;
+
+use notifier;
+use notifier::{Diagnostic, DiagType, Highlight};
 
 #[derive(Debug)]
 pub struct Parser {
@@ -29,19 +31,38 @@ impl Parser {
 
             match &token {
                 Token::Label(ref tok) => {
-                    self.symbols.insert(
-                        tok.token().to_string(),
-                        Symbol::new(address, tok.token().to_string()),
-                    );
+                    if self.symbols.contains_key(tok.token()) {
+                        notifier::add_diagnostic(
+                            Diagnostic::Highlight(Highlight::new(
+                                DiagType::Error,
+                                tok.column(),
+                                tok.line(),
+                                tok.token().len(),
+                                format!(
+                                    "Duplicate symbol found {}",
+                                    tok.token()
+                                )
+                            ))
+                        );
+                    } else {
+                        self.symbols.insert(
+                            tok.token().to_string(),
+                            Symbol::new(address, tok.token().to_string()),
+                        );
+                    }
                 }
                 Token::Orig(ref tok) => {
                     address = tok.starting_address;
                 }
-                _ => {}
+                _ => {
+                    address += 1;
+                }
             }
 
             self.tokens.push(token);
         }
+
+        println!("{:#?}", self.symbols);
     }
 
     pub fn is_okay(&self) -> bool {
@@ -50,5 +71,9 @@ impl Parser {
 
     pub fn tokens(self) -> Vec<Token> {
         self.tokens
+    }
+
+    pub fn symbols(self) -> HashMap<String, Symbol> {
+        self.symbols
     }
 }

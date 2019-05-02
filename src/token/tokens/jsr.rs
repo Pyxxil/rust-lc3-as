@@ -7,28 +7,7 @@ use notifier::{DiagType, Diagnostic, Highlight};
 
 use std::collections::VecDeque;
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct Jsr {
-    token: String,
-    column: u64,
-    line: u64,
-    operands: Vec<Token>,
-}
-
-impl Jsr {
-    pub fn new(token: String, column: u64, line: u64) -> Self {
-        Self {
-            token,
-            column,
-            line,
-            operands: Vec::with_capacity(1),
-        }
-    }
-
-    pub fn token(&self) -> &String {
-        &self.token
-    }
-}
+token!(Jsr, 1);
 
 impl Assemble for Jsr {
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
@@ -37,7 +16,7 @@ impl Assemble for Jsr {
 }
 
 impl Requirements for Jsr {
-    fn require_range(&self) -> (u64, u64) {
+    fn memory_requirement(&self) -> u16 { 0 } fn require_range(&self) -> (u64, u64) {
         (1, 1)
     }
 

@@ -1,34 +1,12 @@
 use token::tokens::traits::*;
 
-use token::Token;
+use token::tokens::*;
 
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
+use token::Token;
 
 use std::collections::VecDeque;
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct Str {
-    token: String,
-    column: u64,
-    line: u64,
-    operands: Vec<Token>,
-}
-
-impl Str {
-    pub fn new(token: String, column: u64, line: u64) -> Self {
-        Self {
-            token,
-            column,
-            line,
-            operands: Vec::with_capacity(3),
-        }
-    }
-
-    pub fn token(&self) -> &String {
-        &self.token
-    }
-}
+token!(Str, 3);
 
 impl Assemble for Str {
     fn assembled(mut self, program_counter: &mut i16) -> Vec<(u16, String)> {
@@ -65,65 +43,24 @@ impl Assemble for Str {
 }
 
 impl Requirements for Str {
-    fn require_range(&self) -> (u64, u64) {
+    fn memory_requirement(&self) -> u16 { 0 } fn require_range(&self) -> (u64, u64) {
         (3, 3)
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         if let Some(token) = tokens.front() {
-            match token {
-                Token::Register(_) => self.operands.push(tokens.pop_front().unwrap()),
-                tok => {
-                    expected(
-                        &["Register"],
-                        &tok,
-                        (self.column, self.line, self.token().len()),
-                    );
-                    return tokens;
-                }
-            }
+            expect!(self, tokens, token, Token::Register, "Register");
         }
 
         if let Some(token) = tokens.front() {
-            match token {
-                Token::Register(_) => self.operands.push(tokens.pop_front().unwrap()),
-                tok => {
-                    expected(
-                        &["Register"],
-                        &tok,
-                        (self.column, self.line, self.token().len()),
-                    );
-                    return tokens;
-                }
-            }
+            expect!(self, tokens, token, Token::Register, "Register");
         }
 
         if let Some(token) = tokens.front() {
-            match token {
-                Token::Immediate(_) => self.operands.push(tokens.pop_front().unwrap()),
-                tok => {
-                    expected(
-                        &["Immediate"],
-                        &tok,
-                        (self.column, self.line, self.token().len()),
-                    );
-                    return tokens;
-                }
-            }
+            expect!(self, tokens, token, Token::Immediate, "Immediate");
         }
 
-        if self.operands.len() < 3 {
-            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                DiagType::Error,
-                self.column,
-                self.line,
-                self.token.len(),
-                format!(
-                    "STR expects three operands, but only {} were found",
-                    self.operands.len()
-                ),
-            )));
-        }
+        operands_check!(self);
 
         tokens
     }

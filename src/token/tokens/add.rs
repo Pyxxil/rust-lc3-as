@@ -1,33 +1,12 @@
 use token::tokens::traits::*;
 
-use token::Token;
+use token::tokens::{expected, too_few_operands};
 
-use std::cell::Cell;
+use token::Token;
 
 use std::collections::VecDeque;
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct Add {
-    token: String,
-    column: u64,
-    line: u64,
-    operands: Vec<Token>,
-}
-
-impl Add {
-    pub fn new(token: String, column: u64, line: u64) -> Self {
-        Self {
-            token,
-            column,
-            line,
-            operands: Vec::with_capacity(3),
-        }
-    }
-
-    pub fn token(&self) -> &String {
-        &self.token
-    }
-}
+token!(Add, 3);
 
 impl Assemble for Add {
     fn assembled(mut self, program_counter: &mut i16) -> Vec<(u16, String)> {
@@ -35,10 +14,15 @@ impl Assemble for Add {
             Token::Register(register) => register.register,
             _ => unreachable!(),
         });
-        let source_one = u16::from(match self.operands.remove(0) {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
-        });
+        let source_one = if let Some(token) = self.operands.first() {
+            if let Token::Register(register) = token {
+                u16::from(register.register)
+            } else {
+                unreachable!()
+            }
+        } else {
+            destination_register
+        };
         let source_two = if let Some(token) = self.operands.first() {
             match token {
                 Token::Register(register) => i16::from(register.register),
@@ -70,33 +54,24 @@ impl Assemble for Add {
 }
 
 impl Requirements for Add {
-    fn require_range(&self) -> (u64, u64) {
+    fn memory_requirement(&self) -> u16 { 0 } fn require_range(&self) -> (u64, u64) {
         (1, 3)
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        let (min, max) = self.require_range();
-
-        let count = Cell::new(0);
-
-        self.operands = tokens
-            .drain_while(|token| match token {
-                Token::Immediate(_) | Token::Character(_) | Token::Register(_) => {
-                    count.set(count.get() + 1);
-                    count.get() <= max
-                }
-                _ => false,
-            })
-            .collect();
-
-        if count.get() < min {
-            too_few_operands(
-                min,
-                count.get(),
-                self.token(),
-                (self.column, self.line, self.token().len()),
-            );
+        if let Some(token) = tokens.front() {
+            expect!(self, tokens, token, Token::Register, "Register");
         }
+
+        if let Some(token) = tokens.front() {
+            maybe_expect!(self, tokens, token, Token::Register);
+        }
+
+        if let Some(token) = tokens.front() {
+            maybe_expect!(self, tokens, token, Token::Immediate, Token::Register);
+        }
+
+        operands_check!(self);
 
         tokens
     }

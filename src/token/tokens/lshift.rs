@@ -7,28 +7,7 @@ use notifier::{DiagType, Diagnostic, Highlight};
 
 use std::collections::VecDeque;
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct Lshift {
-    token: String,
-    column: u64,
-    line: u64,
-    operands: Vec<Token>,
-}
-
-impl Lshift {
-    pub fn new(token: String, column: u64, line: u64) -> Self {
-        Self {
-            token,
-            column,
-            line,
-            operands: Vec::with_capacity(2),
-        }
-    }
-
-    pub fn token(&self) -> &String {
-        &self.token
-    }
-}
+token!(Lshift, 2);
 
 impl Assemble for Lshift {
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
@@ -37,7 +16,7 @@ impl Assemble for Lshift {
 }
 
 impl Requirements for Lshift {
-    fn require_range(&self) -> (u64, u64) {
+    fn memory_requirement(&self) -> u16 { 0 } fn require_range(&self) -> (u64, u64) {
         (2, 2)
     }
 

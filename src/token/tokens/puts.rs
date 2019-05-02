@@ -4,26 +4,7 @@ use token::Token;
 
 use std::collections::VecDeque;
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct Puts {
-    token: String,
-    column: u64,
-    line: u64,
-}
-
-impl Puts {
-    pub fn new(token: String, column: u64, line: u64) -> Self {
-        Self {
-            token,
-            column,
-            line,
-        }
-    }
-
-    pub fn token(&self) -> &String {
-        &self.token
-    }
-}
+token!(Puts);
 
 impl Assemble for Puts {
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
@@ -40,7 +21,7 @@ impl Assemble for Puts {
 }
 
 impl Requirements for Puts {
-    fn require_range(&self) -> (u64, u64) {
+    fn memory_requirement(&self) -> u16 { 0 } fn require_range(&self) -> (u64, u64) {
         (0, 0)
     }
 

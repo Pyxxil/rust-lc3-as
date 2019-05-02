@@ -1,43 +1,21 @@
 use token::tokens::traits::*;
 
-use token::Token;
+use token::tokens::{expected, too_few_operands};
 
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
+use token::Token;
 
 use std::collections::VecDeque;
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct Jmp {
-    token: String,
-    column: u64,
-    line: u64,
-    operands: Vec<Token>,
-}
-
-impl Jmp {
-    pub fn new(token: String, column: u64, line: u64) -> Self {
-        Self {
-            token,
-            column,
-            line,
-            operands: Vec::with_capacity(1),
-        }
-    }
-
-    pub fn token(&self) -> &String {
-        &self.token
-    }
-}
+token!(Jmp, 1);
 
 impl Assemble for Jmp {
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         *program_counter += 1;
 
-        let register = match self.operands.first().unwrap() {
+        let register = u16::from(match self.operands.first().unwrap() {
             Token::Register(register) => register.register,
             _ => unreachable!(),
-        } as u16;
+        });
 
         let instruction = 0xC000 | register << 6;
 
@@ -55,30 +33,16 @@ impl Assemble for Jmp {
 }
 
 impl Requirements for Jmp {
-    fn require_range(&self) -> (u64, u64) {
+    fn memory_requirement(&self) -> u16 { 0 } fn require_range(&self) -> (u64, u64) {
         (1, 1)
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         if let Some(token) = tokens.front() {
-            match token {
-                Token::Register(_) => self.operands.push(tokens.pop_front().unwrap()),
-                tok => expected(
-                    &["Register"],
-                    &tok,
-                    (self.column, self.line, self.token().len()),
-                ),
-            }
-        } else {
-            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                DiagType::Error,
-                self.column,
-                self.line,
-                self.token.len(),
-                "Expected an argument to JMP instruction, but found the end of file instead."
-                    .to_owned(),
-            )));
+            expect!(self, tokens, token, Token::Register, "Register");
         }
+
+        operands_check!(self);
 
         tokens
     }

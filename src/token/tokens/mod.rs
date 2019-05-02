@@ -1,3 +1,42 @@
+#[macro_use]
+pub mod macros;
+pub mod traits;
+
+use notifier;
+use notifier::{DiagType, Diagnostic, Highlight};
+use token::r#type::Token;
+pub fn expected(expect: &[&str], found: &Token, at: (u64, u64, usize)) {
+    notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+        DiagType::Error,
+        at.0,
+        at.1,
+        at.2,
+        format!(
+            "Expected to find argument of type {}, but found\n{:#?}",
+            expect.to_vec().join(", "),
+            found
+        ),
+    )));
+}
+
+pub fn too_few_operands(required: u64, found: u64, token: &str, at: (u64, u64, usize)) {
+    notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+        DiagType::Error,
+        at.0,
+        at.1,
+        at.2,
+        format!(
+            "{} expects {} operand{}, but {}{} {} found",
+            token,
+            required,
+            if required == 1 { "" } else { "s" },
+            if found == 0 { "" } else { "only " },
+            found,
+            if found == 1 { "was" } else { "were" }
+        ),
+    )));
+}
+
 // Instructions
 pub mod add;
 pub mod and;
@@ -43,5 +82,3 @@ pub mod orig;
 pub mod set;
 pub mod stringz;
 pub mod sub;
-
-pub mod traits;

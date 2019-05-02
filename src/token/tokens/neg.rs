@@ -1,31 +1,12 @@
 use token::tokens::traits::*;
 
+use token::tokens::{expected, too_few_operands};
+
 use token::Token;
 
 use std::collections::VecDeque;
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct Neg {
-    token: String,
-    column: u64,
-    line: u64,
-    operands: Vec<Token>,
-}
-
-impl Neg {
-    pub fn new(token: String, column: u64, line: u64) -> Self {
-        Self {
-            token,
-            column,
-            line,
-            operands: Vec::with_capacity(2),
-        }
-    }
-
-    pub fn token(&self) -> &String {
-        &self.token
-    }
-}
+token!(Neg, 2);
 
 impl Assemble for Neg {
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
@@ -34,7 +15,7 @@ impl Assemble for Neg {
 }
 
 impl Requirements for Neg {
-    fn require_range(&self) -> (u64, u64) {
+    fn memory_requirement(&self) -> u16 { 0 } fn require_range(&self) -> (u64, u64) {
         (1, 2)
     }
 

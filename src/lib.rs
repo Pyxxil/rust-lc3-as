@@ -10,4 +10,5 @@ pub mod assembler;
 pub mod lexer;
 pub mod notifier;
 pub mod parser;
+#[macro_use]
 pub mod token;
