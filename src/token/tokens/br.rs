@@ -11,12 +11,17 @@ token!(Br, 1, n: bool, z: bool, p: bool);
 
 impl Assemble for Br {
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
+        *program_counter += 1;
         Vec::new()
     }
 }
 
 impl Requirements for Br {
-    fn memory_requirement(&self) -> u16 { 0 } fn require_range(&self) -> (u64, u64) {
+    fn memory_requirement(&self) -> u16 {
+        1
+    }
+
+    fn require_range(&self) -> (u64, u64) {
         (1, 1)
     }
 

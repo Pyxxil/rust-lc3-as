@@ -12,10 +12,10 @@ impl Assemble for Jmp {
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         *program_counter += 1;
 
-        let register = u16::from(match self.operands.first().unwrap() {
+        let register = match self.operands.first().unwrap() {
             Token::Register(register) => register.register,
             _ => unreachable!(),
-        });
+        };
 
         let instruction = 0xC000 | register << 6;
 
@@ -33,7 +33,10 @@ impl Assemble for Jmp {
 }
 
 impl Requirements for Jmp {
-    fn memory_requirement(&self) -> u16 { 0 } fn require_range(&self) -> (u64, u64) {
+    fn memory_requirement(&self) -> u16 {
+        0
+    }
+    fn require_range(&self) -> (u64, u64) {
         (1, 1)
     }
 

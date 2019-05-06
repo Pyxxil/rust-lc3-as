@@ -10,14 +10,16 @@ token!(Not, 2);
 
 impl Assemble for Not {
     fn assembled(mut self, program_counter: &mut i16) -> Vec<(u16, String)> {
+        *program_counter += 1;
+
         let destination_register = match self.operands.remove(0) {
-            Token::Register(register) => u16::from(register.register),
+            Token::Register(register) => register.register,
             _ => unreachable!(),
         };
 
         let source_register = match self.operands.first() {
             Some(token) => match token {
-                Token::Register(register) => u16::from(register.register),
+                Token::Register(register) => register.register,
                 _ => unreachable!(),
             },
             None => destination_register,
@@ -40,7 +42,11 @@ impl Assemble for Not {
 }
 
 impl Requirements for Not {
-    fn memory_requirement(&self) -> u16 { 0 } fn require_range(&self) -> (u64, u64) {
+    fn memory_requirement(&self) -> u16 {
+        1
+    }
+
+    fn require_range(&self) -> (u64, u64) {
         (1, 2)
     }
 

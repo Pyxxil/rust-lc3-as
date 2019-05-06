@@ -29,7 +29,9 @@ impl Assemble for Blkw {
                     val,
                     format!(
                         "({0:4X}) {1:04X} {1:016b} ({2: >4}) .FILL #{1}",
-                        program_counter, value as i16, self.line,
+                        *program_counter - 1,
+                        val as i16,
+                        self.line,
                     ),
                 )
             })
@@ -38,7 +40,14 @@ impl Assemble for Blkw {
 }
 
 impl Requirements for Blkw {
-    fn memory_requirement(&self) -> u16 { 0 } fn require_range(&self) -> (u64, u64) {
+    fn memory_requirement(&self) -> u16 {
+        match self.operands.first().unwrap() {
+            Token::Immediate(imm) => imm.value as u16,
+            _ => unreachable!()
+        }
+    }
+
+    fn require_range(&self) -> (u64, u64) {
         (1, 2)
     }
 

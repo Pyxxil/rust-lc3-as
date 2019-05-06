@@ -9,6 +9,7 @@ token!(Halt);
 impl Assemble for Halt {
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
         *program_counter += 1;
+
         vec![(
             0xF025,
             format!(
@@ -21,7 +22,11 @@ impl Assemble for Halt {
 }
 
 impl Requirements for Halt {
-    fn memory_requirement(&self) -> u16 { 0 } fn require_range(&self) -> (u64, u64) {
+    fn memory_requirement(&self) -> u16 {
+        1
+    }
+
+    fn require_range(&self) -> (u64, u64) {
         (0, 0)
     }
 

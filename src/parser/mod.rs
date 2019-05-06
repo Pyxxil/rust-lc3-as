@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::collections::VecDeque;
 
 use notifier;
-use notifier::{Diagnostic, DiagType, Highlight};
+use notifier::{DiagType, Diagnostic, Highlight};
 
 #[derive(Debug)]
 pub struct Parser {
@@ -32,18 +32,13 @@ impl Parser {
             match &token {
                 Token::Label(ref tok) => {
                     if self.symbols.contains_key(tok.token()) {
-                        notifier::add_diagnostic(
-                            Diagnostic::Highlight(Highlight::new(
-                                DiagType::Error,
-                                tok.column(),
-                                tok.line(),
-                                tok.token().len(),
-                                format!(
-                                    "Duplicate symbol found {}",
-                                    tok.token()
-                                )
-                            ))
-                        );
+                        notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                            DiagType::Error,
+                            tok.column(),
+                            tok.line(),
+                            tok.token().len(),
+                            format!("Duplicate symbol found {}", tok.token()),
+                        )));
                     } else {
                         self.symbols.insert(
                             tok.token().to_string(),
@@ -54,15 +49,13 @@ impl Parser {
                 Token::Orig(ref tok) => {
                     address = tok.starting_address;
                 }
-                _ => {
-                    address += 1;
+                token => {
+                    address += token.memory_requirement();
                 }
             }
 
             self.tokens.push(token);
         }
-
-        println!("{:#?}", self.symbols);
     }
 
     pub fn is_okay(&self) -> bool {

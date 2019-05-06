@@ -10,27 +10,34 @@ token!(And, 3);
 
 impl Assemble for And {
     fn assembled(mut self, program_counter: &mut i16) -> Vec<(u16, String)> {
-        let destination_register = u16::from(match self.operands.remove(0) {
+        *program_counter += 1;
+
+        let destination_register = match self.operands.remove(0) {
             Token::Register(register) => register.register,
-            _ => 0,
-        });
-        let source_one = u16::from(match self.operands.remove(0) {
-            Token::Register(register) => register.register,
-            _ => 0,
-        });
+            _ => unreachable!(),
+        };
+
+        let source_one = if let Some(token) = self.operands.first() {
+            if let Token::Register(register) = token {
+                register.register
+            } else {
+                unreachable!()
+            }
+        } else {
+            destination_register
+        };
+
         let source_two = if let Some(token) = self.operands.first() {
             match token {
-                Token::Register(register) => i16::from(register.register),
+                Token::Register(register) => register.register as i16,
                 Token::Immediate(imm) => 0x20 | (imm.value & 0x1F),
-                _ => 0,
+                _ => unreachable!(),
             }
         } else {
             source_one as i16
         } as u16;
 
         let instruction: u16 = 0x5000 | destination_register << 9 | source_one << 6 | source_two;
-
-        *program_counter += 1;
 
         vec![(
             instruction,
@@ -49,7 +56,11 @@ impl Assemble for And {
 }
 
 impl Requirements for And {
-    fn memory_requirement(&self) -> u16 { 0 } fn require_range(&self) -> (u64, u64) {
+    fn memory_requirement(&self) -> u16 {
+        1
+    }
+    
+    fn require_range(&self) -> (u64, u64) {
         (2, 3)
     }
 

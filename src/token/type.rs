@@ -112,7 +112,7 @@ impl fmt::Debug for Token {
     }
 }
 
-macro_rules! memory{
+macro_rules! memory_requirement_of{
         ( $self:expr, $( $token:path ),* ) => {
             match *$self {
                 $( $token(ref token) => token.memory_requirement(), )+
@@ -145,42 +145,41 @@ impl Requirements for Token {
     }
 
     fn memory_requirement(&self) -> u16 {
-        0
-        //memory!(
-        //    self,
-        //    Token::Add,
-        //    Token::And,
-        //    Token::Br,
-        //    Token::Jmp,
-        //    Token::Jsr,
-        //    Token::Jsrr,
-        //    Token::Ld,
-        //    Token::Ldi,
-        //    Token::Ldr,
-        //    Token::Lea,
-        //    Token::Not,
-        //    Token::Ret,
-        //    Token::Rti,
-        //    Token::St,
-        //    Token::Sti,
-        //    Token::Str,
-        //    Token::Trap,
-        //    Token::Getc,
-        //    Token::Halt,
-        //    Token::In,
-        //    Token::Out,
-        //    Token::Puts,
-        //    Token::Putsp,
-        //    Token::Blkw,
-        //    Token::Fill,
-        //    Token::Include,
-        //    Token::Lshift,
-        //    Token::Orig,
-        //    Token::Neg,
-        //    Token::Set,
-        //    Token::Stringz,
-        //    Token::Sub,
-        //)
+        memory_requirement_of!(
+           self,
+           Token::Add,
+           Token::And,
+           Token::Br,
+           Token::Jmp,
+           Token::Jsr,
+           Token::Jsrr,
+           Token::Ld,
+           Token::Ldi,
+           Token::Ldr,
+           Token::Lea,
+           Token::Not,
+           Token::Ret,
+           Token::Rti,
+           Token::St,
+           Token::Sti,
+           Token::Str,
+           Token::Trap,
+           Token::Getc,
+           Token::Halt,
+           Token::In,
+           Token::Out,
+           Token::Puts,
+           Token::Putsp,
+           Token::Blkw,
+           Token::Fill,
+           Token::Include,
+           Token::Lshift,
+           Token::Orig,
+           Token::Neg,
+           Token::Set,
+           Token::Stringz,
+           Token::Sub
+        )
     }
 
     fn consume(&mut self, tokens: VecDeque<Token>) -> VecDeque<Token> {

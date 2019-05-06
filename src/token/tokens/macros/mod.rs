@@ -15,7 +15,7 @@ macro_rules! token {
                     token,
                     column,
                     line,
-                    $( $field, )+
+                    $( $field, )*
                     operands: Vec::with_capacity($capacity),
                 }
             }
@@ -35,21 +35,25 @@ macro_rules! token {
     };
 
     ( $name:ident, $capacity:expr ) => {
-        #[derive(Debug, PartialEq, Clone)]
+        token!{$name, $capacity, }
+    };
+
+    ( $name:ident, $( $field:ident: $type: ty),* ) => {
+                #[derive(Debug, PartialEq, Clone)]
         pub struct $name {
             token: String,
             column: u64,
             line: u64,
-            operands: Vec<Token>,
+            $( pub $field : $type, )*
         }
 
         impl $name {
-            pub fn new(token: String, column: u64, line: u64 ) -> Self {
+            pub fn new(token: String, column: u64, line: u64, $( $field: $type, )* ) -> Self {
                 Self {
                     token,
                     column,
                     line,
-                    operands: Vec::with_capacity($capacity),
+                    $( $field, )*
                 }
             }
 
@@ -67,12 +71,8 @@ macro_rules! token {
         }
     };
 
-    ( $name:ident, $( $field:ident: $type: ty),* ) => {
-        token!{$name, 0, $( $field: $type, )+}
-    };
-
     ( $name:ident ) => {
-        token!{$name, 0}
+        token!{$name, }
     };
 }
 

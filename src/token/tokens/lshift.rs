@@ -1,79 +1,70 @@
 use token::tokens::traits::*;
 
+use token::tokens::{expected, too_few_operands};
+
 use token::Token;
 
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
+use std::iter;
 
 use std::collections::VecDeque;
 
 token!(Lshift, 2);
 
 impl Assemble for Lshift {
-    fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
-        Vec::new()
+    fn assembled(mut self, program_counter: &mut i16) -> Vec<(u16, String)> {
+        let register = match self.operands.remove(0) {
+            Token::Register(register) => register.register,
+            _ => unreachable!(),
+        };
+
+        let count = match self.operands.remove(0) {
+            Token::Immediate(immediate) => immediate.value as u16,
+            _ => unreachable!(),
+        };
+
+        let instruction = 0x1000 | register << 9 | register << 6 | register;
+
+        iter::repeat(instruction)
+            .take(count as usize)
+            .map(|val| {
+                *program_counter += 1;
+                (
+                    val,
+                    format!(
+                        "({0:4X}) {1:04X} {1:016b} ({2: >4}) ADD R{3} R{3} R{3}",
+                        *program_counter - 1,
+                        val as i16,
+                        self.line,
+                        register,
+                    ),
+                )
+            })
+            .collect()
     }
 }
 
 impl Requirements for Lshift {
-    fn memory_requirement(&self) -> u16 { 0 } fn require_range(&self) -> (u64, u64) {
+    fn memory_requirement(&self) -> u16 {
+        match self.operands.last().unwrap() {
+            Token::Immediate(imm) => imm.value as u16,
+            _ => unreachable!(),
+        }
+    }
+
+    fn require_range(&self) -> (u64, u64) {
         (2, 2)
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        let (min, _) = self.require_range();
-
-        if min > (tokens.len() as u64) {
-            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                DiagType::Error,
-                self.column,
-                self.line,
-                self.token.len(),
-                format!(
-                    "Expected {} arguments, found {}, for ADD instruction.",
-                    min,
-                    tokens.len() as u64
-                ),
-            )));
-
-            return tokens;
+        if let Some(token) = tokens.front() {
+            expect!(self, tokens, token, Token::Register, "Register");
         }
 
-        let destination = tokens.front().unwrap();
-        match destination {
-            Token::Register(_) => self.operands.push(tokens.pop_front().unwrap()),
-            token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                    DiagType::Error,
-                    self.column,
-                    self.line,
-                    self.token.len(),
-                    format!(
-                        "Expected argument of type Register, but found\n{:#?}",
-                        token
-                    ),
-                )));
-
-                return tokens;
-            }
+        if let Some(token) = tokens.front() {
+            expect!(self, tokens, token, Token::Immediate, "Immediate");
         }
 
-        let value = tokens.front().unwrap();
-        match value {
-            Token::Immediate(_) => self.operands.push(tokens.pop_front().unwrap()),
-            token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                    DiagType::Error,
-                    self.column,
-                    self.line,
-                    self.token.len(),
-                    format!(
-                        "Expected argument of type Immediate, but found\n{:#?}",
-                        token
-                    ),
-                )));
-            }
-        }
+        operands_check!(self);
 
         tokens
     }

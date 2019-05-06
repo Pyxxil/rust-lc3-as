@@ -11,12 +11,18 @@ token!(Lea, 2);
 
 impl Assemble for Lea {
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
+        *program_counter += 1;
+
         Vec::new()
     }
 }
 
 impl Requirements for Lea {
-    fn memory_requirement(&self) -> u16 { 0 } fn require_range(&self) -> (u64, u64) {
+    fn memory_requirement(&self) -> u16 {
+        1
+    }
+
+    fn require_range(&self) -> (u64, u64) {
         (2, 2)
     }
 

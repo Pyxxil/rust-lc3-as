@@ -10,22 +10,24 @@ token!(Ldr, 3);
 
 impl Assemble for Ldr {
     fn assembled(mut self, program_counter: &mut i16) -> Vec<(u16, String)> {
-        let destination_register = u16::from(match self.operands.remove(0) {
+        *program_counter += 1;
+
+        let destination_register = match self.operands.remove(0) {
             Token::Register(register) => register.register,
             _ => unreachable!(),
-        });
-        let source_one = u16::from(match self.operands.remove(0) {
+        };
+
+        let source_one = match self.operands.remove(0) {
             Token::Register(register) => register.register,
             _ => unreachable!(),
-        });
+        };
+
         let source_two = match self.operands.remove(0) {
             Token::Immediate(imm) => imm.value & 0x3F,
             _ => unreachable!(),
         } as u16;
 
         let instruction: u16 = 0x6000 | destination_register << 9 | source_one << 6 | source_two;
-
-        *program_counter += 1;
 
         vec![(
             instruction,
@@ -43,7 +45,11 @@ impl Assemble for Ldr {
 }
 
 impl Requirements for Ldr {
-    fn memory_requirement(&self) -> u16 { 0 } fn require_range(&self) -> (u64, u64) {
+    fn memory_requirement(&self) -> u16 {
+        1
+    }
+
+    fn require_range(&self) -> (u64, u64) {
         (3, 3)
     }
 

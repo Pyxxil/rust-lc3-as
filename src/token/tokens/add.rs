@@ -10,22 +10,26 @@ token!(Add, 3);
 
 impl Assemble for Add {
     fn assembled(mut self, program_counter: &mut i16) -> Vec<(u16, String)> {
-        let destination_register = u16::from(match self.operands.remove(0) {
+        *program_counter += 1;
+
+        let destination_register = match self.operands.remove(0) {
             Token::Register(register) => register.register,
             _ => unreachable!(),
-        });
+        };
+
         let source_one = if let Some(token) = self.operands.first() {
             if let Token::Register(register) = token {
-                u16::from(register.register)
+                register.register
             } else {
                 unreachable!()
             }
         } else {
             destination_register
         };
+
         let source_two = if let Some(token) = self.operands.first() {
             match token {
-                Token::Register(register) => i16::from(register.register),
+                Token::Register(register) => register.register as i16,
                 Token::Immediate(imm) => 0x20 | (imm.value & 0x1F),
                 _ => unreachable!(),
             }
@@ -34,8 +38,6 @@ impl Assemble for Add {
         } as u16;
 
         let instruction: u16 = 0x1000 | destination_register << 9 | source_one << 6 | source_two;
-
-        *program_counter += 1;
 
         vec![(
             instruction,
@@ -54,7 +56,11 @@ impl Assemble for Add {
 }
 
 impl Requirements for Add {
-    fn memory_requirement(&self) -> u16 { 0 } fn require_range(&self) -> (u64, u64) {
+    fn memory_requirement(&self) -> u16 {
+        1
+    }
+
+    fn require_range(&self) -> (u64, u64) {
         (1, 3)
     }
 
