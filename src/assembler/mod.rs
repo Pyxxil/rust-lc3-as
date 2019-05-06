@@ -24,7 +24,8 @@ impl Assembler {
             parser.parse();
             if parser.is_okay() {
                 let tokens = self.do_first_pass(parser);
-                println!("{:#?}", self.do_second_pass(tokens));
+                let tokens = self.do_second_pass(tokens);
+                println!("{:#?}", tokens);
                 return;
             }
         }

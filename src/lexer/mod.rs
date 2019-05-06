@@ -4,6 +4,11 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::io::ErrorKind;
+use std::sync::Mutex;
+
+use std::iter::Iterator;
+
+use std::collections::HashMap;
 
 use token::Token;
 
@@ -12,10 +17,47 @@ use lexer::tokenizer::Tokenizer;
 use notifier;
 use notifier::{DiagType, Diagnostic, Note};
 
+#[derive(Default)]
+pub struct FileController {
+    files: HashMap<String, Vec<String>>,
+}
+
+pub fn add_file(file: String) {
+    let mut guard = FILE_CONTROLLER.lock().unwrap();
+    guard.add_file(file);
+}
+
+pub fn add_line(file: String, line: String) {
+    let mut guard = FILE_CONTROLLER.lock().unwrap();
+    guard.add_line(file, line);
+}
+
+pub fn get_line(file: &str, line: u64) -> String {
+    let guard = FILE_CONTROLLER.lock().unwrap();
+    guard.get_line(file, line)
+}
+
+impl FileController {
+    fn add_file(&mut self, file: String) {
+        self.files.insert(file, Vec::new());
+    }
+
+    pub fn add_line(&mut self, file: String, line: String) {
+        self.files.get_mut(&file).unwrap().push(line);
+    }
+
+    pub fn get_line(&self, file: &str, line: u64) -> String {
+        self.files.get(file).unwrap()[line as usize].clone()
+    }
+
+    pub fn remove(&mut self, file: &str) {
+        self.files.remove(file);
+    }
+}
+
 pub struct Lexer<'a> {
     file: &'a str,
     tokens: Vec<Token>,
-    okay: bool,
 }
 
 impl<'a> Lexer<'a> {
@@ -23,20 +65,21 @@ impl<'a> Lexer<'a> {
         Lexer {
             file,
             tokens: Vec::new(),
-            okay: true,
         }
     }
 
     pub fn lex(&mut self) {
         match File::open(self.file) {
             Ok(file) => {
-                BufReader::new(file)
+                add_file(self.file.to_string());
+                self.tokens = BufReader::new(file)
                     .lines()
                     .enumerate()
-                    .for_each(move |(line_number, line)| {
-                        Tokenizer::new(&line.unwrap(), (line_number + 1) as u64)
-                            .for_each(|token| self.tokens.push(token));
-                    });
+                    .flat_map(|(line_number, line)| {
+                        Tokenizer::new(self.file, &line.unwrap(), (line_number + 1) as u64)
+                            .collect::<Vec<_>>()
+                    })
+                    .collect();
             }
             Err(ref error) if error.kind() == ErrorKind::NotFound => {
                 notifier::add_diagnostic(Diagnostic::Note(Note::new(
@@ -64,6 +107,10 @@ impl<'a> Lexer<'a> {
 
     #[inline]
     pub fn is_okay(&self) -> bool {
-        self.okay && notifier::error_count() == 0
+        notifier::error_count() == 0
     }
+}
+
+lazy_static! {
+    pub static ref FILE_CONTROLLER: Mutex<FileController> = Mutex::new(FileController::default());
 }

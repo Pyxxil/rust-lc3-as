@@ -9,6 +9,8 @@ use notifier::{DiagType, Diagnostic, Highlight, Pointer};
 use token::tokens::*;
 use token::Token;
 
+use lexer::add_line;
+
 macro_rules! err {
     ($tokenizer:expr, $diagnostic:expr) => {
         notifier::add_diagnostic($diagnostic);
@@ -25,14 +27,17 @@ pub struct Tokenizer<'a> {
     line: Peekable<Chars<'a>>,
     column: u64,
     line_number: u64,
+    file: &'a str,
 }
 
 impl<'a> Tokenizer<'a> {
-    pub fn new(line: &'a str, line_number: u64) -> Tokenizer<'a> {
+    pub fn new(file: &'a str, line: &'a str, line_number: u64) -> Tokenizer<'a> {
+        add_line(file.to_string(), line.to_string());
         Tokenizer {
             line: line.chars().peekable(),
             column: 1,
             line_number,
+            file,
         }
     }
 
@@ -119,9 +124,30 @@ impl<'a> Tokenizer<'a> {
             "ST" => Some(Token::St(st::St::new(token, column, line))),
             "STR" => Some(Token::Str(str::Str::new(token, column, line))),
             "STI" => Some(Token::Sti(sti::Sti::new(token, column, line))),
-            "R0" | "R1" | "R2" | "R3" | "R4" | "R5" | "R6" | "R7" => Some(Token::Register(
-                register::Register::new(token, column, line),
-            )),
+            "R0" => Some(Token::Register(register::Register::new(
+                token, column, line, 0,
+            ))),
+            "R1" => Some(Token::Register(register::Register::new(
+                token, column, line, 1,
+            ))),
+            "R2" => Some(Token::Register(register::Register::new(
+                token, column, line, 2,
+            ))),
+            "R3" => Some(Token::Register(register::Register::new(
+                token, column, line, 3,
+            ))),
+            "R4" => Some(Token::Register(register::Register::new(
+                token, column, line, 4,
+            ))),
+            "R5" => Some(Token::Register(register::Register::new(
+                token, column, line, 5,
+            ))),
+            "R6" => Some(Token::Register(register::Register::new(
+                token, column, line, 6,
+            ))),
+            "R7" => Some(Token::Register(register::Register::new(
+                token, column, line, 7,
+            ))),
             "HALT" => Some(Token::Halt(halt::Halt::new(token, column, line))),
             "TRAP" => Some(Token::Trap(trap::Trap::new(token, column, line))),
             "PUTS" => Some(Token::Puts(puts::Puts::new(token, column, line))),
