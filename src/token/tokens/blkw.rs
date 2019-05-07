@@ -43,7 +43,7 @@ impl Requirements for Blkw {
     fn memory_requirement(&self) -> u16 {
         match self.operands.first().unwrap() {
             Token::Immediate(imm) => imm.value as u16,
-            _ => unreachable!()
+            _ => unreachable!(),
         }
     }
 

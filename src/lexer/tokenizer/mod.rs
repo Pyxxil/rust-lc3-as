@@ -82,80 +82,80 @@ impl<'a> Tokenizer<'a> {
         ch.is_whitespace() || ch == ':' || ch == ',' || Self::is_comment_character(ch)
     }
 
-    fn tokenize_literal(token: String, column: u64, line: u64) -> Option<Token> {
+    fn tokenize_literal(&mut self, token: String, column: u64, line: u64) -> Option<Token> {
         if token.is_empty() {
             return None;
         }
 
         match token.to_ascii_uppercase().as_ref() {
-            "ADD" => Some(Token::Add(add::Add::new(token, column, line))),
-            "AND" => Some(Token::And(and::And::new(token, column, line))),
-            "NOT" => Some(Token::Not(not::Not::new(token, column, line))),
+            "ADD" => Some(Token::Add(add::Add::new(token, self.file.to_string(),column, line))),
+            "AND" => Some(Token::And(and::And::new(token, self.file.to_string(),column, line))),
+            "NOT" => Some(Token::Not(not::Not::new(token, self.file.to_string(),column, line))),
             "BRNZP" | "BRNPZ" | "BRZPN" | "BRZNP" | "BRPNZ" | "BRPZN" | "BR" => Some(Token::Br(
-                br::Br::new(token, column, line, true, true, true),
+                br::Br::new(token, self.file.to_string(),column, line, true, true, true),
             )),
             "BRN" => Some(Token::Br(br::Br::new(
-                token, column, line, true, false, false,
+                token, self.file.to_string(),column, line, true, false, false,
             ))),
             "BRZ" => Some(Token::Br(br::Br::new(
-                token, column, line, false, true, false,
+                token, self.file.to_string(),column, line, false, true, false,
             ))),
             "BRP" => Some(Token::Br(br::Br::new(
-                token, column, line, false, false, true,
+                token, self.file.to_string(),column, line, false, false, true,
             ))),
             "BRNZ" | "BRZN" => Some(Token::Br(br::Br::new(
-                token, column, line, true, true, false,
+                token, self.file.to_string(), column, line, true, true, false,
             ))),
             "BRNP" | "BRPN" => Some(Token::Br(br::Br::new(
-                token, column, line, true, false, true,
+                token, self.file.to_string(),column, line, true, false, true,
             ))),
             "BRZP" | "BRPZ" => Some(Token::Br(br::Br::new(
-                token, column, line, false, true, true,
+                token, self.file.to_string(),column, line, false, true, true,
             ))),
-            "JMP" => Some(Token::Jmp(jmp::Jmp::new(token, column, line))),
-            "JSR" => Some(Token::Jsr(jsr::Jsr::new(token, column, line))),
-            "JSRR" => Some(Token::Jsrr(jsrr::Jsrr::new(token, column, line))),
-            "RET" => Some(Token::Ret(ret::Ret::new(token, column, line))),
-            "RTI" => Some(Token::Rti(rti::Rti::new(token, column, line))),
-            "LD" => Some(Token::Ld(ld::Ld::new(token, column, line))),
-            "LDR" => Some(Token::Ldr(ldr::Ldr::new(token, column, line))),
-            "LDI" => Some(Token::Ldi(ldi::Ldi::new(token, column, line))),
-            "LEA" => Some(Token::Lea(lea::Lea::new(token, column, line))),
-            "ST" => Some(Token::St(st::St::new(token, column, line))),
-            "STR" => Some(Token::Str(str::Str::new(token, column, line))),
-            "STI" => Some(Token::Sti(sti::Sti::new(token, column, line))),
+            "JMP" => Some(Token::Jmp(jmp::Jmp::new(token, self.file.to_string(),column, line))),
+            "JSR" => Some(Token::Jsr(jsr::Jsr::new(token, self.file.to_string(),column, line))),
+            "JSRR" => Some(Token::Jsrr(jsrr::Jsrr::new(token, self.file.to_string(),column, line))),
+            "RET" => Some(Token::Ret(ret::Ret::new(token, self.file.to_string(),column, line))),
+            "RTI" => Some(Token::Rti(rti::Rti::new(token, self.file.to_string(), column, line))),
+            "LD" => Some(Token::Ld(ld::Ld::new(token, self.file.to_string(),column, line))),
+            "LDR" => Some(Token::Ldr(ldr::Ldr::new(token, self.file.to_string(),column, line))),
+            "LDI" => Some(Token::Ldi(ldi::Ldi::new(token, self.file.to_string(),column, line))),
+            "LEA" => Some(Token::Lea(lea::Lea::new(token, self.file.to_string(),column, line))),
+            "ST" => Some(Token::St(st::St::new(token, self.file.to_string(), column, line))),
+            "STR" => Some(Token::Str(str::Str::new(token, self.file.to_string(), column, line))),
+            "STI" => Some(Token::Sti(sti::Sti::new(token, self.file.to_string(), column, line))),
             "R0" => Some(Token::Register(register::Register::new(
-                token, column, line, 0,
+                token, self.file.to_string(), column, line, 0,
             ))),
             "R1" => Some(Token::Register(register::Register::new(
-                token, column, line, 1,
+                token, self.file.to_string(), column, line, 1,
             ))),
             "R2" => Some(Token::Register(register::Register::new(
-                token, column, line, 2,
+                token, self.file.to_string(), column, line, 2,
             ))),
             "R3" => Some(Token::Register(register::Register::new(
-                token, column, line, 3,
+                token, self.file.to_string(), column, line, 3,
             ))),
             "R4" => Some(Token::Register(register::Register::new(
-                token, column, line, 4,
+                token, self.file.to_string(), column, line, 4,
             ))),
             "R5" => Some(Token::Register(register::Register::new(
-                token, column, line, 5,
+                token, self.file.to_string(), column, line, 5,
             ))),
             "R6" => Some(Token::Register(register::Register::new(
-                token, column, line, 6,
+                token, self.file.to_string(), column, line, 6,
             ))),
             "R7" => Some(Token::Register(register::Register::new(
-                token, column, line, 7,
+                token, self.file.to_string(), column, line, 7,
             ))),
-            "HALT" => Some(Token::Halt(halt::Halt::new(token, column, line))),
-            "TRAP" => Some(Token::Trap(trap::Trap::new(token, column, line))),
-            "PUTS" => Some(Token::Puts(puts::Puts::new(token, column, line))),
-            "PUTSP" => Some(Token::Putsp(putsp::Putsp::new(token, column, line))),
-            "PUTC" | "OUT" => Some(Token::Out(out::Out::new(token, column, line))),
-            "IN" => Some(Token::In(r#in::In::new(token, column, line))),
-            "GETC" => Some(Token::Getc(getc::Getc::new(token, column, line))),
-            _ => Self::tokenize_immediate_literal(token, column, line),
+            "HALT" => Some(Token::Halt(halt::Halt::new(token, self.file.to_string(), column, line))),
+            "TRAP" => Some(Token::Trap(trap::Trap::new(token, self.file.to_string(), column, line))),
+            "PUTS" => Some(Token::Puts(puts::Puts::new(token, self.file.to_string(), column, line))),
+            "PUTSP" => Some(Token::Putsp(putsp::Putsp::new(token, self.file.to_string(), column, line))),
+            "PUTC" | "OUT" => Some(Token::Out(out::Out::new(token, self.file.to_string(), column, line))),
+            "IN" => Some(Token::In(r#in::In::new(token, self.file.to_string(), column, line))),
+            "GETC" => Some(Token::Getc(getc::Getc::new(token, self.file.to_string(), column, line))),
+            _ => self.tokenize_immediate_literal(token, column, line),
         }
     }
 
@@ -274,6 +274,7 @@ impl<'a> Tokenizer<'a> {
         } else {
             Some(Token::Character(character::Character::new(
                 character,
+                self.file.to_string(),
                 token_start,
                 self.line_number,
             )))
@@ -356,25 +357,25 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
-    fn tokenize_immediate_literal(token: String, column: u64, line: u64) -> Option<Token> {
+    fn tokenize_immediate_literal(&mut self, token: String, column: u64, line: u64) -> Option<Token> {
         if token.is_empty() {
             return None;
         }
 
         if Self::is_valid_decimal(&token) {
             Some(Token::Immediate(immediate::Immediate::from_decimal(
-                token, column, line,
+                token, self.file.to_string(), column, line,
             )))
         } else if Self::is_valid_hexadecimal(&token) {
             Some(Token::Immediate(immediate::Immediate::from_hexadecimal(
-                token, column, line,
+                token, self.file.to_string(), column, line,
             )))
         } else if Self::is_valid_binary(&token) {
             Some(Token::Immediate(immediate::Immediate::from_binary(
-                token, column, line,
+                token, self.file.to_string(), column, line,
             )))
         } else if Self::is_valid_label(&token) {
-            Some(Token::Label(label::Label::new(token, column, line)))
+            Some(Token::Label(label::Label::new(token, self.file.to_string(), column, line)))
         } else {
             None
         }
@@ -394,18 +395,18 @@ impl<'a> Tokenizer<'a> {
         word
     }
 
-    fn tokenize_directive(token: String, column: u64, line: u64) -> Option<Token> {
+    fn tokenize_directive(&mut self, token: String, column: u64, line: u64) -> Option<Token> {
         match token.to_ascii_uppercase().as_ref() {
-            ".ORIG" => Some(Token::Orig(orig::Orig::new(token, column, line, 0))),
-            ".END" => Some(Token::End(end::End::new(token, column, line))),
-            ".STRINGZ" => Some(Token::Stringz(stringz::Stringz::new(token, column, line))),
-            ".BLKW" => Some(Token::Blkw(blkw::Blkw::new(token, column, line))),
-            ".FILL" => Some(Token::Fill(fill::Fill::new(token, column, line))),
-            ".INCLUDE" => Some(Token::Include(include::Include::new(token, column, line))),
-            ".SET" => Some(Token::Set(set::Set::new(token, column, line))),
-            ".LSHIFT" => Some(Token::Lshift(lshift::Lshift::new(token, column, line))),
-            ".NEG" => Some(Token::Neg(neg::Neg::new(token, column, line))),
-            ".SUB" => Some(Token::Sub(sub::Sub::new(token, column, line))),
+            ".ORIG" => Some(Token::Orig(orig::Orig::new(token, self.file.to_string(), column, line, 0))),
+            ".END" => Some(Token::End(end::End::new(token, self.file.to_string(), column, line))),
+            ".STRINGZ" => Some(Token::Stringz(stringz::Stringz::new(token, self.file.to_string(), column, line))),
+            ".BLKW" => Some(Token::Blkw(blkw::Blkw::new(token, self.file.to_string(), column, line))),
+            ".FILL" => Some(Token::Fill(fill::Fill::new(token, self.file.to_string(), column, line))),
+            ".INCLUDE" => Some(Token::Include(include::Include::new(token, self.file.to_string(), column, line))),
+            ".SET" => Some(Token::Set(set::Set::new(token, self.file.to_string(), column, line))),
+            ".LSHIFT" => Some(Token::Lshift(lshift::Lshift::new(token, self.file.to_string(), column, line))),
+            ".NEG" => Some(Token::Neg(neg::Neg::new(token, self.file.to_string(), column, line))),
+            ".SUB" => Some(Token::Sub(sub::Sub::new(token, self.file.to_string(), column, line))),
             _ => None,
         }
     }
@@ -465,6 +466,7 @@ impl<'a> Tokenizer<'a> {
                     if Self::is_valid_decimal(&token) {
                         return Some(Token::Immediate(immediate::Immediate::from_decimal(
                             token,
+                            self.file.to_string(),
                             token_start,
                             self.line_number,
                         )));
@@ -486,6 +488,7 @@ impl<'a> Tokenizer<'a> {
                     if Self::is_valid_decimal(&token) {
                         return Some(Token::Immediate(immediate::Immediate::from_decimal(
                             token,
+                            self.file.to_string(),
                             token_start,
                             self.line_number,
                         )));
@@ -504,22 +507,25 @@ impl<'a> Tokenizer<'a> {
                     }
                 }
                 '.' => {
-                    return Self::tokenize_directive(
-                        self.read_word(),
+                    let token = self.read_word();
+                    return self.tokenize_directive(
+                        token,
                         token_start,
                         self.line_number,
                     )
                 }
                 ch => {
                     if ch.is_digit(10) {
-                        return Self::tokenize_immediate_literal(
-                            self.read_word(),
+                        let token = self.read_word();
+                        return self.tokenize_immediate_literal(
+                            token,
                             token_start,
                             self.line_number,
                         );
                     } else if Self::is_token_character(ch) {
-                        return Self::tokenize_literal(
-                            self.read_word(),
+                        let token = self.read_word();
+                        return self.tokenize_literal(
+                            token,
                             token_start,
                             self.line_number,
                         );

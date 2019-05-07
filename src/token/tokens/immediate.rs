@@ -6,11 +6,12 @@ pub struct Immediate {
     token: String,
     column: u64,
     line: u64,
+    file: String,
     pub value: i16,
 }
 
 impl Immediate {
-    pub fn from_decimal(token: String, column: u64, line: u64) -> Self {
+    pub fn from_decimal(token: String, file: String, column: u64, line: u64) -> Self {
         let value = token
             .chars()
             .skip(token.chars().position(|c| c.is_digit(10)).unwrap())
@@ -40,11 +41,12 @@ impl Immediate {
             token,
             column,
             line,
+            file,
             value,
         }
     }
 
-    pub fn from_hexadecimal(token: String, column: u64, line: u64) -> Self {
+    pub fn from_hexadecimal(token: String, file: String, column: u64, line: u64) -> Self {
         let value = u16::from_str_radix(
             token
                 .chars()
@@ -75,11 +77,12 @@ impl Immediate {
             token,
             column,
             line,
+            file,
             value,
         }
     }
 
-    pub fn from_binary(token: String, column: u64, line: u64) -> Self {
+    pub fn from_binary(token: String, file: String, column: u64, line: u64) -> Self {
         let value = u16::from_str_radix(
             token
                 .chars()
@@ -117,6 +120,7 @@ impl Immediate {
             token,
             column,
             line,
+            file,
             value,
         }
     }

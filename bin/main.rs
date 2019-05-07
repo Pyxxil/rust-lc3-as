@@ -30,10 +30,8 @@ fn main() {
         notifier::Stdout::Colour
     });
 
-    for file in files {
-        let assembler = Assembler::new(file.to_string());
-        assembler.assemble(should_print_ast);
-
+    files.into_iter().for_each(move |file| {
+        Assembler::new(file.to_string()).assemble(should_print_ast);
         notifier::clear();
-    }
+    });
 }

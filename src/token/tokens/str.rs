@@ -21,7 +21,7 @@ impl Assemble for Str {
             Token::Register(register) => register.register,
             _ => unreachable!(),
         };
-        
+
         let source_two = match self.operands.remove(0) {
             Token::Immediate(imm) => imm.value & 0x3F,
             _ => unreachable!(),

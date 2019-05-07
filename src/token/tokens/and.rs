@@ -59,7 +59,7 @@ impl Requirements for And {
     fn memory_requirement(&self) -> u16 {
         1
     }
-    
+
     fn require_range(&self) -> (u64, u64) {
         (2, 3)
     }

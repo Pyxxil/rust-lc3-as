@@ -19,10 +19,10 @@ impl Requirements for Stringz {
     fn memory_requirement(&self) -> u16 {
         self.operands.iter().fold(0u16, |acc, token| match token {
             Token::String(string) => acc + string.token().len() as u16,
-            _ => unreachable!()
+            _ => unreachable!(),
         })
     }
-    
+
     fn require_range(&self) -> (u64, u64) {
         (1, 1)
     }

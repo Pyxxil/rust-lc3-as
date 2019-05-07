@@ -5,16 +5,18 @@ macro_rules! token {
             token: String,
             column: u64,
             line: u64,
+            file: String,
             $( pub $field : $type, )*
             operands: Vec<Token>,
         }
 
         impl $name {
-            pub fn new(token: String, column: u64, line: u64, $( $field: $type, )* ) -> Self {
+            pub fn new(token: String, file: String, column: u64, line: u64, $( $field: $type, )* ) -> Self {
                 Self {
                     token,
                     column,
                     line,
+                    file,
                     $( $field, )*
                     operands: Vec::with_capacity($capacity),
                 }
@@ -44,15 +46,17 @@ macro_rules! token {
             token: String,
             column: u64,
             line: u64,
+            file: String,
             $( pub $field : $type, )*
         }
 
         impl $name {
-            pub fn new(token: String, column: u64, line: u64, $( $field: $type, )* ) -> Self {
+            pub fn new(token: String, file: String, column: u64, line: u64, $( $field: $type, )* ) -> Self {
                 Self {
                     token,
                     column,
                     line,
+                    file,
                     $( $field, )*
                 }
             }

@@ -25,7 +25,7 @@ impl Requirements for Ret {
     fn memory_requirement(&self) -> u16 {
         1
     }
-    
+
     fn require_range(&self) -> (u64, u64) {
         (0, 0)
     }
