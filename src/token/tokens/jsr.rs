@@ -1,9 +1,8 @@
 use token::tokens::traits::*;
 
-use token::Token;
+use token::tokens::{expected, too_few_operands};
 
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
+use token::Token;
 
 use std::collections::VecDeque;
 
@@ -27,43 +26,19 @@ impl Requirements for Jsr {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        let (min, _) = self.require_range();
-
-        if (min) >= tokens.len() as u64 {
-            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                DiagType::Error,
-                self.file.clone(),
-                self.column,
-                self.line,
-                self.token.len(),
-                format!(
-                    "Expected two arguments to JSR instruction, but only {} were found",
-                    (min) - tokens.len() as u64
-                ),
-            )));
-
-            return tokens;
+        if let Some(token) = tokens.front() {
+            expect!(
+                self,
+                tokens,
+                token,
+                Token::Label,
+                "Label",
+                Token::Immediate,
+                "Immediate"
+            );
         }
 
-        match &tokens[0] {
-            &Token::Label(_) | &Token::Immediate(_) => {}
-            token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                    DiagType::Error,
-                    self.file.clone(),
-                    self.column,
-                    self.line,
-                    self.token.len(),
-                    format!(
-                        "Expected to find argument of type Label, but found\n{:#?}",
-                        token
-                    ),
-                )));
-                return tokens;
-            }
-        };
-
-        self.operands.push(tokens.pop_front().unwrap());
+        operands_check!(self);
 
         tokens
     }

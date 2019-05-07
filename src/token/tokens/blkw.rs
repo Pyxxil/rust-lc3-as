@@ -56,7 +56,14 @@ impl Requirements for Blkw {
         }
 
         if let Some(token) = tokens.front() {
-            maybe_expect!(self, tokens, token, Token::Immediate, Token::Character, Token::Label);
+            maybe_expect!(
+                self,
+                tokens,
+                token,
+                Token::Immediate,
+                Token::Character,
+                Token::Label
+            );
         }
 
         operands_check!(self);

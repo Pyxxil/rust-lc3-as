@@ -31,7 +31,15 @@ impl Requirements for Ld {
         }
 
         if let Some(token) = tokens.front() {
-            expect!(self, tokens, token, Token::Immediate, "Immediate", Token::Label, "Label");
+            expect!(
+                self,
+                tokens,
+                token,
+                Token::Immediate,
+                "Immediate",
+                Token::Label,
+                "Label"
+            );
         }
 
         operands_check!(self);

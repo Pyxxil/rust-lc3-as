@@ -5,7 +5,7 @@ pub struct String {
     token: string::String,
     column: u64,
     line: u64,
-    file: string::String
+    file: string::String,
 }
 
 impl String {
@@ -14,7 +14,7 @@ impl String {
             token,
             column,
             line,
-            file
+            file,
         }
     }
 

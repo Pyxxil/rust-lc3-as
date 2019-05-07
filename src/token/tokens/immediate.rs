@@ -25,7 +25,7 @@ impl Immediate {
                     line,
                     token.len(),
                     format!(
-                        "Value {} is too large to be represented in signed 16 bits\n",
+                        "Value {} is too large to be represented in signed 16 bits",
                         token
                     ),
                 )));
@@ -69,7 +69,7 @@ impl Immediate {
                 line,
                 token.len(),
                 format!(
-                    "Value {} is too large to be represented in signed 16 bits\n",
+                    "Value {} is too large to be represented in signed 16 bits",
                     token
                 ),
             )));
@@ -106,7 +106,7 @@ impl Immediate {
                 line,
                 token.len(),
                 format!(
-                    "Value {} is too large to be represented in signed 16 bits\n",
+                    "Value {} is too large to be represented in signed 16 bits",
                     token
                 ),
             )));

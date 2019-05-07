@@ -26,7 +26,17 @@ impl Requirements for Fill {
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         if let Some(token) = tokens.front() {
-            expect!(self, tokens, token, Token::Immediate, "Immediate", Token::Character, "Character", Token::Label, "Label");
+            expect!(
+                self,
+                tokens,
+                token,
+                Token::Immediate,
+                "Immediate",
+                Token::Character,
+                "Character",
+                Token::Label,
+                "Label"
+            );
         }
 
         operands_check!(self);

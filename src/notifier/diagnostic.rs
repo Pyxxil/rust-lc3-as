@@ -49,16 +49,8 @@ impl Colour for Note {
                 DiagType::Warning => "Warning".yellow(),
                 DiagType::Error => "Error".red(),
             },
-            if self.line > 0 {
-                format!(" Line {}:", self.line)
-            } else {
-                String::new()
-            },
-            if self.column > 0 {
-                format!(" Column {}:", self.column)
-            } else {
-                String::new()
-            },
+            self.line,
+            self.column,
             self.context
         )
     }
@@ -67,19 +59,8 @@ impl Colour for Note {
 impl NoColour for Note {
     fn no_colour(&self) -> String {
         format!(
-            "{:#?}:{}{} {}",
-            self.diagnostic_type,
-            if self.line > 0 {
-                format!(" Line {}:", self.line)
-            } else {
-                String::new()
-            },
-            if self.column > 0 {
-                format!(" Column {}:", self.column)
-            } else {
-                String::new()
-            },
-            self.context
+            "{:#?}:{}:{}: {}",
+            self.diagnostic_type, self.line, self.column, self.context
         )
     }
 }
@@ -105,7 +86,7 @@ impl Pointer {
 impl Colour for Pointer {
     fn colour(&self) -> String {
         format!(
-            "{}:{}:{}:{}",
+            "{}:{}:{}: {}",
             match self.diagnostic_type {
                 DiagType::Note => "Note".bright_white(),
                 DiagType::Warning => "Warning".yellow(),
@@ -122,7 +103,7 @@ impl NoColour for Pointer {
     #[inline]
     fn no_colour(&self) -> String {
         format!(
-            "{:#?}: Line {}: Column {}: {}",
+            "{:#?}:{}:{}: {}",
             self.diagnostic_type, self.line, self.column, self.context
         )
     }
@@ -170,7 +151,7 @@ impl Colour for Highlight {
             self.column,
             self.context,
             get_line(&self.file, self.line),
-            " ".repeat(self.column as usize - 1) + &"~".repeat(self.width - 1) + "^"
+            " ".repeat(self.column as usize - 1) + &"~".repeat(self.width)
         )
     }
 }
@@ -179,7 +160,7 @@ impl NoColour for Highlight {
     #[inline]
     fn no_colour(&self) -> String {
         format!(
-            "{:#?}: {}: {}: {}",
+            "{:#?}:{}:{}:{}",
             self.diagnostic_type, self.line, self.column, self.context
         )
     }
