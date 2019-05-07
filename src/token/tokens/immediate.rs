@@ -20,6 +20,7 @@ impl Immediate {
             .unwrap_or_else(|_| {
                 notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
                     DiagType::Error,
+                    file.clone(),
                     column,
                     line,
                     token.len(),
@@ -63,6 +64,7 @@ impl Immediate {
         .unwrap_or_else(|_| {
             notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
                 DiagType::Error,
+                file.clone(),
                 column,
                 line,
                 token.len(),
@@ -99,6 +101,7 @@ impl Immediate {
         .unwrap_or_else(|_| {
             notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
                 DiagType::Error,
+                file.clone(),
                 column,
                 line,
                 token.len(),
@@ -135,5 +138,9 @@ impl Immediate {
 
     pub fn line(&self) -> u64 {
         self.line
+    }
+
+    pub fn file(&self) -> &String {
+        &self.file
     }
 }

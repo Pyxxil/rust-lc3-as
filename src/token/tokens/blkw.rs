@@ -1,9 +1,8 @@
 use token::tokens::traits::*;
 
-use token::Token;
+use token::tokens::{expected, too_few_operands};
 
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
+use token::Token;
 
 use std::collections::VecDeque;
 
@@ -53,37 +52,14 @@ impl Requirements for Blkw {
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         if let Some(token) = tokens.front() {
-            match token {
-                Token::Immediate(_) | Token::Character(_) => {
-                    self.operands.push(tokens.pop_front().unwrap());
-                    if let Some(second) = tokens.front() {
-                        match second {
-                            Token::Immediate(_) | Token::Label(_) => {
-                                self.operands.push(tokens.pop_front().unwrap())
-                            }
-                            _ => {}
-                        };
-                    }
-                }
-                ref token => {
-                    notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                        DiagType::Error,
-                        self.column,
-                        self.line,
-                        self.token.len(),
-                        format!("Expected an Immediate Literal, but found\n {:#?}", token),
-                    )));
-                }
-            }
-        } else {
-            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                DiagType::Error,
-                self.column,
-                self.line,
-                self.token.len(),
-                "Expected an argument, but found nothing.".to_owned(),
-            )));
+            expect!(self, tokens, token, Token::Immediate, "Immediate");
         }
+
+        if let Some(token) = tokens.front() {
+            maybe_expect!(self, tokens, token, Token::Immediate, Token::Character, Token::Label);
+        }
+
+        operands_check!(self);
 
         tokens
     }

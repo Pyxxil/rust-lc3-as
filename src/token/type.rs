@@ -56,13 +56,50 @@ pub enum Token {
     EOL,
 }
 
-macro_rules! fmt {
-    ( $self:expr, $f:expr, $( $token_type:path ),* ) => {
-        match $self {
-            $( $token_type(ref token) => write!($f, "{:#?}", token), )+
-            _ => Ok(())
-        }
-    };
+impl Token {
+    pub fn file(&self) -> &String {
+        file_of!(
+            self,
+            Token::Add,
+            Token::And,
+            Token::Br,
+            Token::Jmp,
+            Token::Jsr,
+            Token::Jsrr,
+            Token::Ld,
+            Token::Ldi,
+            Token::Ldr,
+            Token::Lea,
+            Token::Not,
+            Token::Ret,
+            Token::Rti,
+            Token::St,
+            Token::Sti,
+            Token::Str,
+            Token::Trap,
+            Token::Getc,
+            Token::Halt,
+            Token::In,
+            Token::Out,
+            Token::Puts,
+            Token::Putsp,
+            Token::Blkw,
+            Token::Fill,
+            Token::Include,
+            Token::Lshift,
+            Token::Orig,
+            Token::Neg,
+            Token::Set,
+            Token::Stringz,
+            Token::Sub,
+            Token::Immediate,
+            Token::Label,
+            Token::Character,
+            Token::String,
+            Token::End,
+            Token::Register
+        )
+    }
 }
 
 impl fmt::Debug for Token {
@@ -111,33 +148,6 @@ impl fmt::Debug for Token {
         )
     }
 }
-
-macro_rules! memory_requirement_of{
-        ( $self:expr, $( $token:path ),* ) => {
-            match *$self {
-                $( $token(ref token) => token.memory_requirement(), )+
-                _ => 0,
-            }
-        }
-    }
-
-macro_rules! consume {
-        ( $self:expr, $tokens:expr, $( $token_type:path ),*, 0, $( $fail_token:path ),* ) => {
-            match $self {
-                $( $token_type(ref mut token) => token.consume($tokens), )+
-                $( $fail_token(ref token) => {
-                    expected(
-                        &["Instruction", "Directive", "Label"],
-                        $self,
-                        (token.column(), token.line(), token.token().len()),
-                    );
-                    $tokens
-                }
-                )+
-                _ => $tokens,
-            }
-        };
-    }
 
 impl Requirements for Token {
     fn require_range(&self) -> (u64, u64) {
@@ -225,15 +235,6 @@ impl Requirements for Token {
             Token::Register
         )
     }
-}
-
-macro_rules! assembled {
-    ( $self:expr, $program_counter:expr, $( $token_type:path ),* ) => {
-        match $self {
-            $( $token_type(token) => token.assembled($program_counter), )+
-            _ => Vec::new(),
-        }
-    };
 }
 
 impl Assemble for Token {

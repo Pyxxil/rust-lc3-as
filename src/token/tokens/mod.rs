@@ -5,9 +5,11 @@ pub mod traits;
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight};
 use token::r#type::Token;
-pub fn expected(expect: &[&str], found: &Token, at: (u64, u64, usize)) {
+
+pub fn expected(file: &String, expect: &[&str], found: &Token, at: (u64, u64, usize)) {
     notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
         DiagType::Error,
+        (*file).clone(),
         at.0,
         at.1,
         at.2,
@@ -19,9 +21,10 @@ pub fn expected(expect: &[&str], found: &Token, at: (u64, u64, usize)) {
     )));
 }
 
-pub fn too_few_operands(required: u64, found: u64, token: &str, at: (u64, u64, usize)) {
+pub fn too_few_operands(file: &String, required: u64, found: u64, token: &str, at: (u64, u64, usize)) {
     notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
         DiagType::Error,
+        (*file).clone(),
         at.0,
         at.1,
         at.2,

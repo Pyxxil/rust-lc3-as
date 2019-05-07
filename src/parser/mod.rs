@@ -34,6 +34,7 @@ impl Parser {
                     if self.symbols.contains_key(tok.token()) {
                         notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
                             DiagType::Error,
+                            (*tok.file()).clone(),
                             tok.column(),
                             tok.line(),
                             tok.token().len(),

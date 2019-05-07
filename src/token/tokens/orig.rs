@@ -1,9 +1,8 @@
 use token::tokens::traits::*;
 
-use token::Token;
+use token::tokens::{expected, too_few_operands};
 
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
+use token::Token;
 
 use std::collections::VecDeque;
 
@@ -38,39 +37,11 @@ impl Requirements for Orig {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        let (min, _) = self.require_range();
         if let Some(token) = tokens.front() {
-            match token {
-                Token::Immediate(imm) => {
-                    self.starting_address = imm.value as u16;
-                    self.operands.push(tokens.pop_front().unwrap());
-                }
-                token => {
-                    notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                        DiagType::Error,
-                        self.column,
-                        self.line,
-                        self.token.len(),
-                        format!(
-                            "Expected to find argument of type Immediate, but found {:#?}",
-                            token
-                        ),
-                    )));
-                }
-            }
-        } else {
-            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                DiagType::Error,
-                self.column,
-                self.line,
-                self.token.len(),
-                format!(
-                    "Expected {} arguments, found {}, for ADD instruction.",
-                    min,
-                    tokens.len() as u64
-                ),
-            )));
+            expect!(self, tokens, token, Token::Immediate, "Immediate");
         }
+
+        operands_check!(self);
 
         tokens
     }

@@ -17,7 +17,7 @@ use lexer::tokenizer::Tokenizer;
 use notifier;
 use notifier::{DiagType, Diagnostic, Note};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct FileController {
     files: HashMap<String, Vec<String>>,
 }
@@ -47,7 +47,7 @@ impl FileController {
     }
 
     pub fn get_line(&self, file: &str, line: u64) -> String {
-        self.files.get(file).unwrap()[line as usize].clone()
+        self.files.get(file).unwrap()[(line - 1) as usize].clone()
     }
 
     pub fn remove(&mut self, file: &str) {

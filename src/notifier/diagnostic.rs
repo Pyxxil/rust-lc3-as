@@ -1,6 +1,8 @@
 extern crate colored;
 use self::colored::*;
 
+use lexer::get_line;
+
 pub trait Colour {
     fn colour(&self) -> String;
 }
@@ -41,7 +43,7 @@ impl Note {
 impl Colour for Note {
     fn colour(&self) -> String {
         format!(
-            "{}:{}{} {}",
+            "{}:{}:{}: {}",
             match self.diagnostic_type {
                 DiagType::Note => "Note".bright_white(),
                 DiagType::Warning => "Warning".yellow(),
@@ -103,7 +105,7 @@ impl Pointer {
 impl Colour for Pointer {
     fn colour(&self) -> String {
         format!(
-            "{}: Line {}: Column {}: {}",
+            "{}:{}:{}:{}",
             match self.diagnostic_type {
                 DiagType::Note => "Note".bright_white(),
                 DiagType::Warning => "Warning".yellow(),
@@ -128,6 +130,7 @@ impl NoColour for Pointer {
 
 pub struct Highlight {
     diagnostic_type: DiagType,
+    file: String,
     column: u64,
     line: u64,
     width: usize,
@@ -137,6 +140,7 @@ pub struct Highlight {
 impl Highlight {
     pub fn new(
         diagnostic_type: DiagType,
+        file: String,
         column: u64,
         line: u64,
         width: usize,
@@ -144,6 +148,7 @@ impl Highlight {
     ) -> Self {
         Self {
             diagnostic_type,
+            file,
             column,
             line,
             width,
@@ -155,15 +160,17 @@ impl Highlight {
 impl Colour for Highlight {
     fn colour(&self) -> String {
         format!(
-            "{}: Line {}: Column {}: {}",
+            "{}:{}:{}: {}\n{}\n{}",
             match self.diagnostic_type {
-                DiagType::Note => "Note".bright_white(),
-                DiagType::Warning => "Warning".yellow(),
-                DiagType::Error => "Error".red(),
+                DiagType::Note => self.file.bright_white(),
+                DiagType::Warning => self.file.yellow(),
+                DiagType::Error => self.file.red(),
             },
             self.line,
             self.column,
             self.context,
+            get_line(&self.file, self.line),
+            " ".repeat(self.column as usize - 1) + &"~".repeat(self.width - 1) + "^"
         )
     }
 }

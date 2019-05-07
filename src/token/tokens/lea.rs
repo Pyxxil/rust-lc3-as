@@ -32,6 +32,7 @@ impl Requirements for Lea {
         if (min) >= tokens.len() as u64 {
             notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
                 DiagType::Error,
+                self.file.clone(),
                 self.column,
                 self.line,
                 self.token.len(),
@@ -49,6 +50,7 @@ impl Requirements for Lea {
             token => {
                 notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
                     DiagType::Error,
+                    self.file.clone(),
                     self.column,
                     self.line,
                     self.token.len(),
@@ -66,6 +68,7 @@ impl Requirements for Lea {
             token => {
                 notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
                     DiagType::Error,
+                    self.file.clone(),
                     self.column,
                     self.line,
                     self.token.len(),

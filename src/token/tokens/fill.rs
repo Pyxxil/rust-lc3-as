@@ -1,9 +1,8 @@
 use token::tokens::traits::*;
 
-use token::Token;
+use token::tokens::{expected, too_few_operands};
 
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
+use token::Token;
 
 use std::collections::VecDeque;
 
@@ -27,33 +26,10 @@ impl Requirements for Fill {
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         if let Some(token) = tokens.front() {
-            match token {
-                Token::Immediate(_) | Token::Character(_) | Token::Label(_) => {
-                    self.operands.push(tokens.pop_front().unwrap())
-                }
-                ref token => {
-                    notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                        DiagType::Error,
-                        self.column,
-                        self.line,
-                        self.token.len(),
-                        format!(
-                            "Expected to find argument of type Immediate, or Label, but found {:#?}",
-                            token
-                        ),
-                    )));
-                }
-            }
-        } else {
-            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                DiagType::Error,
-                self.column,
-                self.line,
-                self.token.len(),
-                "Expected an argument to .FILL directive, but found the end of file instead."
-                    .to_owned(),
-            )));
+            expect!(self, tokens, token, Token::Immediate, "Immediate", Token::Character, "Character", Token::Label, "Label");
         }
+
+        operands_check!(self);
 
         tokens
     }

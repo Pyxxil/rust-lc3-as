@@ -33,6 +33,10 @@ macro_rules! token {
             pub fn line(&self) -> u64 {
                 self.line
             }
+
+            pub fn file(&self) -> &String {
+                &self.file
+            }
         }
     };
 
@@ -72,6 +76,10 @@ macro_rules! token {
             pub fn line(&self) -> u64 {
                 self.line
             }
+
+            pub fn file(&self) -> &String {
+                &self.file
+            }
         }
     };
 
@@ -86,6 +94,7 @@ macro_rules! expect {
             $( $token(_) => { $self.operands.push($tokens.pop_front().unwrap()); } )+
             tok => {
                 expected(
+                    $self.file(),
                     &[
                         $( $string, )+
                     ], &tok, ($self.column, $self.line, $self.token().len())
@@ -112,6 +121,7 @@ macro_rules! operands_check {
 
         if received < min {
             too_few_operands(
+                $self.file(),
                 min,
                 received,
                 $self.token(),

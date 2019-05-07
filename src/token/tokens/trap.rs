@@ -1,9 +1,8 @@
 use token::tokens::traits::*;
 
-use token::Token;
+use token::tokens::{expected, too_few_operands};
 
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
+use token::Token;
 
 use std::collections::VecDeque;
 
@@ -42,39 +41,12 @@ impl Requirements for Trap {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        let (min, _) = self.require_range();
-
-        if (min) > (tokens.len() as u64) {
-            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                DiagType::Error,
-                self.column,
-                self.line,
-                self.token.len(),
-                "Expected an argument for TRAP instruction, but found the end of file instead."
-                    .to_owned(),
-            )));
-
-            return tokens;
+        if let Some(token) = tokens.front() {
+            expect!(self, tokens, token, Token::Immediate, "Immediate");
         }
 
-        match &tokens[0] {
-            &Token::Immediate(_) => {}
-            token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                    DiagType::Error,
-                    self.column,
-                    self.line,
-                    self.token.len(),
-                    format!(
-                        "Expected to find argument of type Immediate, but found {:#?}",
-                        token
-                    ),
-                )));
-                return tokens;
-            }
-        };
+        operands_check!(self);
 
-        self.operands.push(tokens.pop_front().unwrap());
         tokens
     }
 }
