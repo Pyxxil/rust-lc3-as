@@ -1,9 +1,8 @@
 use token::tokens::traits::*;
 
-use token::Token;
+use token::tokens::{expected, too_few_operands};
 
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
+use token::Token;
 
 use std::collections::VecDeque;
 

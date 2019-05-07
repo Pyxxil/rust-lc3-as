@@ -17,7 +17,7 @@ impl Assemble for Stringz {
 
 impl Requirements for Stringz {
     fn memory_requirement(&self) -> u16 {
-        self.operands.iter().fold(0u16, |acc, token| match token {
+        self.operands.iter().fold(0_u16, |acc, token| match token {
             Token::String(string) => acc + string.token().len() as u16,
             _ => unreachable!(),
         })
