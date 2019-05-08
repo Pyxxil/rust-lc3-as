@@ -1,8 +1,10 @@
+use std::collections::HashMap;
 pub use std::collections::VecDeque;
 use std::fmt;
 
-use token::tokens::traits::*;
+use token::Symbol;
 use token::tokens::*;
+use token::tokens::traits::*;
 
 #[derive(PartialEq, Clone)]
 pub enum Token {
@@ -237,10 +239,12 @@ impl Requirements for Token {
 }
 
 impl Assemble for Token {
-    fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
+    fn assembled(self, program_counter: &mut i16, symbols: &HashMap<String, Symbol>, symbol: &String) -> Vec<(u16, String)> {
         assembled!(
             self,
             program_counter,
+            symbols,
+            symbol,
             Token::Add,
             Token::And,
             Token::Br,

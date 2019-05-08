@@ -1,6 +1,9 @@
+use std::collections::HashMap;
+
 use lexer::Lexer;
 use parser::Parser;
 use token;
+use token::Symbol;
 use token::tokens::traits::Assemble;
 
 pub struct Assembler {
@@ -22,9 +25,9 @@ impl Assembler {
             let mut parser = Parser::new(lexer.tokens());
             parser.parse();
             if parser.is_okay() {
-                let tokens = self.do_first_pass(parser);
-                let tokens = self.do_second_pass(tokens);
-                //println!("{:#?}", tokens);
+                let (tokens, symbols) = self.do_first_pass(parser);
+                let tokens = self.do_second_pass(tokens, symbols);
+                println!("{:#?}", tokens);
                 return;
             }
         }
@@ -32,15 +35,17 @@ impl Assembler {
         println!("Assembly failed for {}", self.file);
     }
 
-    fn do_first_pass(&self, parser: Parser) -> Vec<token::Token> {
-        parser.tokens()
+    fn do_first_pass(&self, parser: Parser) -> (Vec<token::Token>, HashMap<String, Symbol>) {
+        parser.tokens_and_symbols()
     }
 
-    fn do_second_pass(&self, tokens: Vec<token::Token>) -> Vec<(u16, String)> {
+    fn do_second_pass(&self, tokens: Vec<token::Token>, symbols: HashMap<String, Symbol>) -> Vec<(u16, String)> {
         let mut program_counter = 0;
         tokens
             .into_iter()
-            .flat_map(|token| token.assembled(&mut program_counter))
+            .flat_map(|token| {
+                token.assembled(&mut program_counter, &symbols, &String::new())
+            })
             .collect()
     }
 }

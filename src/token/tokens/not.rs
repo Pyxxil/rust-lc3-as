@@ -1,13 +1,15 @@
+use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::tokens::traits::*;
-use token::tokens::{expected, too_few_operands};
+use token::Symbol;
 use token::Token;
+use token::tokens::{expected, too_few_operands};
+use token::tokens::traits::*;
 
 token!(Not, 2);
 
 impl Assemble for Not {
-    fn assembled(mut self, program_counter: &mut i16) -> Vec<(u16, String)> {
+    fn assembled(mut self, program_counter: &mut i16, _symbols: &HashMap<String, Symbol>, symbol: &String) -> Vec<(u16, String)> {
         *program_counter += 1;
 
         let destination_register = match self.operands.remove(0) {
@@ -28,10 +30,11 @@ impl Assemble for Not {
         vec![(
             instruction,
             format!(
-                "({0:4X}) {1:04X} {1:016b} ({2: >4}) NOT R{3} R{4}",
+                "({0:4X}) {1:04X} {1:016b} ({2: >4}) {3: <20} NOT R{4} R{5}",
                 *program_counter - 1,
                 instruction,
                 self.line,
+                symbol,
                 destination_register,
                 source_register,
             ),

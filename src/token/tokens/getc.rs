@@ -1,20 +1,23 @@
+use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::tokens::traits::*;
+use token::Symbol;
 use token::Token;
+use token::tokens::traits::*;
 
 token!(Getc);
 
 impl Assemble for Getc {
-    fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
+    fn assembled(self, program_counter: &mut i16, _symbols: &HashMap<String, Symbol>, symbol: &String) -> Vec<(u16, String)> {
         *program_counter += 1;
 
         vec![(
             0xF020,
             format!(
-                "({:04X}) F020 1111000000100000 ({: >4}) GETC",
+                "({:04X}) F020 1111000000100000 ({: >4}) {: <20} GETC",
                 *program_counter - 1,
-                self.line
+                self.line,
+                symbol
             ),
         )]
     }

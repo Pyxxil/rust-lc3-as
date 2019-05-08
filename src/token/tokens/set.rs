@@ -1,14 +1,15 @@
+use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
-use token::tokens::traits::*;
+use token::Symbol;
 use token::Token;
+use token::tokens::{expected, too_few_operands};
+use token::tokens::traits::*;
 
 token!(Set, 2);
 
 impl Assemble for Set {
-    fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
+    fn assembled(mut self, program_counter: &mut i16, symbols: &HashMap<String, Symbol>, symbol: &String) -> Vec<(u16, String)> {
         *program_counter += 1;
 
         Vec::new()
@@ -25,62 +26,15 @@ impl Requirements for Set {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        let (min, _) = self.require_range();
-
-        if (min) > (tokens.len() as u64) {
-            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                DiagType::Error,
-                self.file.clone(),
-                self.column,
-                self.line,
-                self.token.len(),
-                format!(
-                    "Expected {} arguments, found {}, for .SET directive.",
-                    min,
-                    tokens.len()
-                ),
-            )));
-
-            return tokens;
+        if let Some(token) = tokens.front() {
+            expect!(self, tokens, token, Token::Register, "Register");
         }
 
-        match &tokens[0] {
-            &Token::Register(_) => {}
-            token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                    DiagType::Error,
-                    self.file.clone(),
-                    self.column,
-                    self.line,
-                    self.token.len(),
-                    format!(
-                        "Expected argument of type Register, but found\n{:#?}",
-                        token
-                    ),
-                )));
-            }
-        };
-
-        match &tokens[1] {
-            &Token::Immediate(_) | &Token::Register(_) | &Token::Label(_) => {}
-            token => {
-                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                    DiagType::Error,
-                    self.file.clone(),
-                    self.column,
-                    self.line,
-                    self.token.len(),
-                    format!(
-                        "Expected argument of type Immediate, Label, or Register, but found\n{:#?}",
-                        token
-                    ),
-                )));
-            }
-        };
-
-        for _ in 0..min {
-            self.operands.push(tokens.pop_front().unwrap());
+        if let Some(token) = tokens.front() {
+            expect!(self, tokens, token, Token::Register, "Register", Token::Immediate, "Immediate", Token::Label, "Label");
         }
+
+        operands_check!(self);
 
         tokens
     }

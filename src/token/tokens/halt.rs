@@ -1,20 +1,23 @@
+use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::tokens::traits::*;
+use token::Symbol;
 use token::Token;
+use token::tokens::traits::*;
 
 token!(Halt);
 
 impl Assemble for Halt {
-    fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
+    fn assembled(self, program_counter: &mut i16, _symbols: &HashMap<String, Symbol>, symbol: &String) -> Vec<(u16, String)> {
         *program_counter += 1;
 
         vec![(
             0xF025,
             format!(
-                "({:04X}) F025 1111000000100101 ({: >4}) HALT",
+                "({:04X}) F025 1111000000100101 ({: >4}) {: <20} HALT",
                 *program_counter - 1,
-                self.line
+                self.line,
+                symbol
             ),
         )]
     }

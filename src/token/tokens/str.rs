@@ -1,13 +1,15 @@
+use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::tokens::traits::*;
-use token::tokens::*;
+use token::Symbol;
 use token::Token;
+use token::tokens::*;
+use token::tokens::traits::*;
 
 token!(Str, 3);
 
 impl Assemble for Str {
-    fn assembled(mut self, program_counter: &mut i16) -> Vec<(u16, String)> {
+    fn assembled(mut self, program_counter: &mut i16, _symbols: &HashMap<String, Symbol>, symbol: &String) -> Vec<(u16, String)> {
         *program_counter += 1;
 
         let destination_register = match self.operands.remove(0) {
@@ -30,10 +32,11 @@ impl Assemble for Str {
         vec![(
             instruction,
             format!(
-                "({0:4X}) {1:04X} {1:016b} ({2: >4}) ADD R{3} R{4} #{5}",
+                "({0:4X}) {1:04X} {1:016b} ({2: >4}) {3: <20} STR R{4} R{5} #{6}",
                 *program_counter - 1,
                 instruction,
                 self.line,
+                symbol,
                 destination_register,
                 source_one,
                 (source_two << 10) as i16 >> 10,

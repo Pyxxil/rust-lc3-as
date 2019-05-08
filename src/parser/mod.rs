@@ -2,10 +2,10 @@ use std::collections::HashMap;
 use std::collections::VecDeque;
 
 use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
-use token::traits::Requirements;
+use notifier::{Diagnostic, DiagType, Highlight};
 use token::Symbol;
 use token::Token;
+use token::traits::Requirements;
 
 #[derive(Debug)]
 pub struct Parser {
@@ -47,7 +47,7 @@ impl Parser {
                     }
                 }
                 Token::Orig(ref tok) => {
-                    address = tok.starting_address;
+                    address = tok.memory_requirement();
                 }
                 token => {
                     address += token.memory_requirement();
@@ -62,11 +62,7 @@ impl Parser {
         notifier::error_count() == 0
     }
 
-    pub fn tokens(self) -> Vec<Token> {
-        self.tokens
-    }
-
-    pub fn symbols(self) -> HashMap<String, Symbol> {
-        self.symbols
+    pub fn tokens_and_symbols(self) -> (Vec<Token>, HashMap<String, Symbol>)  {
+        (self.tokens, self.symbols)
     }
 }

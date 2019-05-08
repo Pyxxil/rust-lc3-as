@@ -1,5 +1,5 @@
 use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
+use notifier::{Diagnostic, DiagType, Highlight};
 use token::r#type::Token;
 
 #[macro_use]

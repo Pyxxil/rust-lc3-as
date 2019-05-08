@@ -1,21 +1,24 @@
+use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::tokens::traits::*;
+use token::Symbol;
 use token::Token;
+use token::tokens::traits::*;
 
 token!(Rti);
 
 impl Assemble for Rti {
-    fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
+    fn assembled(self, program_counter: &mut i16, _symbols: &HashMap<String, Symbol>, symbol: &String) -> Vec<(u16, String)> {
         *program_counter += 1;
 
         vec![(
             0x8000,
             format!(
-                "({0:4X}) {1:04X} {1:016b} ({2: >4}) RTI",
+                "({0:4X}) {1:04X} {1:016b} ({2: >4}) {3: <20} RTI",
                 *program_counter - 1,
                 0x8000,
                 self.line,
+                symbol
             ),
         )]
     }

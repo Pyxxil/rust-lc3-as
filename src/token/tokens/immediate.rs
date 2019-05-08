@@ -1,5 +1,5 @@
 use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
+use notifier::{Diagnostic, DiagType, Highlight};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Immediate {

@@ -45,9 +45,9 @@ macro_rules! consume {
 }
 
 macro_rules! assembled {
-    ( $self:expr, $program_counter:expr, $( $token_type:path ),* ) => {
+    ( $self:expr, $program_counter:expr, $symbols:expr, $symbol:expr, $( $token_type:path ),* ) => {
         match $self {
-            $( $token_type(token) => token.assembled($program_counter), )+
+            $( $token_type(token) => token.assembled($program_counter, $symbols, $symbol), )+
             _ => Vec::new(),
         }
     };

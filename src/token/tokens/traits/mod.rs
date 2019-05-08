@@ -1,9 +1,11 @@
+use std::collections::HashMap;
 use std::collections::VecDeque;
 
+use token::Symbol;
 use token::Token;
 
 pub trait Assemble {
-    fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)>;
+    fn assembled(self, program_counter: &mut i16, symbols: &HashMap<String, Symbol>, symbol: &String) -> Vec<(u16, String)>;
 }
 
 pub trait Requirements {

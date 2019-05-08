@@ -1,15 +1,47 @@
+use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::tokens::traits::*;
-use token::tokens::{expected, too_few_operands};
+use token::Symbol;
 use token::Token;
+use token::tokens::{expected, too_few_operands};
+use token::tokens::traits::*;
 
 token!(Br, 1, n: bool, z: bool, p: bool);
 
 impl Assemble for Br {
-    fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)> {
+    fn assembled(mut self, program_counter: &mut i16, symbols: &HashMap<String, Symbol>, symbol: &String) -> Vec<(u16, String)> {
         *program_counter += 1;
-        Vec::new()
+
+        let value = match self.operands.last().unwrap() {
+            Token::Immediate(imm) => imm.value,
+            Token::Label(label) => {
+                if let Some(symbol) = symbols.get(label.token()) {
+                    symbol.address() as i16 - *program_counter
+                } else {
+                    0
+                }
+            },
+            _ => unreachable!(),
+        } as u16;
+
+        let instruction = 0x0000 | (self.n as u16) << 11 | (self.z as u16) << 10 | (self.p as u16) << 9 | value & 0x1FF;
+
+        vec![
+            (
+                instruction,
+                format!(
+                    "({0:4X}) {1:04X} {1:016b} ({2: >4}) {3: <20} BR{4}{5}{6} #{7}",
+                    *program_counter - 1,
+                    instruction,
+                    self.line,
+                    symbol,
+                    if self.n { "n" } else { "" },
+                    if self.z { "z" } else { "" },
+                    if self.p { "p" } else { "" },
+                    value as i16
+                ),
+            )
+        ]
     }
 }
 
