@@ -1,11 +1,9 @@
-use token::tokens::traits::*;
-
-use token::Token;
+use std::collections::VecDeque;
 
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight};
-
-use std::collections::VecDeque;
+use token::tokens::traits::*;
+use token::Token;
 
 token!(Set, 2);
 
@@ -18,12 +16,12 @@ impl Assemble for Set {
 }
 
 impl Requirements for Set {
-    fn memory_requirement(&self) -> u16 {
-        0
-    }
-
     fn require_range(&self) -> (u64, u64) {
         (2, 2)
+    }
+
+    fn memory_requirement(&self) -> u16 {
+        0
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {

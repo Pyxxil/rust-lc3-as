@@ -1,10 +1,8 @@
-use token::tokens::traits::*;
+use std::collections::VecDeque;
 
 use token::tokens::expected;
-
+use token::tokens::traits::*;
 use token::Token;
-
-use std::collections::VecDeque;
 
 token!(Stringz, 1);
 
@@ -16,15 +14,15 @@ impl Assemble for Stringz {
 }
 
 impl Requirements for Stringz {
+    fn require_range(&self) -> (u64, u64) {
+        (1, 1)
+    }
+
     fn memory_requirement(&self) -> u16 {
         self.operands.iter().fold(0_u16, |acc, token| match token {
             Token::String(string) => acc + string.token().len() as u16,
             _ => unreachable!(),
         })
-    }
-
-    fn require_range(&self) -> (u64, u64) {
-        (1, 1)
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {

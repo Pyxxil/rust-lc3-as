@@ -1,15 +1,13 @@
+extern crate colored;
+
 use std::iter::Peekable;
 use std::str::Chars;
 
-extern crate colored;
-
+use lexer::add_line;
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight, Pointer};
-
 use token::tokens::*;
 use token::Token;
-
-use lexer::add_line;
 
 macro_rules! err {
     ($tokenizer:expr, $diagnostic:expr) => {
@@ -691,7 +689,7 @@ impl<'a> Tokenizer<'a> {
                                 token_start,
                                 self.line_number,
                                 "Expected another '/' here. Treating it as a comment anyways"
-                                    .to_owned()
+                                    .to_owned(),
                             )));
                         }
                     } else {
@@ -700,7 +698,7 @@ impl<'a> Tokenizer<'a> {
                             token_start,
                             self.line_number,
                             "Expected another '/' here. Treating it as a comment anyways"
-                                .to_owned()
+                                .to_owned(),
                         )));
                     }
                     return Some(Token::EOL);

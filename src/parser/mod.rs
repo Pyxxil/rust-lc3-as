@@ -1,12 +1,11 @@
-use token::traits::Requirements;
-use token::Symbol;
-use token::Token;
-
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight};
+use token::traits::Requirements;
+use token::Symbol;
+use token::Token;
 
 #[derive(Debug)]
 pub struct Parser {

@@ -1,8 +1,7 @@
-use token::tokens::traits::*;
-
-use token::Token;
-
 use std::collections::VecDeque;
+
+use token::tokens::traits::*;
+use token::Token;
 
 token!(Out);
 
@@ -22,12 +21,12 @@ impl Assemble for Out {
 }
 
 impl Requirements for Out {
-    fn memory_requirement(&self) -> u16 {
-        1
-    }
-
     fn require_range(&self) -> (u64, u64) {
         (0, 0)
+    }
+
+    fn memory_requirement(&self) -> u16 {
+        1
     }
 
     // As OUT takes no operands, just do nothing here.

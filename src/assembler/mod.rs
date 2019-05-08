@@ -1,6 +1,5 @@
 use lexer::Lexer;
 use parser::Parser;
-
 use token;
 use token::tokens::traits::Assemble;
 
@@ -25,7 +24,7 @@ impl Assembler {
             if parser.is_okay() {
                 let tokens = self.do_first_pass(parser);
                 let tokens = self.do_second_pass(tokens);
-                println!("{:#?}", tokens);
+                //println!("{:#?}", tokens);
                 return;
             }
         }

@@ -1,21 +1,17 @@
-pub mod tokenizer;
-
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::io::ErrorKind;
+use std::iter::Iterator;
 use std::sync::Mutex;
 
-use std::iter::Iterator;
-
-use std::collections::HashMap;
-
-use token::Token;
-
 use lexer::tokenizer::Tokenizer;
-
 use notifier;
 use notifier::{DiagType, Diagnostic, Note};
+use token::Token;
+
+pub mod tokenizer;
 
 #[derive(Default, Debug)]
 pub struct FileController {

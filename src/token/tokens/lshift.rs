@@ -1,12 +1,9 @@
-use token::tokens::traits::*;
-
-use token::tokens::{expected, too_few_operands};
-
-use token::Token;
-
+use std::collections::VecDeque;
 use std::iter;
 
-use std::collections::VecDeque;
+use token::tokens::traits::*;
+use token::tokens::{expected, too_few_operands};
+use token::Token;
 
 token!(Lshift, 2);
 
@@ -44,15 +41,15 @@ impl Assemble for Lshift {
 }
 
 impl Requirements for Lshift {
+    fn require_range(&self) -> (u64, u64) {
+        (2, 2)
+    }
+
     fn memory_requirement(&self) -> u16 {
         match self.operands.last().unwrap() {
             Token::Immediate(imm) => imm.value as u16,
             _ => unreachable!(),
         }
-    }
-
-    fn require_range(&self) -> (u64, u64) {
-        (2, 2)
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {

@@ -1,12 +1,9 @@
-use token::tokens::traits::*;
-
-use token::tokens::{expected, too_few_operands};
-
-use token::Token;
-
 use std::collections::VecDeque;
-
 use std::iter;
+
+use token::tokens::traits::*;
+use token::tokens::{expected, too_few_operands};
+use token::Token;
 
 token!(Blkw, 2);
 
@@ -39,15 +36,15 @@ impl Assemble for Blkw {
 }
 
 impl Requirements for Blkw {
+    fn require_range(&self) -> (u64, u64) {
+        (1, 2)
+    }
+
     fn memory_requirement(&self) -> u16 {
         match self.operands.first().unwrap() {
             Token::Immediate(imm) => imm.value as u16,
             _ => unreachable!(),
         }
-    }
-
-    fn require_range(&self) -> (u64, u64) {
-        (1, 2)
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {

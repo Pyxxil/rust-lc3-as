@@ -1,8 +1,7 @@
-use token::tokens::traits::*;
-
-use token::Token;
-
 use std::collections::VecDeque;
+
+use token::tokens::traits::*;
+use token::Token;
 
 token!(Rti);
 
@@ -23,12 +22,12 @@ impl Assemble for Rti {
 }
 
 impl Requirements for Rti {
-    fn memory_requirement(&self) -> u16 {
-        1
-    }
-
     fn require_range(&self) -> (u64, u64) {
         (0, 0)
+    }
+
+    fn memory_requirement(&self) -> u16 {
+        1
     }
 
     // As RTI takes no operands, just do nothing here.

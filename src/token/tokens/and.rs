@@ -1,10 +1,8 @@
-use token::tokens::traits::*;
-
-use token::tokens::{expected, too_few_operands};
-
-use token::Token;
-
 use std::collections::VecDeque;
+
+use token::tokens::traits::*;
+use token::tokens::{expected, too_few_operands};
+use token::Token;
 
 token!(And, 3);
 
@@ -27,7 +25,7 @@ impl Assemble for And {
             destination_register
         };
 
-        let source_two = if let Some(token) = self.operands.first() {
+        let source_two = if let Some(token) = self.operands.last() {
             match token {
                 Token::Register(register) => register.register as i16,
                 Token::Immediate(imm) => 0x20 | (imm.value & 0x1F),
@@ -56,12 +54,12 @@ impl Assemble for And {
 }
 
 impl Requirements for And {
-    fn memory_requirement(&self) -> u16 {
-        1
-    }
-
     fn require_range(&self) -> (u64, u64) {
         (2, 3)
+    }
+
+    fn memory_requirement(&self) -> u16 {
+        1
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
@@ -74,7 +72,13 @@ impl Requirements for And {
         }
 
         if let Some(token) = tokens.front() {
-            maybe_expect!(self, tokens, token, Token::Immediate, Token::Register);
+            // We want to allow ADD R1, R2[, #2] but not ADD R2, #2
+            if self.operands.len() == 2 {
+                // This will mean the above maybe_expect! succeeded, and so we can accept an immediate value here
+                maybe_expect!(self, tokens, token, Token::Immediate, Token::Register);
+            } else {
+                maybe_expect!(self, tokens, token, Token::Register);
+            }
         }
 
         operands_check!(self);

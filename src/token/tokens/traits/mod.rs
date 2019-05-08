@@ -1,6 +1,6 @@
-use token::Token;
-
 use std::collections::VecDeque;
+
+use token::Token;
 
 pub trait Assemble {
     fn assembled(self, program_counter: &mut i16) -> Vec<(u16, String)>;

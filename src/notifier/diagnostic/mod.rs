@@ -1,7 +1,8 @@
 extern crate colored;
-use self::colored::*;
 
 use lexer::get_line;
+
+use self::colored::*;
 
 pub trait Colour {
     fn colour(&self) -> String;

@@ -1,10 +1,8 @@
-use token::tokens::traits::*;
-
-use token::tokens::{expected, too_few_operands};
-
-use token::Token;
-
 use std::collections::VecDeque;
+
+use token::tokens::traits::*;
+use token::tokens::{expected, too_few_operands};
+use token::Token;
 
 token!(Neg, 2);
 
@@ -17,12 +15,12 @@ impl Assemble for Neg {
 }
 
 impl Requirements for Neg {
-    fn memory_requirement(&self) -> u16 {
-        self.operands.len() as u16
-    }
-
     fn require_range(&self) -> (u64, u64) {
         (1, 2)
+    }
+
+    fn memory_requirement(&self) -> u16 {
+        self.operands.len() as u16
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {

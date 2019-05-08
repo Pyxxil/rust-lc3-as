@@ -1,10 +1,10 @@
-#[macro_use]
-pub mod macros;
-pub mod traits;
-
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight};
 use token::r#type::Token;
+
+#[macro_use]
+pub mod macros;
+pub mod traits;
 
 pub fn expected(file: &str, expect: &[&str], found: &Token, at: (u64, u64, usize)) {
     notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(

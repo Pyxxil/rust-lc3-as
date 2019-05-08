@@ -1,10 +1,8 @@
-use token::tokens::traits::*;
-
-use token::tokens::{expected, too_few_operands};
-
-use token::Token;
-
 use std::collections::VecDeque;
+
+use token::tokens::traits::*;
+use token::tokens::{expected, too_few_operands};
+use token::Token;
 
 token!(Jsrr, 1);
 
@@ -33,12 +31,12 @@ impl Assemble for Jsrr {
 }
 
 impl Requirements for Jsrr {
-    fn memory_requirement(&self) -> u16 {
-        1
-    }
-
     fn require_range(&self) -> (u64, u64) {
         (1, 1)
+    }
+
+    fn memory_requirement(&self) -> u16 {
+        1
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {

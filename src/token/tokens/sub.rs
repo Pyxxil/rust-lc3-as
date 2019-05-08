@@ -1,10 +1,8 @@
-use token::tokens::traits::*;
-
-use token::tokens::*;
+use std::collections::VecDeque;
 
 use token::r#type::Token;
-
-use std::collections::VecDeque;
+use token::tokens::traits::*;
+use token::tokens::*;
 
 token!(Sub, 3);
 
@@ -17,12 +15,12 @@ impl Assemble for Sub {
 }
 
 impl Requirements for Sub {
-    fn memory_requirement(&self) -> u16 {
-        0
-    }
-
     fn require_range(&self) -> (u64, u64) {
         (2, 3)
+    }
+
+    fn memory_requirement(&self) -> u16 {
+        0
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {

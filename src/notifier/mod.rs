@@ -1,7 +1,9 @@
-pub mod diagnostic;
+use std::sync::Mutex;
+
 pub use self::diagnostic::{Colour, NoColour};
 pub use self::diagnostic::{DiagType, Diagnostic, Highlight, Note, Pointer, Type};
-use std::sync::Mutex;
+
+pub mod diagnostic;
 
 trait Notify {
     fn notify(&self, diagnostic: &Diagnostic);

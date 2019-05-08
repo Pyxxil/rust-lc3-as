@@ -1,9 +1,10 @@
+extern crate clap;
 extern crate lc3lib;
+
+use clap::{App, Arg};
+
 use lc3lib::assembler::Assembler;
 use lc3lib::notifier;
-
-extern crate clap;
-use clap::{App, Arg};
 
 fn main() {
     let args = App::new("LC3AS")

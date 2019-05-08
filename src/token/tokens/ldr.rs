@@ -1,10 +1,8 @@
-use token::tokens::traits::*;
-
-use token::tokens::*;
-
-use token::Token;
-
 use std::collections::VecDeque;
+
+use token::tokens::traits::*;
+use token::tokens::*;
+use token::Token;
 
 token!(Ldr, 3);
 
@@ -45,12 +43,12 @@ impl Assemble for Ldr {
 }
 
 impl Requirements for Ldr {
-    fn memory_requirement(&self) -> u16 {
-        1
-    }
-
     fn require_range(&self) -> (u64, u64) {
         (3, 3)
+    }
+
+    fn memory_requirement(&self) -> u16 {
+        1
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {

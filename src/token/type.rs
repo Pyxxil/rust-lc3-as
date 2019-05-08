@@ -1,9 +1,8 @@
-use token::tokens::traits::*;
-use token::tokens::*;
-
+pub use std::collections::VecDeque;
 use std::fmt;
 
-pub use std::collections::VecDeque;
+use token::tokens::traits::*;
+use token::tokens::*;
 
 #[derive(PartialEq, Clone)]
 pub enum Token {

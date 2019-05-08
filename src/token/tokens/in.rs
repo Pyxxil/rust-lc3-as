@@ -1,8 +1,7 @@
-use token::tokens::traits::*;
-
-use token::Token;
-
 use std::collections::VecDeque;
+
+use token::tokens::traits::*;
+use token::Token;
 
 token!(In);
 
@@ -22,12 +21,12 @@ impl Assemble for In {
 }
 
 impl Requirements for In {
-    fn memory_requirement(&self) -> u16 {
-        1
-    }
-
     fn require_range(&self) -> (u64, u64) {
         (0, 0)
+    }
+
+    fn memory_requirement(&self) -> u16 {
+        1
     }
 
     // As IN takes no operands, do nothing here.

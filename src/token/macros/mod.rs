@@ -7,7 +7,7 @@ macro_rules! fmt {
     };
 }
 
-macro_rules! file_of{
+macro_rules! file_of {
     ( $self:expr, $( $token:path ),* ) => {
         match *$self {
             $( $token(ref token) => token.file(), )+
@@ -16,7 +16,7 @@ macro_rules! file_of{
     }
 }
 
-macro_rules! memory_requirement_of{
+macro_rules! memory_requirement_of {
     ( $self:expr, $( $token:path ),* ) => {
         match *$self {
             $( $token(ref token) => token.memory_requirement(), )+
