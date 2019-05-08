@@ -29,13 +29,13 @@ impl Assemble for Add {
 
         let source_two = if let Some(token) = self.operands.last() {
             match token {
-                Token::Register(register) => register.register as i16,
+                Token::Register(register) => register.register,
                 Token::Immediate(imm) => 0x20 | (imm.value & 0x1F),
                 _ => unreachable!(),
             }
         } else {
-            source_one as i16
-        } as u16;
+            source_one
+        };
 
         let instruction: u16 = 0x1000 | destination_register << 9 | source_one << 6 | source_two;
 
