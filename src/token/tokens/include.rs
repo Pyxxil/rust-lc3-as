@@ -1,8 +1,8 @@
 use std::collections::VecDeque;
 
-use token::Token;
-use token::tokens::{expected, too_few_operands};
 use token::tokens::traits::*;
+use token::tokens::{expected, too_few_operands};
+use token::Token;
 
 token!(Include, 1);
 

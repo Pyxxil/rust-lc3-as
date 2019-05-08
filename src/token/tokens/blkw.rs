@@ -1,15 +1,20 @@
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
+use token::tokens::traits::*;
+use token::tokens::{expected, too_few_operands};
 use token::Symbol;
 use token::Token;
-use token::tokens::{expected, too_few_operands};
-use token::tokens::traits::*;
 
 token!(Blkw, 2);
 
 impl Assemble for Blkw {
-    fn assembled(self, program_counter: &mut i16, symbols: &HashMap<String, Symbol>, symbol: &String) -> Vec<(u16, String)> {
+    fn assembled(
+        self,
+        program_counter: &mut i16,
+        symbols: &HashMap<String, Symbol>,
+        symbol: &String,
+    ) -> Vec<(u16, String)> {
         let value = match self.operands.last().unwrap() {
             Token::Immediate(imm) => imm.value as u16,
             Token::Label(label) => {
@@ -18,17 +23,15 @@ impl Assemble for Blkw {
                 } else {
                     0
                 }
-            },
+            }
             _ => unreachable!(),
         };
 
         let mut assembled = vec![(
-                value, format!(
+            value,
+            format!(
                 "({0:4X}) {1:04X} {1:016b} ({2: >4}) {3: <20} .FILL #{1}",
-                *program_counter,
-                value as i16,
-                self.line,
-                symbol,
+                *program_counter, value as i16, self.line, symbol,
             ),
         )];
 
@@ -43,10 +46,9 @@ impl Assemble for Blkw {
                 value,
                 format!(
                     "({0:4X}) {1:04X} {1:016b} ({2: >4})                      .FILL #{1}",
-                    *program_counter,
-                    value as i16,
-                    self.line,
-                )));
+                    *program_counter, value as i16, self.line,
+                ),
+            ));
         }
 
         *program_counter += 1;

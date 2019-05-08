@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 use std::fs::File;
+use std::io::prelude::*;
 use std::io::BufReader;
 use std::io::ErrorKind;
-use std::io::prelude::*;
 use std::iter::Iterator;
 use std::sync::Mutex;
 
 use lexer::tokenizer::Tokenizer;
 use notifier;
-use notifier::{Diagnostic, DiagType, Note};
+use notifier::{DiagType, Diagnostic, Note};
 use token::Token;
 
 pub mod tokenizer;

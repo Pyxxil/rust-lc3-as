@@ -1,15 +1,20 @@
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
+use token::tokens::traits::*;
+use token::tokens::*;
 use token::Symbol;
 use token::Token;
-use token::tokens::*;
-use token::tokens::traits::*;
 
 token!(Str, 3);
 
 impl Assemble for Str {
-    fn assembled(mut self, program_counter: &mut i16, _symbols: &HashMap<String, Symbol>, symbol: &String) -> Vec<(u16, String)> {
+    fn assembled(
+        mut self,
+        program_counter: &mut i16,
+        _symbols: &HashMap<String, Symbol>,
+        symbol: &String,
+    ) -> Vec<(u16, String)> {
         *program_counter += 1;
 
         let destination_register = match self.operands.remove(0) {

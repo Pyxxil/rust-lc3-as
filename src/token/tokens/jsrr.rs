@@ -1,15 +1,20 @@
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
+use token::tokens::traits::*;
+use token::tokens::{expected, too_few_operands};
 use token::Symbol;
 use token::Token;
-use token::tokens::{expected, too_few_operands};
-use token::tokens::traits::*;
 
 token!(Jsrr, 1);
 
 impl Assemble for Jsrr {
-    fn assembled(mut self, program_counter: &mut i16, symbols: &HashMap<String, Symbol>, symbol: &String) -> Vec<(u16, String)> {
+    fn assembled(
+        mut self,
+        program_counter: &mut i16,
+        symbols: &HashMap<String, Symbol>,
+        symbol: &String,
+    ) -> Vec<(u16, String)> {
         *program_counter += 1;
 
         let register = match self.operands.first().unwrap() {

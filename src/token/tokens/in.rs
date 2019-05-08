@@ -1,14 +1,19 @@
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
+use token::tokens::traits::*;
 use token::Symbol;
 use token::Token;
-use token::tokens::traits::*;
 
 token!(In);
 
 impl Assemble for In {
-    fn assembled(self, program_counter: &mut i16, _symbols: &HashMap<String, Symbol>, symbol: &String) -> Vec<(u16, String)> {
+    fn assembled(
+        self,
+        program_counter: &mut i16,
+        _symbols: &HashMap<String, Symbol>,
+        symbol: &String,
+    ) -> Vec<(u16, String)> {
         *program_counter += 1;
 
         vec![(

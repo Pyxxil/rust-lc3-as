@@ -1,15 +1,20 @@
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
+use token::tokens::traits::*;
+use token::tokens::{expected, too_few_operands};
 use token::Symbol;
 use token::Token;
-use token::tokens::{expected, too_few_operands};
-use token::tokens::traits::*;
 
 token!(And, 3);
 
 impl Assemble for And {
-    fn assembled(mut self, program_counter: &mut i16, symbols: &HashMap<String, Symbol>, symbol: &String) -> Vec<(u16, String)> {
+    fn assembled(
+        mut self,
+        program_counter: &mut i16,
+        symbols: &HashMap<String, Symbol>,
+        symbol: &String,
+    ) -> Vec<(u16, String)> {
         *program_counter += 1;
 
         let destination_register = match self.operands.remove(0) {
@@ -29,13 +34,13 @@ impl Assemble for And {
 
         let source_two = if let Some(token) = self.operands.last() {
             match token {
-                Token::Register(register) => register.register as i16,
-                Token::Immediate(imm) => 0x20 | (imm.value & 0x1F),
+                Token::Register(register) => register.register,
+                Token::Immediate(imm) => (0x20 | (imm.value & 0x1F)) as u16,
                 _ => unreachable!(),
             }
         } else {
-            source_one as i16
-        } as u16;
+            source_one
+        };
 
         let instruction: u16 = 0x5000 | destination_register << 9 | source_one << 6 | source_two;
 

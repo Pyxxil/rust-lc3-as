@@ -1,7 +1,7 @@
 use std::sync::Mutex;
 
 pub use self::diagnostic::{Colour, NoColour};
-pub use self::diagnostic::{Diagnostic, DiagType, Highlight, Note, Pointer, Type};
+pub use self::diagnostic::{DiagType, Diagnostic, Highlight, Note, Pointer, Type};
 
 pub mod diagnostic;
 

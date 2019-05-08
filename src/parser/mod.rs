@@ -2,10 +2,10 @@ use std::collections::HashMap;
 use std::collections::VecDeque;
 
 use notifier;
-use notifier::{Diagnostic, DiagType, Highlight};
+use notifier::{DiagType, Diagnostic, Highlight};
+use token::traits::Requirements;
 use token::Symbol;
 use token::Token;
-use token::traits::Requirements;
 
 #[derive(Debug)]
 pub struct Parser {
@@ -62,7 +62,7 @@ impl Parser {
         notifier::error_count() == 0
     }
 
-    pub fn tokens_and_symbols(self) -> (Vec<Token>, HashMap<String, Symbol>)  {
+    pub fn tokens_and_symbols(self) -> (Vec<Token>, HashMap<String, Symbol>) {
         (self.tokens, self.symbols)
     }
 }

@@ -1,15 +1,20 @@
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
+use token::tokens::traits::*;
+use token::tokens::{expected, too_few_operands};
 use token::Symbol;
 use token::Token;
-use token::tokens::{expected, too_few_operands};
-use token::tokens::traits::*;
 
 token!(Orig, 1, starting_address: u16);
 
 impl Assemble for Orig {
-    fn assembled(mut self, program_counter: &mut i16, _symbols: &HashMap<String, Symbol>, symbol: &String) -> Vec<(u16, String)> {
+    fn assembled(
+        mut self,
+        program_counter: &mut i16,
+        _symbols: &HashMap<String, Symbol>,
+        symbol: &String,
+    ) -> Vec<(u16, String)> {
         let instruction = match self.operands.remove(0) {
             Token::Immediate(imm) => imm.value,
             _ => unreachable!(),
@@ -36,7 +41,7 @@ impl Requirements for Orig {
         if !self.operands.is_empty() {
             match self.operands.first().unwrap() {
                 Token::Immediate(imm) => imm.value as u16,
-               _ => unreachable!(),
+                _ => unreachable!(),
             }
         } else {
             0

@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use lexer::Lexer;
 use parser::Parser;
 use token;
-use token::Symbol;
 use token::tokens::traits::Assemble;
+use token::Symbol;
 
 pub struct Assembler {
     file: String,
@@ -39,13 +39,15 @@ impl Assembler {
         parser.tokens_and_symbols()
     }
 
-    fn do_second_pass(&self, tokens: Vec<token::Token>, symbols: HashMap<String, Symbol>) -> Vec<(u16, String)> {
+    fn do_second_pass(
+        &self,
+        tokens: Vec<token::Token>,
+        symbols: HashMap<String, Symbol>,
+    ) -> Vec<(u16, String)> {
         let mut program_counter = 0;
         tokens
             .into_iter()
-            .flat_map(|token| {
-                token.assembled(&mut program_counter, &symbols, &String::new())
-            })
+            .flat_map(|token| token.assembled(&mut program_counter, &symbols, &String::new()))
             .collect()
     }
 }

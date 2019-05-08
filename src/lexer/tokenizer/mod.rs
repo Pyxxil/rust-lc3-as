@@ -5,9 +5,9 @@ use std::str::Chars;
 
 use lexer::add_line;
 use notifier;
-use notifier::{Diagnostic, DiagType, Highlight, Pointer};
-use token::Token;
+use notifier::{DiagType, Diagnostic, Highlight, Pointer};
 use token::tokens::*;
+use token::Token;
 
 macro_rules! err {
     ($tokenizer:expr, $diagnostic:expr) => {

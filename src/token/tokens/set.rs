@@ -1,15 +1,20 @@
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
+use token::tokens::traits::*;
+use token::tokens::{expected, too_few_operands};
 use token::Symbol;
 use token::Token;
-use token::tokens::{expected, too_few_operands};
-use token::tokens::traits::*;
 
 token!(Set, 2);
 
 impl Assemble for Set {
-    fn assembled(mut self, program_counter: &mut i16, symbols: &HashMap<String, Symbol>, symbol: &String) -> Vec<(u16, String)> {
+    fn assembled(
+        mut self,
+        program_counter: &mut i16,
+        symbols: &HashMap<String, Symbol>,
+        symbol: &String,
+    ) -> Vec<(u16, String)> {
         *program_counter += 1;
 
         Vec::new()
@@ -31,7 +36,17 @@ impl Requirements for Set {
         }
 
         if let Some(token) = tokens.front() {
-            expect!(self, tokens, token, Token::Register, "Register", Token::Immediate, "Immediate", Token::Label, "Label");
+            expect!(
+                self,
+                tokens,
+                token,
+                Token::Register,
+                "Register",
+                Token::Immediate,
+                "Immediate",
+                Token::Label,
+                "Label"
+            );
         }
 
         operands_check!(self);

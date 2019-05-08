@@ -1,15 +1,20 @@
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::Symbol;
-use token::Token;
 use token::tokens::expected;
 use token::tokens::traits::*;
+use token::Symbol;
+use token::Token;
 
 token!(Stringz, 1);
 
 impl Assemble for Stringz {
-    fn assembled(mut self, program_counter: &mut i16, symbols: &HashMap<String, Symbol>, symbol: &String) -> Vec<(u16, String)> {
+    fn assembled(
+        mut self,
+        program_counter: &mut i16,
+        symbols: &HashMap<String, Symbol>,
+        symbol: &String,
+    ) -> Vec<(u16, String)> {
         *program_counter += self.memory_requirement() as i16;
         Vec::new()
     }
