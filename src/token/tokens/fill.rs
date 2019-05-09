@@ -14,7 +14,7 @@ impl Assemble for Fill {
         program_counter: &mut i16,
         symbols: &HashMap<String, Symbol>,
         symbol: &str,
-    ) -> Vec<( u16, String)> {
+    ) -> Vec<(u16, String)> {
         *program_counter += 1;
 
         let value = match self.operands.first().unwrap() {
