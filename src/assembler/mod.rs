@@ -44,10 +44,20 @@ impl Assembler {
         tokens: Vec<token::Token>,
         symbols: HashMap<String, Symbol>,
     ) -> Vec<(u16, String)> {
-        let mut program_counter = 0;
+        let mut program_counter: i16 = 0;
         tokens
             .into_iter()
-            .flat_map(|token| token.assembled(&mut program_counter, &symbols, &String::new()))
+            .flat_map(|token| {
+                let symbol = if let Some(symbol) = symbols
+                    .iter()
+                    .find(|(_, sym)| sym.address() == program_counter as u16)
+                {
+                    symbol.1.symbol()
+                } else {
+                    ""
+                };
+                token.assembled(&mut program_counter, &symbols, symbol)
+            })
             .collect()
     }
 }

@@ -13,11 +13,35 @@ impl Assemble for Jsr {
         mut self,
         program_counter: &mut i16,
         symbols: &HashMap<String, Symbol>,
-        symbol: &String,
+        symbol: &str,
     ) -> Vec<(u16, String)> {
         *program_counter += 1;
 
-        Vec::new()
+        let value = match self.operands.first().unwrap() {
+            Token::Immediate(imm) => imm.value,
+            Token::Label(label) => {
+                if let Some(symbol) = symbols.get(label.token()) {
+                    symbol.address() as i16 - *program_counter
+                } else {
+                    0
+                }
+            }
+            _ => unreachable!(),
+        } as u16;
+
+        let instruction = 0x4800 | value & 0x7FF;
+
+        vec![(
+            instruction,
+            format!(
+                "({0:4X}) {1:04X} {1:016b} ({2: >4}) {3: <20} JSR #{4}",
+                *program_counter - 1,
+                instruction,
+                self.line,
+                symbol,
+                value as i16
+            ),
+        )]
     }
 }
 

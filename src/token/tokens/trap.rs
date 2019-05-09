@@ -13,7 +13,7 @@ impl Assemble for Trap {
         mut self,
         program_counter: &mut i16,
         symbols: &HashMap<String, Symbol>,
-        symbol: &String,
+        symbol: &str,
     ) -> Vec<(u16, String)> {
         *program_counter += 1;
 

@@ -10,14 +10,14 @@ token!(Br, 1, n: bool, z: bool, p: bool);
 
 impl Assemble for Br {
     fn assembled(
-        mut self,
+        self,
         program_counter: &mut i16,
         symbols: &HashMap<String, Symbol>,
-        symbol: &String,
+        symbol: &str,
     ) -> Vec<(u16, String)> {
         *program_counter += 1;
 
-        let value = match self.operands.last().unwrap() {
+        let value = match self.operands.first().unwrap() {
             Token::Immediate(imm) => imm.value,
             Token::Label(label) => {
                 if let Some(symbol) = symbols.get(label.token()) {
@@ -29,11 +29,8 @@ impl Assemble for Br {
             _ => unreachable!(),
         } as u16;
 
-        let instruction = 0x0000
-            | (self.n as u16) << 11
-            | (self.z as u16) << 10
-            | (self.p as u16) << 9
-            | value & 0x1FF;
+        let instruction =
+            (self.n as u16) << 11 | (self.z as u16) << 10 | (self.p as u16) << 9 | value & 0x1FF;
 
         vec![(
             instruction,

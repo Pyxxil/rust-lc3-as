@@ -13,7 +13,7 @@ impl Assemble for Stringz {
         mut self,
         program_counter: &mut i16,
         symbols: &HashMap<String, Symbol>,
-        symbol: &String,
+        symbol: &str,
     ) -> Vec<(u16, String)> {
         *program_counter += self.memory_requirement() as i16;
         Vec::new()

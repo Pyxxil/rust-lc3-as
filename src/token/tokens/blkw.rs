@@ -13,7 +13,7 @@ impl Assemble for Blkw {
         self,
         program_counter: &mut i16,
         symbols: &HashMap<String, Symbol>,
-        symbol: &String,
+        symbol: &str,
     ) -> Vec<(u16, String)> {
         let value = match self.operands.last().unwrap() {
             Token::Immediate(imm) => imm.value as u16,
@@ -40,7 +40,7 @@ impl Assemble for Blkw {
             _ => unreachable!(),
         } as usize;
 
-        for item in 1..count {
+        (1..count).for_each(|_| {
             *program_counter += 1;
             assembled.push((
                 value,
@@ -49,7 +49,7 @@ impl Assemble for Blkw {
                     *program_counter, value as i16, self.line,
                 ),
             ));
-        }
+        });
 
         *program_counter += 1;
 

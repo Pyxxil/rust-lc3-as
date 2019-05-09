@@ -243,7 +243,7 @@ impl Assemble for Token {
         self,
         program_counter: &mut i16,
         symbols: &HashMap<String, Symbol>,
-        symbol: &String,
+        symbol: &str,
     ) -> Vec<(u16, String)> {
         assembled!(
             self,

@@ -14,7 +14,7 @@ impl Assemble for Lshift {
         mut self,
         program_counter: &mut i16,
         symbols: &HashMap<String, Symbol>,
-        symbol: &String,
+        symbol: &str,
     ) -> Vec<(u16, String)> {
         let register = match self.operands.remove(0) {
             Token::Register(register) => register.register,
