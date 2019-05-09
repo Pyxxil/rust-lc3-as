@@ -10,9 +10,9 @@ token!(Trap, 1);
 
 impl Assemble for Trap {
     fn assembled(
-        mut self,
+        self,
         program_counter: &mut i16,
-        symbols: &HashMap<String, Symbol>,
+        _symbols: &HashMap<String, Symbol>,
         symbol: &str,
     ) -> Vec<(u16, String)> {
         *program_counter += 1;
@@ -26,11 +26,12 @@ impl Assemble for Trap {
         vec![(
             instruction,
             format!(
-                "({0:4X}) {1:04X} {1:016b} ({2: >4}) TRAP 0x{3:02X}",
+                "({0:4X}) {1:04X} {1:016b} ({2: >4}) {3: <20} TRAP 0x{4:02X}",
                 *program_counter - 1,
                 instruction,
+                self.line,
+                symbol,
                 instruction & 0xFF,
-                self.line
             ),
         )]
     }

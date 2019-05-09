@@ -10,9 +10,9 @@ token!(Jmp, 1);
 
 impl Assemble for Jmp {
     fn assembled(
-        mut self,
+        self,
         program_counter: &mut i16,
-        symbols: &HashMap<String, Symbol>,
+        _symbols: &HashMap<String, Symbol>,
         symbol: &str,
     ) -> Vec<(u16, String)> {
         *program_counter += 1;
@@ -27,10 +27,11 @@ impl Assemble for Jmp {
         vec![(
             instruction,
             format!(
-                "({0:4X}) {1:04X} {1:016b} ({2: >4}) JMP R{3}",
+                "({0:4X}) {1:04X} {1:016b} ({2: >4}) {3: <20} JMP R{4}",
                 *program_counter - 1,
                 instruction,
                 self.line,
+                symbol,
                 register,
             ),
         )]

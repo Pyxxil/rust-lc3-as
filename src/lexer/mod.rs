@@ -23,9 +23,9 @@ pub fn add_file(file: String) {
     guard.add_file(file);
 }
 
-pub fn add_line(file: String, line: String) {
+pub fn add_line(file: &str, line: String) {
     let mut guard = FILE_CONTROLLER.lock().unwrap();
-    guard.add_line(file, line);
+    guard.add_line(&file, line);
 }
 
 pub fn get_line(file: &str, line: u64) -> String {
@@ -38,8 +38,8 @@ impl FileController {
         self.files.insert(file, Vec::new());
     }
 
-    pub fn add_line(&mut self, file: String, line: String) {
-        self.files.get_mut(&file).unwrap().push(line);
+    pub fn add_line(&mut self, file: &str, line: String) {
+        self.files.get_mut(file).unwrap().push(line);
     }
 
     pub fn get_line(&self, file: &str, line: u64) -> String {

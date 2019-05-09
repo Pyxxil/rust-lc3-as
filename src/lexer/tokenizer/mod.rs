@@ -30,7 +30,7 @@ pub struct Tokenizer<'a> {
 
 impl<'a> Tokenizer<'a> {
     pub fn new(file: &'a str, line: &'a str, line_number: u64) -> Tokenizer<'a> {
-        add_line(file.to_string(), line.to_string());
+        add_line(file, line.to_string());
         Tokenizer {
             line: line.chars().peekable(),
             column: 1,

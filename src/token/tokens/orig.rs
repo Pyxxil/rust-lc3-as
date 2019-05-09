@@ -38,13 +38,13 @@ impl Requirements for Orig {
     }
 
     fn memory_requirement(&self) -> u16 {
-        if !self.operands.is_empty() {
+        if self.operands.is_empty() {
+            0
+        } else {
             match self.operands.first().unwrap() {
                 Token::Immediate(imm) => imm.value as u16,
                 _ => unreachable!(),
             }
-        } else {
-            0
         }
     }
 

@@ -10,7 +10,7 @@ token!(Fill, 1);
 
 impl Assemble for Fill {
     fn assembled(
-        mut self,
+        self,
         program_counter: &mut i16,
         symbols: &HashMap<String, Symbol>,
         symbol: &str,

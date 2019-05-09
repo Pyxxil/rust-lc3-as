@@ -10,14 +10,52 @@ token!(Neg, 2);
 
 impl Assemble for Neg {
     fn assembled(
-        mut self,
+        self,
         program_counter: &mut i16,
-        symbols: &HashMap<String, Symbol>,
+        _symbols: &HashMap<String, Symbol>,
         symbol: &str,
     ) -> Vec<(u16, String)> {
         *program_counter += self.memory_requirement() as i16;
 
-        Vec::new()
+        let destination_register = match self.operands.first().unwrap() {
+            Token::Register(register) => register.register,
+            _ => unreachable!(),
+        };
+
+        let source_register = match self.operands.last().unwrap() {
+            Token::Register(register) => register.register,
+            _ => unreachable!(),
+        };
+
+        let not_instruction = 0x903F | destination_register << 9 | source_register << 6;
+        let add_instruction = 0x1021 | destination_register << 9 | source_register << 6;
+
+        vec![
+            (
+                not_instruction,
+                format!(
+                    "({0:0>4X}) {1:04X} {1:0>16b} ({2: >4}) {3: <20} NOT R{4} R{5}",
+                    *program_counter - 1,
+                    not_instruction,
+                    self.line,
+                    symbol,
+                    destination_register,
+                    source_register,
+                ),
+            ),
+            (
+                add_instruction,
+                format!(
+                    "({0:0>4X}) {1:04X} {1:0>16b} ({2: >4}) {3: <20} ADD R{4} R{5} #1",
+                    *program_counter - 1,
+                    add_instruction,
+                    self.line,
+                    symbol,
+                    destination_register,
+                    source_register,
+                ),
+            ),
+        ]
     }
 }
 

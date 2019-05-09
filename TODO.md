@@ -18,3 +18,4 @@
     - STI [ ]
     - LDI [ ]
     - LEA [ ]
+    - SET (not being found only) [ ]

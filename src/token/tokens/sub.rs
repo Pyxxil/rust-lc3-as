@@ -10,10 +10,10 @@ token!(Sub, 3);
 
 impl Assemble for Sub {
     fn assembled(
-        mut self,
+        self,
         program_counter: &mut i16,
-        symbols: &HashMap<String, Symbol>,
-        symbol: &str,
+        _symbols: &HashMap<String, Symbol>,
+        _symbol: &str,
     ) -> Vec<(u16, String)> {
         *program_counter += 1;
 

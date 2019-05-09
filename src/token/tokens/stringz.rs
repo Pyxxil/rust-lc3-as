@@ -10,13 +10,72 @@ token!(Stringz, 1);
 
 impl Assemble for Stringz {
     fn assembled(
-        mut self,
+        self,
         program_counter: &mut i16,
-        symbols: &HashMap<String, Symbol>,
+        _symbols: &HashMap<String, Symbol>,
         symbol: &str,
     ) -> Vec<(u16, String)> {
-        *program_counter += self.memory_requirement() as i16;
-        Vec::new()
+        let mut assembled = Vec::new();
+
+        match self.operands.first().unwrap() {
+            Token::String(string) => {
+                if let Some(character) = string.token().chars().next() {
+                    assembled.push((
+                        character as u16,
+                        format!(
+                            "({0:4X}) {1:04X} {1:016b} ({2: >4}) {3: <20} .FILL #{1}",
+                            *program_counter, character as u16, self.line, symbol
+                        ),
+                    ));
+                }
+                string.token().chars().skip(1).for_each(|c| {
+                    *program_counter += 1;
+                    assembled.push((
+                        c as u16,
+                        format!(
+                            "({0:4X}) {1:04X} {1:016b} ({2: >4})                      .FILL #{1}",
+                            *program_counter, c as u16, self.line
+                        ),
+                    ));
+                });
+                *program_counter += 1;
+                assembled.push((
+                    0,
+                    format!(
+                        "({0:4X}) 0000 0000000000000000 ({1: >4})                      .FILL #0",
+                        *program_counter, self.line
+                    ),
+                ))
+            }
+            _ => unreachable!(),
+        }
+
+        self.operands.iter().skip(1).for_each(|token| match token {
+            Token::String(string) => {
+                string.token().chars().for_each(|c| {
+                    *program_counter += 1;
+                    assembled.push((
+                        c as u16,
+                        format!(
+                            "({0:4X}) {1:04X} {1:016b} ({2: >4})                      .FILL #{1}",
+                            *program_counter, c as u16, self.line
+                        ),
+                    ))
+                });
+                assembled.push((
+                    0,
+                    format!(
+                        "({0:4X}) 0000 0000000000000000 ({1: >4})                      .FILL #0",
+                        *program_counter, self.line
+                    ),
+                ))
+            }
+            _ => unreachable!(),
+        });
+
+        *program_counter += 1;
+
+        assembled
     }
 }
 

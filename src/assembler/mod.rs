@@ -26,7 +26,7 @@ impl Assembler {
             parser.parse();
             if parser.is_okay() {
                 let (tokens, symbols) = self.do_first_pass(parser);
-                let tokens = self.do_second_pass(tokens, symbols);
+                let tokens = self.do_second_pass(tokens, &symbols);
                 println!("{:#?}", tokens);
                 return;
             }
@@ -42,7 +42,7 @@ impl Assembler {
     fn do_second_pass(
         &self,
         tokens: Vec<token::Token>,
-        symbols: HashMap<String, Symbol>,
+        symbols: &HashMap<String, Symbol>,
     ) -> Vec<(u16, String)> {
         let mut program_counter: i16 = 0;
         tokens

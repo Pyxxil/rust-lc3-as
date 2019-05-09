@@ -10,7 +10,7 @@ token!(Ld, 2);
 
 impl Assemble for Ld {
     fn assembled(
-        mut self,
+        self,
         program_counter: &mut i16,
         symbols: &HashMap<String, Symbol>,
         symbol: &str,

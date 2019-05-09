@@ -10,7 +10,7 @@ token!(Jsr, 1);
 
 impl Assemble for Jsr {
     fn assembled(
-        mut self,
+        self,
         program_counter: &mut i16,
         symbols: &HashMap<String, Symbol>,
         symbol: &str,

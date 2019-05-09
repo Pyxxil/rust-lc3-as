@@ -15,16 +15,20 @@ impl Assemble for Blkw {
         symbols: &HashMap<String, Symbol>,
         symbol: &str,
     ) -> Vec<(u16, String)> {
-        let value = match self.operands.last().unwrap() {
-            Token::Immediate(imm) => imm.value as u16,
-            Token::Label(label) => {
-                if let Some(symbol) = symbols.get(label.token()) {
-                    symbol.address()
-                } else {
-                    0
+        let value = if self.operands.len() == 1 {
+            0
+        } else {
+            match self.operands.last().unwrap() {
+                Token::Immediate(imm) => imm.value as u16,
+                Token::Label(label) => {
+                    if let Some(symbol) = symbols.get(label.token()) {
+                        symbol.address()
+                    } else {
+                        0
+                    }
                 }
+                _ => unreachable!(),
             }
-            _ => unreachable!(),
         };
 
         let mut assembled = vec![(
