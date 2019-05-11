@@ -37,6 +37,10 @@ macro_rules! token {
             pub fn file(&self) -> &String {
                 &self.file
             }
+
+            pub fn operands(&self) -> &Vec<Token> {
+                &self.operands
+            }
         }
     };
 

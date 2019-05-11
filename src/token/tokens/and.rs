@@ -80,7 +80,7 @@ impl Requirements for And {
         }
 
         if let Some(token) = tokens.front() {
-            // We want to allow ADD R1, R2[, #2] but not ADD R2, #2
+            // We want to allow AND R1, R2[, #2] but not AND R2, #2
             if self.operands.len() == 2 {
                 // This will mean the above maybe_expect! succeeded, and so we can accept an immediate value here
                 maybe_expect!(self, tokens, token, Token::Immediate, Token::Register);

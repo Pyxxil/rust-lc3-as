@@ -84,7 +84,7 @@ impl Assemble for Sub {
                     format!(
                         "({0:0>4X}) {1:04X} {1:0>16b} ({2: >4})                      ADD R{3} R{4} R{5}",
                         *program_counter - 1,
-                        add_instruction,
+                        subtract_instruction,
                         self.line,
                         destination_register,
                         source_register_one,
@@ -150,12 +150,10 @@ impl Requirements for Sub {
 
         if source_register_one == source_register_two {
             1
+        } else if destination_register != source_register_two {
+            5
         } else {
-            if destination_register != source_register_two {
-                5
-            } else {
-                3
-            }
+            3
         }
     }
 

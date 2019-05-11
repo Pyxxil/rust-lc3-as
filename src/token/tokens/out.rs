@@ -17,7 +17,7 @@ impl Assemble for Out {
         *program_counter += 1;
 
         vec![(
-            0xF022,
+            0xF021,
             format!(
                 "({:04X}) F021 1111000000100001 ({: >4}) {: <20} OUT",
                 *program_counter - 1,

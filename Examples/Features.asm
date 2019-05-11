@@ -42,7 +42,7 @@
   .SUB R1, R2, R1
   .SUB R1, R2, R3
 
-  oct     .FILL 0700     ; Octal values are also acceptable
+  oct     .FILL 0700     ; Octal values aren't accepted
   ;oct .FILL 0600 ; This should throw an error about multiple definitions
   ; of a label.
   .FILL 'A'
@@ -60,7 +60,7 @@
   .INCLUDE "include.h"
 
   JSR WARNING_THROWS
- // WARNING_THROWS:         ; All of the following should throw warnings with
+  ;WARNING_THROWS:         ; All of the following should throw warnings with
   ; --warn all
   JSR WARNING_THROWS ; Complains about an infinite loop
   JSR #0          ; Statement has no effect

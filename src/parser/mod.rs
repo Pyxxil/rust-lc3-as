@@ -7,6 +7,8 @@ use token::traits::Requirements;
 use token::Symbol;
 use token::Token;
 
+use lexer::Lexer;
+
 #[derive(Debug)]
 pub struct Parser {
     tokens: Vec<Token>,
@@ -23,7 +25,7 @@ impl Parser {
 
     pub fn parse(&mut self) {
         let mut address = 0;
-        let mut tokens = self.tokens.drain(..).collect::<VecDeque<_>>();
+        let mut tokens: VecDeque<Token> = self.tokens.drain(..).collect();
 
         while let Some(mut token) = tokens.pop_front() {
             tokens = token.consume(tokens);
@@ -46,6 +48,28 @@ impl Parser {
                         );
                     }
                 }
+                Token::Include(ref token) => match token.operands().first().unwrap() {
+                    Token::String(string) => {
+                        let file = string
+                            .file()
+                            .chars()
+                            .take(string.file().rfind(|c| c == '/').unwrap() + 1)
+                            .collect::<String>()
+                            + string.token();
+                        let mut lexer = Lexer::new(&file);
+                        lexer.lex();
+                        if lexer.is_okay() {
+                            lexer
+                                .tokens()
+                                .into_iter()
+                                .rev()
+                                .for_each(|token| tokens.push_front(token));
+                        } else {
+                            break;
+                        }
+                    }
+                    _ => unreachable!(),
+                },
                 Token::Orig(ref tok) => {
                     address = tok.memory_requirement();
                 }

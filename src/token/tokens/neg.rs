@@ -35,7 +35,7 @@ impl Assemble for Neg {
                 not_instruction,
                 format!(
                     "({0:0>4X}) {1:04X} {1:0>16b} ({2: >4}) {3: <20} NOT R{4} R{5}",
-                    *program_counter - 1,
+                    *program_counter - 2,
                     not_instruction,
                     self.line,
                     symbol,
@@ -64,7 +64,7 @@ impl Requirements for Neg {
     }
 
     fn memory_requirement(&self) -> u16 {
-        self.operands.len() as u16
+        2
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
