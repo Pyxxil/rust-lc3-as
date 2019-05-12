@@ -402,7 +402,7 @@ impl<'a> Tokenizer<'a> {
         let mut terminated = false;
         let mut previous_character = '\0';
 
-        let _ = self.next(); // We can skip the first character, as it's the single quote
+        self.next(); // We can skip the first character, as it's the single quote
 
         while let Some(ch) = self.next() {
             if previous_character == '\\' {
@@ -580,7 +580,7 @@ impl<'a> Tokenizer<'a> {
     }
 
     fn read_word(&mut self) -> String {
-        let mut word = String::with_capacity(10);
+        let mut word = String::with_capacity(20);
 
         while let Some(&ch) = self.peek() {
             if Self::is_terminator_character(ch) {
@@ -680,18 +680,9 @@ impl<'a> Tokenizer<'a> {
         if let Some(&c) = self.peek() {
             match c {
                 '/' => {
-                    let _ = self.next();
-                    if let Some(ch) = self.next() {
-                        if let '/' = ch {
-                        } else {
-                            warn!(Diagnostic::Pointer(Pointer::new(
-                                DiagType::Warning,
-                                token_start,
-                                self.line_number,
-                                "Expected another '/' here. Treating it as a comment anyways"
-                                    .to_owned(),
-                            )));
-                        }
+                    self.next(); // Skip this character
+                    if let Some('/') = self.next() {
+                        Some(Token::EOL) // Line comment
                     } else {
                         warn!(Diagnostic::Pointer(Pointer::new(
                             DiagType::Warning,
@@ -700,17 +691,17 @@ impl<'a> Tokenizer<'a> {
                             "Expected another '/' here. Treating it as a comment anyways"
                                 .to_owned(),
                         )));
+                        Some(Token::EOL)
                     }
-                    return Some(Token::EOL);
                 }
-                ';' => Some(Token::EOL), // Comment
+                ';' => Some(Token::EOL), // Line comment
                 ':' | ',' => {
                     self.next();
                     return self.next_token();
                 }
                 '"' => return self.tokenize_string_literal(),
                 '\'' => return self.tokenize_character_literal(),
-                '#' => {
+                '#' | '-' => {
                     let token = self.read_word();
                     if Self::is_valid_decimal(&token) {
                         return Some(Token::Immediate(immediate::Immediate::from_decimal(
@@ -732,30 +723,6 @@ impl<'a> Tokenizer<'a> {
                         ))
                     );
                     return self.next_token();
-                }
-                '-' => {
-                    let token = self.read_word();
-                    if Self::is_valid_decimal(&token) {
-                        return Some(Token::Immediate(immediate::Immediate::from_decimal(
-                            token,
-                            self.file.to_string(),
-                            token_start,
-                            self.line_number,
-                        )));
-                    } else {
-                        err!(
-                            self,
-                            Diagnostic::Highlight(Highlight::new(
-                                DiagType::Error,
-                                self.file.to_string(),
-                                token_start,
-                                self.line_number,
-                                token.len(),
-                                format!("Invalid token '{}'", token),
-                            ))
-                        );
-                        return None;
-                    }
                 }
                 '.' => {
                     let token = self.read_word();
