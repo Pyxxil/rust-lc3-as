@@ -30,7 +30,7 @@ impl Assemble for Not {
             None => destination_register,
         };
 
-        let instruction = 0x901F | destination_register << 9 | source_register << 6;
+        let instruction = 0x903F | destination_register << 9 | source_register << 6;
 
         vec![(
             instruction,

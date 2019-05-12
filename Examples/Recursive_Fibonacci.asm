@@ -30,8 +30,7 @@ OUT_PROMPT:
         PUTS                            ; Put it to the display.
 
         ; Initialise Registers for the first part of the program.
-        AND R5, R5, #0                  ; Reset R5.
-        ADD R5, R5, #10                 ; Set R5 to ten, its our character counter.
+        .SET R5, #10                    ; Set R5 to ten, its our character counter.
         LD R1, NUMBER                   ; Load the number into R1.
         JSR CLEAR_FLAG                  ; Clear any flags added.
 
@@ -46,16 +45,12 @@ GET_INPUT:
 
         ; Compare input character against 9.
         LD R3, NINE                     ; Load the value in NINE into R3.
-        NOT R3, R3                      ; Start two's compliment.
-        ADD R3, R3, #1
-        ADD R3, R0, R3                  ; Compare ascii values.
+        .SUB R3, R0, R3                 ; Check that R0 is < '9'
         BRp FLAG_THAT                   ; If the character's ascii value is greater
                                         ; than 9's, flag it.
         ; Compare input character against 0.
         LD R3, ZERO                     ; Load the value of ZER0 into R3.
-        NOT R3, R3                      ; Negate R3.
-        ADD R3, R3, #1
-        ADD R3, R3, R0                  ; Compare the ascii values.
+        .SUB R3, R0, R3                 ; Check that R0 > '0'
         BRn FLAG_THAT                   ; If the character's ascii value is less than 0's,
                                         ; flag it.
         ; So, the character is a digit. Update the number.
@@ -64,7 +59,7 @@ GET_INPUT:
                                         ; pass it.
         BRz SET_TO                      ; If this is the first character, then set the
                                         ; count to this number.
-        BRnzp MULTIPLY_BY_TEN           ; Always multiply the current number by ten if
+        BR MULTIPLY_BY_TEN              ; Always multiply the current number by ten if
                                         ; it doesn't get updated by the above.
 
 ; The user entered too many characters, so print a prompt telling them so, and go back
@@ -87,17 +82,16 @@ DECREMENT_INPUT_COUNTER:
 ; Set the number to the input.
 SET_TO:
         ADD R1, R3, #0                  ; Set the number to the current input.
-        BRnzp DECREMENT_INPUT_COUNTER
+        BR DECREMENT_INPUT_COUNTER
 
 
 ; Multiply the number by 10
 MULTIPLY_BY_TEN:
         JSR CHECK_FLAG                  ; Jump to check if we have flagged something,
                                         ; this will only return here if we have not flagged something.
-        ADD R4, R1, R1                  ; Store  2x R1 in R4.
-        ADD R6, R4, R4                  ; Store  4x R1 in R1.
-        ADD R6, R6, R6                  ; Store  8x R1 in R1.
-        ADD R1, R6, R4                  ; Store 10x R1 in R1.
+        ADD R4, R1, R1                  ; Store 2x R1 in R4.
+        .LSHIFT R1, 3                   ; R1 = R1 << 3
+        ADD R1, R4, R1                  ; R1 = 8xR1 + 2xR1
         ADD R1, R1, R3                  ; Add the current number.
         ADD R4, R1, #-16                ; We don't want numbers greater than 23.
         ADD R4, R4, #-7                 ; Because we can't add numbers less than -16,
@@ -122,14 +116,13 @@ CHECK_ZERO:
         ADD R6, R1, #-1                 ; Set R6 to be equal to R1 - 1.
         BRn FLAG_THAT                   ; If R6 is less than 0, then R1 must have been 0,
                                         ; so flag it.
-        BRnzp MULTIPLY_BY_TEN           ; Otherwise, multiply the current number by 10.
+        BR MULTIPLY_BY_TEN              ; Otherwise, multiply the current number by 10.
 
 
 ; Something incorrect was entered.
 FLAG_THAT:
         LEA R4, FLAG                    ; Load the address of FLAG into R4.
-        AND R6, R6, #0                  ; Reset R6.
-        ADD R6, R6, #1
+        .SET R6, #1                     ; Reset R6.
         STR R6, R4, #0                  ; Set the flag.
         BR DECREMENT_INPUT_COUNTER
 
@@ -153,7 +146,7 @@ CHECK_INPUT:
         ; Note, we don't have to check if the number is greater than 23 because
         ; we already did that in MULTIPLY_BY_TEN.
         ST R1, NUMBER                   ; Store the value of R1 into the address.
-        BRnzp INIT_LOOP                 ; Get ready to find the Nth Fibonacci number.
+        BR INIT_LOOP                    ; Get ready to find the Nth Fibonacci number.
 
 
 ; Take a number in R5 and convert each digit to ASCII to print to the display.
@@ -167,8 +160,7 @@ CONVERT_TO_ASCII:
 OUTER_LOOP:
         LDR R4, R2, #0                  ; Load the current place into R4.
         BRz END                         ; If that number is 0, we're done.
-        NOT R4, R4                      ; Set R4 for two's compliment.
-        ADD R4, R4, #1
+        .NEG R4                         ; Negate R4
 
 ; Inner loop which handles all of the subtracting
 INNER_LOOP:
@@ -176,7 +168,7 @@ INNER_LOOP:
         BRn CHECK_DIGIT                 ; and if R5 is now negative, then we've got the
                                         ; digit in R6.
         ADD R6, R6, #1                  ; Otherwise, add 1 the digit in the current place.
-        BRnzp INNER_LOOP                ; And loop again.
+        BR INNER_LOOP                   ; And loop again.
 
 ; We've found what the digit is, so lets check some things.
 CHECK_DIGIT:
@@ -197,11 +189,8 @@ OUTPUT:
 INCREMENT:
         ADD R2, R2, #1                  ; Increment the pointer to the numbers.
         AND R6, R6, #0                  ; Clear R6 so it can be used again.
-        NOT R4, R4                      ; Set R4 for two's compliment because we put the
-        ADD R4, R4, #1                  ; number into the negative, so we need to make it
-                                        ; positive again.
-        ADD R5, R5, R4                  ; Make R5 positive.
-        BRnzp OUTER_LOOP
+        .SUB R5, R5, R4                 ; Make R5 the positive value
+        BR OUTER_LOOP
 
 ; We've reached the last digit, so display it and return.
 END:
@@ -269,10 +258,9 @@ RECURSIVE_FIBONACCI:
         ADD R3, R3, #-1                 ; N = N - 2.
         JSR RECURSIVE_FIBONACCI         ; Recurse with N - 2.
 
-        ADD R0, R0, #-1                 ; Decrement stack pointer.
-        LDR R3, R0, #0                  ; Load result of Fib(N - 1).
-        ADD R0, R0, #-1                 ; Decrement stack pointer.
-        LDR R5, R0, #0                  ; Load result of Fib(N - 2).
+        LDR R3, R0, #-1                 ; Load result of Fib(N - 1).
+        LDR R5, R0, #-2                 ; Load result of Fib(N - 2).
+        ADD R0, R0, #-2                 ; Reset stack pointer.
         ADD R5, R5, R3                  ; Add the recursive results together
         BR RETURN                       ; and return.
 
@@ -306,13 +294,11 @@ LOOP:
         JSR CONVERT_TO_ASCII            ; Display the fibonacci number.
         LD R3, COUNT                    ; Load the current count into R3.
         LD R6, NUMBER                   ; Load the original input into R6.
-        NOT R6, R6                      ; Set R6 for twos compliment.
-        ADD R6, R6, #1
-        ADD R6, R6, R3                  ; Check if R3 is now equal to the input.
+        .SUB R6, R3, R6                 ; Compare input and count
         BRz FINISH                      ; If so, then finish the program.
         ADD R3, R3, #1                  ; Otherwise, add 1 to the count
         ST R3, COUNT                    ; store the new count into NUMBER
-        BRnzp LOOP                      ; and loop again.
+        BR LOOP                         ; and loop again.
 
 ; We've finished finding the fibonacci numbers, so end the program.
 FINISH: HALT
