@@ -150,10 +150,10 @@ impl Requirements for Sub {
 
         if source_register_one == source_register_two {
             1
-        } else if destination_register != source_register_two {
-            5
-        } else {
+        } else if destination_register == source_register_two {
             3
+        } else {
+            5
         }
     }
 

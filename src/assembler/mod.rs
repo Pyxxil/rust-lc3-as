@@ -29,7 +29,7 @@ impl Assembler {
             let mut parser = Parser::new(lexer.tokens());
             parser.parse();
             if parser.is_okay() {
-                let (tokens, symbols) = self.do_first_pass(parser);
+                let (tokens, symbols) = parser.tokens_and_symbols();
                 let assembled = self.do_second_pass(tokens, &symbols);
 
                 let base_file_name: String = self
@@ -53,10 +53,11 @@ impl Assembler {
                         .unwrap(),
                 );
 
-                match writeln!(sym_f, "{: <20} {}", "Symbol", "Address") {
-                    _ => {}
-                }
-                match writeln!(sym_f, "-------------------- -------") {
+                match writeln!(
+                    sym_f,
+                    "{: <20} Assembler\n-------------------- -------",
+                    "Symbol"
+                ) {
                     _ => {}
                 }
 
@@ -119,15 +120,12 @@ impl Assembler {
                         _ => {}
                     };
                 });
+
                 return;
             }
         }
 
         println!("Assembly failed for {}", self.file);
-    }
-
-    fn do_first_pass(&self, parser: Parser) -> (Vec<token::Token>, HashMap<String, Symbol>) {
-        parser.tokens_and_symbols()
     }
 
     fn do_second_pass(
