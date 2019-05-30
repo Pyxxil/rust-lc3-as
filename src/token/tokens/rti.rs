@@ -19,7 +19,7 @@ impl Assemble for Rti {
         vec![(
             0x8000,
             format!(
-                "({0:4X}) {1:04X} {1:016b} ({2: >4}) {3: <20} RTI",
+                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} RTI",
                 *program_counter - 1,
                 0x8000,
                 self.line,

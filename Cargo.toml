@@ -18,3 +18,10 @@ lazy_static = "1.*"
 
 [profile.release]
 lto = true
+
+[dev-dependencies]
+criterion = "0.2"
+
+[[bench]]
+name = "bench"
+harness = false

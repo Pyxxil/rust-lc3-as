@@ -31,7 +31,7 @@ impl Assemble for Lshift {
         let mut assembled = vec![(
             instruction,
             format!(
-                "({0:4X}) {1:04X} {1:016b} ({2: >4}) {3: <20} ADD R{4} R{4} R{4}",
+                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} ADD R{4} R{4} R{4}",
                 *program_counter, instruction, self.line, symbol, register,
             ),
         )];
@@ -43,7 +43,7 @@ impl Assemble for Lshift {
                 (
                     val,
                     format!(
-                        "({0:4X}) {1:04X} {1:016b} ({2: >4})                      ADD R{3} R{3} R{3}",
+                        "({0:04X}) {1:04X} {1:016b} ({2: >4})                      ADD R{3} R{3} R{3}",
                         *program_counter, val as i16, self.line, register,
                     ),
                 )

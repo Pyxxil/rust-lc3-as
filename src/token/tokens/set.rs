@@ -34,7 +34,7 @@ impl Assemble for Set {
                 (
                     and_instruction,
                     format!(
-                        "({0:4X}) {1:04X} {1:016b} ({2: >4}) {3: <20} AND R{4} R{4} #0",
+                        "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} AND R{4} R{4} #0",
                         *program_counter - 2,
                         and_instruction,
                         self.line,
@@ -45,7 +45,7 @@ impl Assemble for Set {
                 (
                     add_instruction,
                     format!(
-                        "({0:4X}) {1:04X} {1:016b} ({2: >4})                      ADD R{3} R{3} #{4}",
+                        "({0:04X}) {1:04X} {1:016b} ({2: >4})                      ADD R{3} R{3} #{4}",
                         *program_counter - 1,
                         add_instruction,
                         self.line,
@@ -60,7 +60,7 @@ impl Assemble for Set {
                 (
                     0x0E01,
                     format!(
-                        "({0:4X}) 0E01 0000111000000001 ({1: >4}) {2: <20} BRnzp #1",
+                        "({0:04X}) 0E01 0000111000000001 ({1: >4}) {2: <20} BRnzp #1",
                         *program_counter - 3,
                         self.line,
                         symbol
@@ -69,7 +69,7 @@ impl Assemble for Set {
                 (
                     immediate as u16,
                     format!(
-                        "({0:4X}) {1:04X} {1:016b} ({2: >4})                      .FILL #{1}",
+                        "({0:04X}) {1:04X} {1:016b} ({2: >4})                      .FILL #{1}",
                         *program_counter - 2,
                         immediate as i16,
                         self.line
@@ -78,7 +78,7 @@ impl Assemble for Set {
                 (
                     0x21FE,
                     format!(
-                        "({0:4X}) {1:04X} {1:016b} ({2: >4})                      LD R{3} #-2",
+                        "({0:04X}) {1:04X} {1:016b} ({2: >4})                      LD R{3} #-2",
                         *program_counter - 1,
                         0x21FE | register << 9,
                         self.line,

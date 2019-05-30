@@ -40,7 +40,7 @@ impl Assemble for Sub {
             vec![(
                 instruction,
                 format!(
-                    "({0:4X}) {1:04X} {1:016b} ({2: >4}) {3: <20} AND R{4} R{5} #0",
+                    "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} AND R{4} R{5} #0",
                     *program_counter - 1,
                     instruction,
                     self.line,
@@ -61,7 +61,7 @@ impl Assemble for Sub {
                 (
                     not_instruction,
                     format!(
-                        "({0:0>4X}) {1:04X} {1:0>16b} ({2: >4}) {3: <20} NOT R{4} R{4}",
+                        "({0:04X}) {1:04X} {1:0>16b} ({2: >4}) {3: <20} NOT R{4} R{4}",
                         *program_counter - 3,
                         not_instruction,
                         self.line,
@@ -72,7 +72,7 @@ impl Assemble for Sub {
                 (
                     add_instruction,
                     format!(
-                        "({0:0>4X}) {1:04X} {1:0>16b} ({2: >4})                      ADD R{3} R{3} #1",
+                        "({0:04X}) {1:04X} {1:0>16b} ({2: >4})                      ADD R{3} R{3} #1",
                         *program_counter - 2,
                         add_instruction,
                         self.line,
@@ -82,7 +82,7 @@ impl Assemble for Sub {
                 (
                     subtract_instruction,
                     format!(
-                        "({0:0>4X}) {1:04X} {1:0>16b} ({2: >4})                      ADD R{3} R{4} R{5}",
+                        "({0:04X}) {1:04X} {1:0>16b} ({2: >4})                      ADD R{3} R{4} R{5}",
                         *program_counter - 1,
                         subtract_instruction,
                         self.line,
@@ -98,7 +98,7 @@ impl Assemble for Sub {
                 assembled.push((
                     not_instruction,
                     format!(
-                        "({0:0>4X}) {1:04X} {1:0>16b} ({2: >4})                      NOT R{3} R{3}",
+                        "({0:04X}) {1:04X} {1:0>16b} ({2: >4})                      NOT R{3} R{3}",
                         *program_counter - 2,
                         not_instruction,
                         self.line,
@@ -109,7 +109,7 @@ impl Assemble for Sub {
                 (
                     add_instruction,
                     format!(
-                        "({0:0>4X}) {1:04X} {1:0>16b} ({2: >4})                      ADD R{3} R{3} #1",
+                        "({0:04X}) {1:04X} {1:0>16b} ({2: >4})                      ADD R{3} R{3} #1",
                         *program_counter - 1,
                         add_instruction,
                         self.line,

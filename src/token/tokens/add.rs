@@ -47,7 +47,7 @@ impl Assemble for Add {
         vec![(
             instruction,
             format!(
-                "({0:4X}) {1:04X} {1:016b} ({2: >4}) {3: <20} ADD R{4} R{5} {6}{7}",
+                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} ADD R{4} R{5} {6}{7}",
                 *program_counter - 1,
                 instruction,
                 self.line,

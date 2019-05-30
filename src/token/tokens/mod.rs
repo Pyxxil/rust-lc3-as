@@ -45,6 +45,7 @@ pub mod add;
 pub mod and;
 pub mod br;
 pub mod jmp;
+pub mod jmpt;
 pub mod jsr;
 pub mod jsrr;
 pub mod ld;

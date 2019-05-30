@@ -36,7 +36,7 @@ impl Assemble for Fill {
         vec![(
             value,
             format!(
-                "({0:4X}) {1:04X} {1:016b} ({2: >4}) {3: <20} .FILL #{1}",
+                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} .FILL #{1}",
                 *program_counter - 1,
                 value as i16,
                 self.line,

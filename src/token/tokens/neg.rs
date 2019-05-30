@@ -34,7 +34,7 @@ impl Assemble for Neg {
             (
                 not_instruction,
                 format!(
-                    "({0:0>4X}) {1:04X} {1:0>16b} ({2: >4}) {3: <20} NOT R{4} R{5}",
+                    "({0:04X}) {1:04X} {1:0>16b} ({2: >4}) {3: <20} NOT R{4} R{5}",
                     *program_counter - 2,
                     not_instruction,
                     self.line,
@@ -46,7 +46,7 @@ impl Assemble for Neg {
             (
                 add_instruction,
                 format!(
-                    "({0:0>4X}) {1:04X} {1:0>16b} ({2: >4})                      ADD R{3} R{4} #1",
+                    "({0:04X}) {1:04X} {1:0>16b} ({2: >4})                      ADD R{3} R{4} #1",
                     *program_counter - 1,
                     add_instruction,
                     self.line,

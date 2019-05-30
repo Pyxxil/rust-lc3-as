@@ -23,7 +23,7 @@ impl Assemble for Stringz {
                     assembled.push((
                         character as u16,
                         format!(
-                            "({0:4X}) {1:04X} {1:016b} ({2: >4}) {3: <20} .FILL #{1}",
+                            "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} .FILL #{1}",
                             *program_counter, character as u16, self.line, symbol
                         ),
                     ));
@@ -33,7 +33,7 @@ impl Assemble for Stringz {
                     assembled.push((
                         c as u16,
                         format!(
-                            "({0:4X}) {1:04X} {1:016b} ({2: >4})                      .FILL #{1}",
+                            "({0:04X}) {1:04X} {1:016b} ({2: >4})                      .FILL #{1}",
                             *program_counter, c as u16, self.line
                         ),
                     ));
@@ -42,7 +42,7 @@ impl Assemble for Stringz {
                 assembled.push((
                     0,
                     format!(
-                        "({0:4X}) 0000 0000000000000000 ({1: >4})                      .FILL #0",
+                        "({0:04X}) 0000 0000000000000000 ({1: >4})                      .FILL #0",
                         *program_counter, self.line
                     ),
                 ))
@@ -57,7 +57,7 @@ impl Assemble for Stringz {
                     assembled.push((
                         c as u16,
                         format!(
-                            "({0:4X}) {1:04X} {1:016b} ({2: >4})                      .FILL #{1}",
+                            "({0:04X}) {1:04X} {1:016b} ({2: >4})                      .FILL #{1}",
                             *program_counter, c as u16, self.line
                         ),
                     ))
@@ -65,7 +65,7 @@ impl Assemble for Stringz {
                 assembled.push((
                     0,
                     format!(
-                        "({0:4X}) 0000 0000000000000000 ({1: >4})                      .FILL #0",
+                        "({0:04X}) 0000 0000000000000000 ({1: >4})                      .FILL #0",
                         *program_counter, self.line
                     ),
                 ))

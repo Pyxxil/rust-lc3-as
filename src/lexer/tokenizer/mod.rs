@@ -167,6 +167,12 @@ impl<'a> Tokenizer<'a> {
                 column,
                 line,
             ))),
+            "JMPT" => Some(Token::Jmpt(jmpt::Jmpt::new(
+                token,
+                self.file.to_string(),
+                column,
+                line,
+            ))),
             "JSR" => Some(Token::Jsr(jsr::Jsr::new(
                 token,
                 self.file.to_string(),
@@ -660,7 +666,8 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
-    // Skip all whitespace characters, as they don't actually signify anything (unless inside a character or string literal)
+    // Skip all whitespace characters, as they don't actually signify anything
+    // (unless inside a character or string literal)
     #[inline]
     fn skip_whitespace(&mut self) {
         while let Some(&ch) = self.peek() {
