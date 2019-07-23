@@ -1,10 +1,8 @@
-use std::collections::HashMap;
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 
 use token::tokens::traits::*;
 use token::tokens::{expected, too_few_operands};
-use token::Symbol;
-use token::Token;
+use token::{Symbol, Token};
 
 token!(Lea, 2);
 
@@ -39,13 +37,17 @@ impl Assemble for Lea {
         vec![(
             instruction,
             format!(
-                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} LEA R{4} #{5}",
+                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} LEA R{4} {5}",
                 *program_counter - 1,
                 instruction,
                 self.line,
                 symbol,
                 destination_register,
-                offset as i16,
+                match self.operands.last().unwrap() {
+                    Token::Immediate(imm) => format!("#{}", imm.value),
+                    Token::Label(label) => label.token().to_string(),
+                    _ => unreachable!(),
+                }
             ),
         )]
     }

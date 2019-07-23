@@ -28,6 +28,7 @@ impl Assembler {
         if lexer.is_okay() {
             let mut parser = Parser::new(lexer.tokens());
             parser.parse();
+
             if parser.is_okay() {
                 let (tokens, symbols) = parser.tokens_and_symbols();
                 let assembled = self.do_second_pass(tokens, &symbols);
@@ -53,18 +54,15 @@ impl Assembler {
                         .unwrap(),
                 );
 
-                match writeln!(
+                writeln!(
                     sym_f,
                     "{: <20} Assembler\n-------------------- -------",
                     "Symbol"
-                ) {
-                    _ => {}
-                }
+                )
+                .unwrap();
 
-                symbols.iter().for_each(|(_, symbol)| {
-                    match writeln!(sym_f, "{: <20} {:04X}", symbol.symbol(), symbol.address()) {
-                        _ => {}
-                    };
+                symbols.into_iter().for_each(|(_, symbol)| {
+                    writeln!(sym_f, "{: <20} {:04X}", symbol.symbol(), symbol.address()).unwrap();
                 });
 
                 let mut bin_f = BufWriter::new(
@@ -100,25 +98,16 @@ impl Assembler {
                         .write(true)
                         .truncate(true)
                         .open(obj_file)
-                        .unwrap(),
+                        .expect("Can't create object file"),
                 );
 
-                assembled.iter().for_each(|assembled_token| {
-                    match writeln!(bin_f, "{:016b}", assembled_token.0) {
-                        _ => {}
-                    };
-                    match writeln!(hex_f, "{:04X}", assembled_token.0) {
-                        _ => {}
-                    };
-                    match writeln!(lst_f, "{}", assembled_token.1) {
-                        _ => {}
-                    };
-                    match obj_f.write(&[
-                        (assembled_token.0 >> 8 & 0xFF) as u8,
-                        (assembled_token.0 & 0xFF) as u8,
-                    ]) {
-                        _ => {}
-                    };
+                assembled.iter().for_each(|(binary, listing)| {
+                    writeln!(bin_f, "{:016b}", binary).unwrap();
+                    writeln!(hex_f, "{:04X}", binary).unwrap();
+                    writeln!(lst_f, "{}", listing).unwrap();
+                    obj_f
+                        .write(&[(binary >> 8 & 0xFF as u16) as u8, (binary & 0xFF) as u8])
+                        .unwrap();
                 });
 
                 return;

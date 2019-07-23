@@ -497,7 +497,7 @@ impl<'a> Tokenizer<'a> {
 
         if let Some(ch) = characters.next() {
             match ch {
-                '0'...'9' => characters.all(|c| c.is_digit(10)),
+                '0'..='9' => characters.all(|c| c.is_digit(10)),
                 '-' => characters.peek().is_some() && !characters.any(|x| !x.is_digit(10)),
                 _ => false,
             }
@@ -532,7 +532,7 @@ impl<'a> Tokenizer<'a> {
         let mut characters = token.chars();
         if let Some(ch) = characters.next() {
             match ch {
-                '.' | '_' | 'a'...'z' | 'A'...'Z' => {
+                '.' | '_' | 'a'..='z' | 'A'..='Z' => {
                     characters.all(|c| c.is_alphanumeric() || c == '_')
                 }
                 _ => false,

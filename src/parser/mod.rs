@@ -1,13 +1,12 @@
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
+use lexer::Lexer;
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight};
 use token::traits::Requirements;
 use token::Symbol;
 use token::Token;
-
-use lexer::Lexer;
 
 #[derive(Debug)]
 pub struct Parser {

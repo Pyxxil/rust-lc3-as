@@ -14,18 +14,21 @@ pub trait Assemble {
 }
 
 pub trait Requirements {
-    /* The amount of tokens that the token requires for operands.
+    /* The amount of tokens that this token requires for operands
+     *
+     * @return A tuple in the form (min, max)
      */
     fn require_range(&self) -> (u64, u64);
 
     /* The amount of memory that is required by this token
+     *
+     * @return The memory requirement
      */
     fn memory_requirement(&self) -> u16;
 
-    /* Consume a range of tokens corresponding to Requirements::require_amount (at most).
+    /* Consume a range of tokens corresponding to Requirements::require_range.1 (at most).
      *
-     * @param: tokens The vector containing the tokens we can consume from.
-     * @param at The index to begin consuming from
+     * @param: tokens The queue containing the tokens we can consume from.
      *
      * @return The tokens not consumed
      */

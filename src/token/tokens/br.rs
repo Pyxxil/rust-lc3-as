@@ -1,10 +1,8 @@
-use std::collections::HashMap;
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 
 use token::tokens::traits::*;
 use token::tokens::{expected, too_few_operands};
-use token::Symbol;
-use token::Token;
+use token::{Symbol, Token};
 
 token!(Br, 1, n: bool, z: bool, p: bool);
 
@@ -35,7 +33,7 @@ impl Assemble for Br {
         vec![(
             instruction,
             format!(
-                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} BR{4}{5}{6} #{7}",
+                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} BR{4}{5}{6} {7}",
                 *program_counter - 1,
                 instruction,
                 self.line,
@@ -43,7 +41,11 @@ impl Assemble for Br {
                 if self.n { "n" } else { "" },
                 if self.z { "z" } else { "" },
                 if self.p { "p" } else { "" },
-                value as i16
+                match self.operands.first().unwrap() {
+                    Token::Immediate(imm) => format!("#{}", imm.value),
+                    Token::Label(label) => label.token().to_string(),
+                    _ => unreachable!(),
+                }
             ),
         )]
     }
