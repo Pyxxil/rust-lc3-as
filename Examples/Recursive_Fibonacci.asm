@@ -141,7 +141,7 @@ CHECK_INPUT:
         LD R3, FLAG                     ; Load whats in FLAG to R3.
         ADD R3, R3, #-1                 ; If R3 == 1, then something went wrong
         BRzp OUT_PROMPT                 ; so start again.
-        ADD R4, R1, #-3                 ; We also don't want numbers less than 3
+        ADD R4, R1, #-1                 ; We also don't want numbers less than 1
         BRn OUT_PROMPT                  ; so start again.
         ; Note, we don't have to check if the number is greater than 23 because
         ; we already did that in MULTIPLY_BY_TEN.
@@ -208,7 +208,7 @@ END:
 SAVER7      .FILL 0
 
 ; Strings that will be used throughout the program
-PROMPT      .STRINGZ "\nEnter a number from 3 to 23: "
+PROMPT      .STRINGZ "\nEnter a number from 1 to 23: "
 
 SPACE       .FILL 0x20                  ; A space character has the ascii value of 0x20, too large
                                         ; for an immediate offset to ADD.
@@ -219,7 +219,6 @@ FLAG        .FILL 0                     ; A way to tell the program we've receiv
 
 ; ASCII values that will be used to check input, as well as convert to ASCII.
 ZERO        .FILL #48
-THREE       .FILL #51
 NINE        .FILL #57
 
 ; Values that we will use to output the current fibonacci number to the screen.

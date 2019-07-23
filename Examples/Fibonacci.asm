@@ -47,8 +47,7 @@ GET_INPUT:
   BRz CHECK_INPUT         ; If yes, check what was input
   ; Compare input character against 9
   LD R3, ASCII_NINE       ; Load the value in ASCII_NINE into R3
-  .SUB R3, R0, R3
-  ADD R3, R0, R3          ; Compare ascii values
+  .SUB R3, R0, R3         ; Compare ASCII values
   BRp FLAG_THAT           ; If the character's ascii value is greater than 9's, flag it
   ; Compare input character against 0
   LD R3, ASCII_ZERO       ; Load the value of ASCII_ZER0 into R3
@@ -87,7 +86,7 @@ MULTIPLY_BY_TEN:
   ADD R4, R1, #-16        ; We don't want numbers greater than 23.
   ADD R4, R4, #-7         ; Because we can't add numbers less than -16, we do this twice
   BRp FLAG_THAT           ; If the number is greater than 23, no need to keep going
-  BRnzp DECREMENT_INPUT_COUNTER
+  BR DECREMENT_INPUT_COUNTER
 
 
 ; Check if we've flagged something, and if so then skip over the input
@@ -129,8 +128,8 @@ CHECK_INPUT:
   LD R3, FLAG             ; Load whats in FLAG to R3
   ADD R3, R3, #-1         ; If R3 == 1, then something went wrong
   BRzp OUT_PROMPT         ; so start again.
-  ADD R4, R1, #-3         ; We also don't want numbers less than 3
-  BRn OUT_PROMPT          ; so start again.
+  ADD R4, R1, #-1         ; We also don't want numbers less than 1
+  BRn OUT_PROMPT         ; so start again.
 
   ; Initialise the registers to be used for the loop
   AND R3, R3, #0          ; Reset R3 to be used as the lower number
@@ -158,7 +157,7 @@ INNER_LOOP:
   ADD R5, R5, R4          ; Subtract the current number from R5
   BRn CHECK_DIGIT         ; and if R5 is now negative, then we've got the digit in R6
   ADD R6, R6, #1          ; Otherwise, add 1 the digit in the current place
-  BRnzp INNER_LOOP        ; And loop again
+  BR INNER_LOOP        ; And loop again
 ; We've found what the digit is, so lets check some things
 CHECK_DIGIT:
   ADD R6, R6, #0          ; If R6 is greater than 0, output it
@@ -201,7 +200,7 @@ ITERATIVE_FIBONACCI:
   ADD R4, R3, R6          ; Set R4 to equal the lower + higher values
   ADD R3, R6, #0          ; Set R3 to equal the previous higher number
   ADD R1, R1, #-1         ; Subtract 1 from the loop counter
-  BRp ITERATIVE_FIBONACCI ; Loop until we've got the counter down to 0
+  BRp ITERATIVE_FIBONACCI
 
 ; Finish the program
 FINISH:
@@ -209,7 +208,7 @@ FINISH:
 
 
 ; Strings that will be used throughout the program
-PROMPT      .STRINGZ "\nEnter a number from \"3\" to 23: "
+PROMPT      .STRINGZ "Enter a number from 1 to 23: "
 
 NUMBER      .FILL    #0   ; The number that we will use as the number of fibonacci numbers we want
 FLAG        .FILL    #0   ; A way to tell the program we've received input we don't want
