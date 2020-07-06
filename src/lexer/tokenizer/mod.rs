@@ -3,7 +3,7 @@ extern crate colored;
 use std::iter::Peekable;
 use std::str::Chars;
 
-use lexer::add_line;
+use assembler::add_line;
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight, Pointer};
 use token::tokens::*;
@@ -354,6 +354,7 @@ impl<'a> Tokenizer<'a> {
                 match ch {
                     'n' => token.push('\n'),
                     't' => token.push('\t'),
+                    'e' => token.push(0x1B as char),
                     '"' => token.push('"'),
                     '0' => token.push('\0'),
                     '\\' => token.push('\\'),
@@ -415,6 +416,7 @@ impl<'a> Tokenizer<'a> {
                 match ch {
                     'n' => character.push('\n'),
                     't' => character.push('\t'),
+                    'e' => character.push(0x1B as char),
                     '\\' => character.push('\\'),
                     '\'' => character.push('\''),
                     '0' => character.push('\0'),

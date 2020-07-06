@@ -1,4 +1,8 @@
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::Error;
+use std::io::{BufReader, Read};
+use std::sync::Mutex;
 
 use lexer::Lexer;
 use parser::Parser;
@@ -10,20 +14,81 @@ use std::fs::OpenOptions;
 use std::io::BufWriter;
 use std::io::Write;
 
+#[derive(Default, Debug)]
+pub struct FileController {
+    files: HashMap<String, Vec<String>>,
+}
+
+pub fn add_file(file: String) {
+    let mut guard = FILE_CONTROLLER.lock().unwrap();
+    guard.add_file(file);
+}
+
+pub fn add_line(file: &str, line: String) {
+    let mut guard = FILE_CONTROLLER.lock().unwrap();
+    guard.add_line(&file, line);
+}
+
+pub fn get_line(file: &str, line: u64) -> String {
+    let guard = FILE_CONTROLLER.lock().unwrap();
+    guard.get_line(file, line)
+}
+
+impl FileController {
+    fn add_file(&mut self, file: String) {
+        self.files.insert(file, Vec::new());
+    }
+
+    pub fn add_line(&mut self, file: &str, line: String) {
+        self.files.get_mut(file).unwrap().push(line);
+    }
+
+    pub fn get_line(&self, file: &str, line: u64) -> String {
+        self.files.get(file).unwrap()[(line - 1) as usize].clone()
+    }
+
+    pub fn remove(&mut self, file: &str) {
+        self.files.remove(file);
+    }
+}
+
 pub struct Assembler {
     file: String,
+    content: String,
 }
 
 impl Assembler {
-    pub fn new(file: String) -> Self {
-        Self { file }
+    pub fn from_file(file: String) -> Result<Self, Error> {
+        add_file(file.to_string());
+
+        let mut content = String::new();
+
+        BufReader::new(File::open(file.clone())?)
+            .read_to_string(&mut content)
+            .unwrap();
+
+        Ok(Self { file, content })
+    }
+
+    pub fn from_string(content: String) -> Self {
+        Self {
+            file: String::from("temp"),
+            content,
+        }
+    }
+
+    pub fn lex_only(&self) -> Lexer {
+        let mut lexer = Lexer::new(&self.file, &self.content);
+
+        lexer.lex();
+
+        lexer
     }
 
     pub fn assemble(&self, _do_print_ast: bool) {
         println!("Assembling file {}", self.file);
-        let mut lexer = Lexer::new(&self.file);
 
-        lexer.lex();
+        let lexer = self.lex_only();
 
         if lexer.is_okay() {
             let mut parser = Parser::new(lexer.tokens());
@@ -138,4 +203,8 @@ impl Assembler {
             })
             .collect()
     }
+}
+
+lazy_static! {
+    pub static ref FILE_CONTROLLER: Mutex<FileController> = Mutex::new(FileController::default());
 }

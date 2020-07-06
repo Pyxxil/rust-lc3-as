@@ -1,6 +1,6 @@
 extern crate colored;
 
-use lexer::get_line;
+use assembler::get_line;
 
 use self::colored::*;
 

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use lexer::Lexer;
+use assembler::Assembler;
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight};
 use token::traits::Requirements;
@@ -55,16 +55,20 @@ impl Parser {
                             .take(string.file().rfind(|c| c == '/').unwrap() + 1)
                             .collect::<String>()
                             + string.token();
-                        let mut lexer = Lexer::new(&file);
-                        lexer.lex();
-                        if lexer.is_okay() {
-                            lexer
-                                .tokens()
-                                .into_iter()
-                                .rev()
-                                .for_each(|token| tokens.push_front(token));
-                        } else {
-                            break;
+                        let mut assembler = Assembler::from_file(file);
+                        match assembler {
+                            Err(e) => return,
+                            Ok(assembler) => {
+                                let lexer = assembler.lex_only();
+
+                                if lexer.is_okay() {
+                                    lexer
+                                        .tokens()
+                                        .into_iter()
+                                        .rev()
+                                        .for_each(|token| tokens.push_front(token));
+                                }
+                            }
                         }
                     }
                     _ => unreachable!(),
