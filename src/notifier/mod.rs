@@ -6,7 +6,7 @@ pub use self::diagnostic::{DiagType, Diagnostic, Highlight, Note, Pointer, Type}
 pub mod diagnostic;
 
 trait Notify {
-    fn notify(&self, diagnostic: &Diagnostic);
+    fn notify(&mut self, diagnostic: &Diagnostic);
 }
 
 pub enum Stdout {
@@ -15,40 +15,60 @@ pub enum Stdout {
     Quiet,
 }
 
-// TODO: At the moment, notifications will only work for Stdout. This
-//       should be changed to be more similar to how the C++ version does it
-//       i.e. with Callbacks.
+pub enum Notifier {
+    Standard(Stdout),
+    Stringify(Vec<String>),
+}
 
 /**
- * The `Stdout` will simply push the diagnostic to stdout, with
+ * The `Standard` will simply push the diagnostic to stdout, with
  * optional colouring.
+ *
+ * The 'Stringifiy' will simply collect each into a vector for later
  */
-impl Notify for Stdout {
-    fn notify(&self, diagnostic: &Diagnostic) {
+
+impl Notify for Notifier {
+    fn notify(&mut self, diagnostic: &Diagnostic) {
         match *self {
-            Stdout::NoColour => match *diagnostic {
-                Diagnostic::Note(ref d) => println!("{}", d.no_colour()),
-                Diagnostic::Highlight(ref d) => println!("{}", d.no_colour()),
-                Diagnostic::Pointer(ref d) => println!("{}", d.no_colour()),
+            Self::Standard(ref stdout) => match stdout {
+                Stdout::NoColour => match *diagnostic {
+                    Diagnostic::Note(ref d) => println!("{}", d.no_colour()),
+                    Diagnostic::Highlight(ref d) => println!("{}", d.no_colour()),
+                    Diagnostic::Pointer(ref d) => println!("{}", d.no_colour()),
+                },
+                Stdout::Colour => match *diagnostic {
+                    Diagnostic::Note(ref d) => println!("{}", d.colour()),
+                    Diagnostic::Highlight(ref d) => println!("{}", d.colour()),
+                    Diagnostic::Pointer(ref d) => println!("{}", d.colour()),
+                },
+                Stdout::Quiet => {}
             },
-            Stdout::Colour => match *diagnostic {
-                Diagnostic::Note(ref d) => println!("{}", d.colour()),
-                Diagnostic::Highlight(ref d) => println!("{}", d.colour()),
-                Diagnostic::Pointer(ref d) => println!("{}", d.colour()),
+            Self::Stringify(ref mut strings) => match *diagnostic {
+                Diagnostic::Note(ref d) => strings.push(format!("{}", d.no_colour())),
+                Diagnostic::Highlight(ref d) => strings.push(format!("{}", d.no_colour())),
+                Diagnostic::Pointer(ref d) => strings.push(format!("{}", d.no_colour())),
             },
-            Stdout::Quiet => {}
+        }
+    }
+}
+
+impl Notifier {
+    pub fn inner(&self) -> Vec<String> {
+        match self {
+            Self::Stringify(i) => i.clone(),
+            _ => Vec::new(),
         }
     }
 }
 
 #[derive(Default)]
 pub struct NotificationController {
-    notifiers: Vec<Stdout>,
+    notifiers: Vec<Notifier>,
     diagnostics: Vec<Diagnostic>,
 }
 
 #[inline]
-pub fn push(notifier: Stdout) {
+pub fn push(notifier: Notifier) {
     let mut guard = NOTIFICATION_CONTROLLER.lock().unwrap();
     guard.register(notifier);
 }
@@ -75,6 +95,20 @@ pub fn clear() {
     guard.diagnostics.clear();
 }
 
+#[inline]
+pub fn notifications() -> Vec<String> {
+    let guard = NOTIFICATION_CONTROLLER.lock().unwrap();
+    guard
+        .notifiers
+        .iter()
+        .find(|notifier| match notifier {
+            Notifier::Stringify(_) => true,
+            _ => false,
+        })
+        .unwrap_or(&Notifier::Stringify(Vec::new()))
+        .inner()
+}
+
 impl NotificationController {
     fn push(&mut self, diagnostic: Diagnostic) {
         self.diagnostics.push(diagnostic);
@@ -87,14 +121,14 @@ impl NotificationController {
     }
 
     #[inline]
-    fn register(&mut self, notification: Stdout) {
+    fn register(&mut self, notification: Notifier) {
         self.notifiers.push(notification);
     }
 
-    fn notify(&self) {
+    fn notify(&mut self) {
         if let Some(diagnostic) = self.diagnostics.last() {
             self.notifiers
-                .iter()
+                .iter_mut()
                 .for_each(|notifier| notifier.notify(diagnostic))
         }
     }

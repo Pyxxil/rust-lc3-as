@@ -2,7 +2,6 @@ use std::iter::Iterator;
 
 use lexer::tokenizer::Tokenizer;
 use notifier;
-use notifier::{DiagType, Diagnostic, Note};
 use token::Token;
 
 pub mod tokenizer;

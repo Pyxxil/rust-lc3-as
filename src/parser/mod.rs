@@ -55,21 +55,19 @@ impl Parser {
                             .take(string.file().rfind(|c| c == '/').unwrap() + 1)
                             .collect::<String>()
                             + string.token();
-                        let mut assembler = Assembler::from_file(file);
-                        match assembler {
-                            Err(e) => return,
-                            Ok(assembler) => {
-                                let lexer = assembler.lex_only();
 
-                                if lexer.is_okay() {
-                                    lexer
-                                        .tokens()
-                                        .into_iter()
-                                        .rev()
-                                        .for_each(|token| tokens.push_front(token));
-                                }
-                            }
-                        }
+                        Assembler::from_file(file)
+                            .ok()
+                            .and_then(|assembler| {
+                                assembler.lex().and_then(|ast| {
+                                    let length = tokens.len();
+                                    tokens.extend(ast.into_iter().rev());
+                                    tokens.rotate_left(length);
+
+                                    Some(())
+                                })
+                            })
+                            .unwrap();
                     }
                     _ => unreachable!(),
                 },

@@ -1,8 +1,6 @@
 extern crate clap;
 extern crate lc3lib;
 
-use std::io::Error;
-
 use clap::{App, Arg};
 
 use lc3lib::assembler::Assembler;
@@ -28,15 +26,21 @@ fn main() {
     let should_print_ast = args.is_present("print-ast");
 
     notifier::push(if args.is_present("quiet") {
-        notifier::Stdout::Quiet
+        notifier::Notifier::Standard(notifier::Stdout::Quiet)
     } else {
-        notifier::Stdout::Colour
+        notifier::Notifier::Standard(notifier::Stdout::Colour)
     });
 
     files.into_iter().for_each(move |file| {
         Assembler::from_file(file.to_string())
-            .and_then(|assembler| Ok(assembler.assemble(should_print_ast)))
-            .unwrap();
+            .map(|assembler| {
+                assembler
+                    .assemble(should_print_ast)
+                    .map(|(assembler, symbols, assembled)| assembler.write(symbols, assembled))
+            })
+            .and_then(|_| Ok(println!("Assembly successful")))
+            .expect(&format!("Assembly failed for {}", file));
+
         notifier::clear();
     });
 }
