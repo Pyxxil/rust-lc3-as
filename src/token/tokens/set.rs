@@ -111,6 +111,16 @@ impl Requirements for Set {
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         if let Some(token) = tokens.front() {
             expect!(self, tokens, token, Token::Register, "Register");
+        } else {
+            too_few_operands(
+                &self.file,
+                2,
+                0,
+                &self.token,
+                (self.column, self.line, self.token().len()),
+            );
+
+            return tokens;
         }
 
         if let Some(token) = tokens.front() {
@@ -125,6 +135,16 @@ impl Requirements for Set {
                 Token::Label,
                 "Label"
             );
+        } else {
+            too_few_operands(
+                &self.file,
+                2,
+                1,
+                &self.token,
+                (self.column, self.line, self.token().len()),
+            );
+
+            return tokens;
         }
 
         operands_check!(self);
