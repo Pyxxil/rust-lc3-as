@@ -40,6 +40,19 @@ impl Parser {
                             tok.token().len(),
                             format!("Duplicate symbol found {}", tok.token()),
                         )));
+                    } else if self
+                        .symbols
+                        .values()
+                        .any(|symbol| symbol.address() == address)
+                    {
+                        notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                            DiagType::Warning,
+                            (*tok.file()).clone(),
+                            tok.column(),
+                            tok.line(),
+                            tok.token().len(),
+                            format!("Multiple symbols found for address {:#X}", address),
+                        )));
                     } else {
                         self.symbols.insert(
                             tok.token().to_string(),

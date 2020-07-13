@@ -25,11 +25,14 @@ fn main() {
     let files: Vec<&str> = args.values_of("files").unwrap().collect();
     let should_print_ast = args.is_present("print-ast");
 
-    notifier::push(if args.is_present("quiet") {
-        notifier::Notifier::Standard(notifier::Stdout::Quiet)
-    } else {
-        notifier::Notifier::Standard(notifier::Stdout::Colour)
-    });
+    notifier::register(
+        String::from("lc3as"),
+        if args.is_present("quiet") {
+            notifier::Notifier::Standard(notifier::Stdout::Quiet)
+        } else {
+            notifier::Notifier::Standard(notifier::Stdout::Colour)
+        },
+    );
 
     files.into_iter().for_each(move |file| {
         Assembler::from_file(file.to_string())
@@ -41,6 +44,7 @@ fn main() {
             .and_then(|_| Ok(println!("Assembly successful")))
             .expect(&format!("Assembly failed for {}", file));
 
-        notifier::clear();
+        // Clear all notifications
+        notifier::clear(None);
     });
 }

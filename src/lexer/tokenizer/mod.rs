@@ -755,9 +755,10 @@ impl<'a> Tokenizer<'a> {
                             DiagType::Error,
                             token_start,
                             self.line_number,
-                            "Unknown character".to_owned(),
+                            String::from("Unknown character"),
                         ))
                     );
+                    self.next();
                     return self.next_token();
                 }
             };

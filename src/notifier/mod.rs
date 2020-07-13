@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::sync::Mutex;
 
 pub use self::diagnostic::{Colour, NoColour};
@@ -44,9 +45,9 @@ impl Notify for Notifier {
                 Stdout::Quiet => {}
             },
             Self::Stringify(ref mut strings) => match *diagnostic {
-                Diagnostic::Note(ref d) => strings.push(format!("{}", d.no_colour())),
-                Diagnostic::Highlight(ref d) => strings.push(format!("{}", d.no_colour())),
-                Diagnostic::Pointer(ref d) => strings.push(format!("{}", d.no_colour())),
+                Diagnostic::Note(ref d) => strings.push(d.no_colour()),
+                Diagnostic::Highlight(ref d) => strings.push(d.no_colour()),
+                Diagnostic::Pointer(ref d) => strings.push(d.no_colour()),
             },
         }
     }
@@ -59,18 +60,24 @@ impl Notifier {
             _ => Vec::new(),
         }
     }
+
+    pub fn reset(&mut self) {
+        if let Self::Stringify(i) = self {
+            i.clear();
+        }
+    }
 }
 
 #[derive(Default)]
 pub struct NotificationController {
-    notifiers: Vec<Notifier>,
+    notifiers: HashMap<String, Notifier>,
     diagnostics: Vec<Diagnostic>,
 }
 
 #[inline]
-pub fn push(notifier: Notifier) {
+pub fn register(name: String, notifier: Notifier) {
     let mut guard = NOTIFICATION_CONTROLLER.lock().unwrap();
-    guard.register(notifier);
+    guard.register(name, notifier);
 }
 
 #[inline]
@@ -90,9 +97,15 @@ pub fn error_count() -> u64 {
 }
 
 #[inline]
-pub fn clear() {
+pub fn clear(notifier: Option<&str>) {
     let mut guard = NOTIFICATION_CONTROLLER.lock().unwrap();
     guard.diagnostics.clear();
+
+    if let Some(n) = notifier {
+        if let Some(no) = guard.notifiers.get_mut(n) {
+            no.reset();
+        }
+    }
 }
 
 #[inline]
@@ -101,12 +114,12 @@ pub fn notifications() -> Vec<String> {
     guard
         .notifiers
         .iter()
-        .find(|notifier| match notifier {
+        .find(|(_, notifier)| match notifier {
             Notifier::Stringify(_) => true,
             _ => false,
         })
-        .unwrap_or(&Notifier::Stringify(Vec::new()))
-        .inner()
+        .map(|(_, notifier)| notifier.inner())
+        .unwrap_or_else(Vec::new)
 }
 
 impl NotificationController {
@@ -121,15 +134,15 @@ impl NotificationController {
     }
 
     #[inline]
-    fn register(&mut self, notification: Notifier) {
-        self.notifiers.push(notification);
+    fn register(&mut self, name: String, notification: Notifier) {
+        self.notifiers.insert(name, notification);
     }
 
     fn notify(&mut self) {
         if let Some(diagnostic) = self.diagnostics.last() {
             self.notifiers
                 .iter_mut()
-                .for_each(|notifier| notifier.notify(diagnostic))
+                .for_each(|(_, notifier)| notifier.notify(diagnostic))
         }
     }
 }
