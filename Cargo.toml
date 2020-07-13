@@ -1,5 +1,5 @@
 [package]
-name = "rust_lc3"
+name = "lc3-rs"
 version = "0.1.0"
 authors = ["Josh Hill <josh.hill189@gmail.com>"]
 
