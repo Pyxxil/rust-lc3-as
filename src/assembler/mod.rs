@@ -125,7 +125,7 @@ impl Assembler {
         let hex_file = base_file_name.clone() + ".hex";
         let lst_file = base_file_name.clone() + ".lst";
         let obj_file = base_file_name.clone() + ".obj";
-        let sym_file = base_file_name.clone() + ".sym";
+        let sym_file = base_file_name + ".sym";
 
         let mut sym_f = BufWriter::new(
             OpenOptions::new()
@@ -188,8 +188,8 @@ impl Assembler {
             writeln!(hex_f, "{:04X}", binary).unwrap();
             writeln!(lst_f, "{}", listing).unwrap();
             obj_f
-                .write(&[(binary >> 8 & 0xFF as u16) as u8, (binary & 0xFF) as u8])
-                .unwrap();
+                .write_all(&[(binary >> 8 & 0xFF as u16) as u8, (binary & 0xFF) as u8])
+                .expect("There was a problem generating the binary file");
         });
     }
 
