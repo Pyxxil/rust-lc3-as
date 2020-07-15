@@ -12,11 +12,18 @@ name = "lc3as"
 path = "bin/main.rs"
 
 [dependencies]
-colored = "^1.9.0"
+colored = "^2.0.0"
 clap = "^2.33.0"
 lazy_static = "1.4.0"
 
 [profile.release]
+# less code to include into binary
+panic = 'abort'
+# optimization over all codebase ( better optimization, slower build )
+codegen-units = 1
+# optimization for size
+opt-level = 's'
+# link time optimization using using whole-program analysis
 lto = true
 
 [dev-dependencies]

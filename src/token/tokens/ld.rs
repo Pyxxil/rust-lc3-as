@@ -4,6 +4,9 @@ use token::tokens::traits::*;
 use token::tokens::{expected, too_few_operands};
 use token::{Symbol, Token};
 
+use crate::notifier;
+use crate::notifier::{DiagType, Diagnostic, Highlight};
+
 token!(Ld, 2);
 
 impl Assemble for Ld {
@@ -26,6 +29,7 @@ impl Assemble for Ld {
                 if let Some(symbol) = symbols.get(label.token()) {
                     symbol.address() as i16 - *program_counter
                 } else {
+                    undefined!(self, label);
                     0
                 }
             }
