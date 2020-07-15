@@ -142,7 +142,7 @@ impl Highlight {
 impl Colour for Highlight {
     fn colour(&self) -> String {
         format!(
-            "{}:{}:{}: {}\n{}\n{}",
+            "{}:{}:{}: {}: {}\n{}\n{}",
             match self.diagnostic_type {
                 DiagType::Note => self.file.bright_white(),
                 DiagType::Warning => self.file.yellow(),
@@ -150,6 +150,11 @@ impl Colour for Highlight {
             },
             self.line,
             self.column,
+            match self.diagnostic_type {
+                DiagType::Note => "Note".bright_white(),
+                DiagType::Warning => "Warning".yellow(),
+                DiagType::Error => "Error".red(),
+            },
             self.context,
             get_line(&self.file, self.line),
             " ".repeat(self.column as usize - 1) + &"~".repeat(self.width)
@@ -158,11 +163,17 @@ impl Colour for Highlight {
 }
 
 impl NoColour for Highlight {
-    #[inline]
     fn no_colour(&self) -> String {
         format!(
             "{:#?}:{}:{}:{}",
-            self.diagnostic_type, self.line, self.column, self.context
+            match self.diagnostic_type {
+                DiagType::Note => "Note",
+                DiagType::Warning => "Warning",
+                DiagType::Error => "Error",
+            },
+            self.line,
+            self.column,
+            self.context
         )
     }
 }

@@ -6,6 +6,9 @@ use token::tokens::{expected, too_few_operands};
 use token::Symbol;
 use token::Token;
 
+use crate::notifier;
+use crate::notifier::{DiagType, Diagnostic, Highlight};
+
 token!(Fill, 1);
 
 impl Assemble for Fill {
@@ -25,6 +28,7 @@ impl Assemble for Fill {
                 {
                     symbol.1.address()
                 } else {
+                    undefined!(self, label);
                     0
                 }
             }

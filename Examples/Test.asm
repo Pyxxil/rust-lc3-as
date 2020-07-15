@@ -21,7 +21,7 @@ TEST:   BRn #0          ; Superfluous statement
         BRn #1          ; Checks same CC
         BRp #-1         ; Infinite loop
 
-ERRORS: 9               ; Current error count (this line complains twice)
+ERRORS: 18               ; Current error count (this line complains twice)
         ADD R0, R10, R0 ; Expected register
         AND R0, R8, R0  ; Invalid register
         JMP R9          ; Invalid register
@@ -32,7 +32,18 @@ ERRORS: 9               ; Current error count (this line complains twice)
 
         JSR jdjdjjsjdsfkljsljfkjdsfkjlsdkjfksjdfkjsdkljf
 
+        >               ; Invalid character
+
+        .FILL DOES_NOT_EXIST ; Should fail because the label doesn't exist
+        .BLKW #100 DOES_NOT_EXIST
+        JSR DOES_NOT_EXIST
+        LD R0, DOES_NOT_EXIST
+        LDI R0, DOES_NOT_EXIST
+        BR DOES_NOT_EXIST
+        LEA R0, DOES_NOT_EXIST
+        ST R0, DOES_NOT_EXIST
+        STI R0, DOES_NOT_EXIST
+
 .END
 WARNING_LABEL
 .END
-

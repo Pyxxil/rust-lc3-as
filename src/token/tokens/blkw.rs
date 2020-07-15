@@ -6,6 +6,9 @@ use token::tokens::{expected, too_few_operands};
 use token::Symbol;
 use token::Token;
 
+use crate::notifier;
+use crate::notifier::{DiagType, Diagnostic, Highlight};
+
 token!(Blkw, 2);
 
 impl Assemble for Blkw {
@@ -24,6 +27,7 @@ impl Assemble for Blkw {
                     if let Some(symbol) = symbols.get(label.token()) {
                         symbol.address()
                     } else {
+                        undefined!(self, label);
                         0
                     }
                 }

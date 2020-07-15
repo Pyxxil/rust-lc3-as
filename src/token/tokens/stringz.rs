@@ -94,21 +94,14 @@ impl Requirements for Stringz {
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         if let Some(token) = tokens.front() {
             expect!(self, tokens, token, Token::String, "String");
-        } else {
-            too_few_operands(
-                &self.file,
-                1,
-                0,
-                &self.token,
-                (self.column, self.line, self.token().len()),
-            );
-            return tokens;
         }
 
         // Get all of the strings that belong to this .STRINGZ
         while let Some(Token::String(_)) = tokens.front() {
             self.operands.push(tokens.pop_front().unwrap());
         }
+
+        operands_check!(self);
 
         tokens
     }
