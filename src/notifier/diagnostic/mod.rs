@@ -192,7 +192,7 @@ impl Colour for Highlight {
 impl NoColour for Highlight {
     fn no_colour(&self) -> String {
         format!(
-            "{:#?}:{}:{}:{}",
+            "{}:{}:{}:{}",
             match self.diagnostic_type {
                 DiagType::Note => "Note",
                 DiagType::Warning => "Warning",
