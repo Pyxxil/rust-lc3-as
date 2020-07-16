@@ -102,7 +102,7 @@ impl Pointer {
 impl Colour for Pointer {
     fn colour(&self) -> String {
         format!(
-            "{}:{}:{}:{}: {}\n{}\n{}",
+            "{}:{}:{}: {}: {}\n{}\n{}",
             match self.diagnostic_type {
                 DiagType::Note => "Note".bright_white(),
                 DiagType::Warning => "Warning".yellow(),
@@ -121,15 +121,15 @@ impl Colour for Pointer {
 impl NoColour for Pointer {
     fn no_colour(&self) -> String {
         format!(
-            "{}:{}:{}:{}: {}\n{}\n{}",
+            "{}:{}:{}: {}: {}\n{}\n{}",
+            self.file,
+            self.line,
+            self.column,
             match self.diagnostic_type {
                 DiagType::Note => "Note",
                 DiagType::Warning => "Warning",
                 DiagType::Error => "Error",
             },
-            self.file,
-            self.line,
-            self.column,
             self.context,
             get_line(&self.file, self.line),
             " ".repeat(self.column as usize - 1) + &"^"
@@ -170,11 +170,7 @@ impl Colour for Highlight {
     fn colour(&self) -> String {
         format!(
             "{}:{}:{}: {}: {}\n{}\n{}",
-            match self.diagnostic_type {
-                DiagType::Note => self.file.bright_white(),
-                DiagType::Warning => self.file.yellow(),
-                DiagType::Error => self.file.red(),
-            },
+            self.file,
             self.line,
             self.column,
             match self.diagnostic_type {
@@ -192,15 +188,18 @@ impl Colour for Highlight {
 impl NoColour for Highlight {
     fn no_colour(&self) -> String {
         format!(
-            "{}:{}:{}:{}",
+            "{}:{}:{}: {}: {}\n{}\n{}",
+            self.file,
+            self.line,
+            self.column,
             match self.diagnostic_type {
                 DiagType::Note => "Note",
                 DiagType::Warning => "Warning",
                 DiagType::Error => "Error",
             },
-            self.line,
-            self.column,
-            self.context
+            self.context,
+            get_line(&self.file, self.line),
+            " ".repeat(self.column as usize - 1) + &"~".repeat(self.width)
         )
     }
 }
