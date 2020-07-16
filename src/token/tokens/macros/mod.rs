@@ -101,7 +101,8 @@ macro_rules! expect {
                     $self.file(),
                     &[
                         $( $string, )+
-                    ], &tok, ($self.column, $self.line, $self.token().len())
+                    ], &tok,
+                    (tok.column(), tok.line(), tok.token().len())
                 );
                 return $tokens;
             }

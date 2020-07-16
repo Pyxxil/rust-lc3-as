@@ -7,6 +7,33 @@ macro_rules! fmt {
     };
 }
 
+macro_rules! token_of {
+    ( $self:expr, $( $token:path ),* ) => {
+        match *$self {
+            $( $token(ref token) => token.token().clone(), )+
+            _ => unreachable!(),
+        }
+    }
+}
+
+macro_rules! column_of {
+    ( $self:expr, $( $token:path ),* ) => {
+        match *$self {
+            $( $token(ref token) => token.column(), )+
+            _ => unreachable!(),
+        }
+    }
+}
+
+macro_rules! line_of {
+    ( $self:expr, $( $token:path ),* ) => {
+        match *$self {
+            $( $token(ref token) => token.line(), )+
+            _ => unreachable!(),
+        }
+    }
+}
+
 macro_rules! file_of {
     ( $self:expr, $( $token:path ),* ) => {
         match *$self {
