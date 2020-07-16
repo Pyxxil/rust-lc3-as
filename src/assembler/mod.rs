@@ -5,6 +5,7 @@ use std::io::{BufReader, Read};
 use std::sync::Mutex;
 
 use lexer::Lexer;
+use notifier;
 use parser::Parser;
 use token;
 use token::tokens::traits::Assemble;
@@ -110,7 +111,12 @@ impl Assembler {
             .and_then(|ast| self.parse(ast))
             .and_then(|(tokens, symbols)| {
                 let assembled = self.do_second_pass(tokens, &symbols);
-                Some((self, symbols, assembled))
+
+                if notifier::error_count() > 0 {
+                    None
+                } else {
+                    Some((self, symbols, assembled))
+                }
             })
     }
 
