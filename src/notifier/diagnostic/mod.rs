@@ -60,8 +60,15 @@ impl Colour for Note {
 impl NoColour for Note {
     fn no_colour(&self) -> String {
         format!(
-            "{:#?}:{}:{}: {}",
-            self.diagnostic_type, self.line, self.column, self.context
+            "{}:{}:{}: {}",
+            match self.diagnostic_type {
+                DiagType::Note => "Note",
+                DiagType::Warning => "Warning",
+                DiagType::Error => "Error",
+            },
+            self.line,
+            self.column,
+            self.context
         )
     }
 }
@@ -114,8 +121,12 @@ impl Colour for Pointer {
 impl NoColour for Pointer {
     fn no_colour(&self) -> String {
         format!(
-            "{:#?}:{}:{}:{}: {}\n{}\n{}",
-            self.diagnostic_type,
+            "{}:{}:{}:{}: {}\n{}\n{}",
+            match self.diagnostic_type {
+                DiagType::Note => "Note",
+                DiagType::Warning => "Warning",
+                DiagType::Error => "Error",
+            },
             self.file,
             self.line,
             self.column,
