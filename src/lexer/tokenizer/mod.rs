@@ -384,10 +384,12 @@ impl<'a> Tokenizer<'a> {
         if !terminated {
             err!(
                 self,
-                Diagnostic::Pointer(Pointer::new(
+                Diagnostic::Highlight(Highlight::new(
                     DiagType::Error,
+                    self.file.to_string(),
                     token_start,
                     self.line_number,
+                    token.len() + 1,
                     "Unterminated string literal".to_owned()
                 ))
             );
@@ -437,10 +439,12 @@ impl<'a> Tokenizer<'a> {
         if !terminated {
             err!(
                 self,
-                Diagnostic::Pointer(Pointer::new(
+                Diagnostic::Highlight(Highlight::new(
                     DiagType::Error,
+                    self.file.to_string(),
                     token_start,
                     self.line_number,
+                    character.len(),
                     "Unterminated character literal".to_owned()
                 ))
             );
@@ -695,6 +699,7 @@ impl<'a> Tokenizer<'a> {
                     } else {
                         warn!(Diagnostic::Pointer(Pointer::new(
                             DiagType::Warning,
+                            self.file.to_string(),
                             token_start,
                             self.line_number,
                             "Expected another '/' here. Treating it as a comment anyways"
@@ -753,9 +758,10 @@ impl<'a> Tokenizer<'a> {
                         self,
                         Diagnostic::Pointer(Pointer::new(
                             DiagType::Error,
+                            self.file.to_string(),
                             token_start,
                             self.line_number,
-                            String::from("Unknown character"),
+                            format!("Unknown character literal '{}'", ch),
                         ))
                     );
                     self.next();

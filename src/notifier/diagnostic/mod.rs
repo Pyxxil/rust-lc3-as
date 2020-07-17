@@ -60,23 +60,38 @@ impl Colour for Note {
 impl NoColour for Note {
     fn no_colour(&self) -> String {
         format!(
-            "{:#?}:{}:{}: {}",
-            self.diagnostic_type, self.line, self.column, self.context
+            "{}:{}:{}: {}",
+            match self.diagnostic_type {
+                DiagType::Note => "Note",
+                DiagType::Warning => "Warning",
+                DiagType::Error => "Error",
+            },
+            self.line,
+            self.column,
+            self.context
         )
     }
 }
 
 pub struct Pointer {
     diagnostic_type: DiagType,
+    file: String,
     column: u64,
     line: u64,
     context: String,
 }
 
 impl Pointer {
-    pub fn new(diagnostic_type: DiagType, column: u64, line: u64, context: String) -> Self {
+    pub fn new(
+        diagnostic_type: DiagType,
+        file: String,
+        column: u64,
+        line: u64,
+        context: String,
+    ) -> Self {
         Self {
             diagnostic_type,
+            file,
             column,
             line,
             context,
@@ -87,25 +102,37 @@ impl Pointer {
 impl Colour for Pointer {
     fn colour(&self) -> String {
         format!(
-            "{}:{}:{}: {}",
+            "{}:{}:{}: {}: {}\n{}\n{}",
             match self.diagnostic_type {
                 DiagType::Note => "Note".bright_white(),
                 DiagType::Warning => "Warning".yellow(),
                 DiagType::Error => "Error".red(),
             },
+            self.file,
             self.line,
             self.column,
-            self.context
+            self.context,
+            get_line(&self.file, self.line),
+            " ".repeat(self.column as usize - 1) + &"^"
         )
     }
 }
 
 impl NoColour for Pointer {
-    #[inline]
     fn no_colour(&self) -> String {
         format!(
-            "{:#?}:{}:{}: {}",
-            self.diagnostic_type, self.line, self.column, self.context
+            "{}:{}:{}: {}: {}\n{}\n{}",
+            self.file,
+            self.line,
+            self.column,
+            match self.diagnostic_type {
+                DiagType::Note => "Note",
+                DiagType::Warning => "Warning",
+                DiagType::Error => "Error",
+            },
+            self.context,
+            get_line(&self.file, self.line),
+            " ".repeat(self.column as usize - 1) + &"^"
         )
     }
 }
@@ -143,11 +170,7 @@ impl Colour for Highlight {
     fn colour(&self) -> String {
         format!(
             "{}:{}:{}: {}: {}\n{}\n{}",
-            match self.diagnostic_type {
-                DiagType::Note => self.file.bright_white(),
-                DiagType::Warning => self.file.yellow(),
-                DiagType::Error => self.file.red(),
-            },
+            self.file,
             self.line,
             self.column,
             match self.diagnostic_type {
@@ -165,15 +188,18 @@ impl Colour for Highlight {
 impl NoColour for Highlight {
     fn no_colour(&self) -> String {
         format!(
-            "{:#?}:{}:{}:{}",
+            "{}:{}:{}: {}: {}\n{}\n{}",
+            self.file,
+            self.line,
+            self.column,
             match self.diagnostic_type {
                 DiagType::Note => "Note",
                 DiagType::Warning => "Warning",
                 DiagType::Error => "Error",
             },
-            self.line,
-            self.column,
-            self.context
+            self.context,
+            get_line(&self.file, self.line),
+            " ".repeat(self.column as usize - 1) + &"~".repeat(self.width)
         )
     }
 }
