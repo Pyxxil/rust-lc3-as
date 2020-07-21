@@ -71,15 +71,29 @@ impl Requirements for Blkw {
     }
 
     fn memory_requirement(&self) -> u16 {
-        match self.operands.first().unwrap() {
-            Token::Immediate(imm) => imm.value as u16,
-            _ => unreachable!(),
+        if self.operands.len() > 0 {
+            match self.operands.first().unwrap() {
+                Token::Immediate(imm) => imm.value as u16,
+                _ => unreachable!(),
+            }
+        } else {
+            0
         }
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         if let Some(token) = tokens.front() {
             expect!(self, tokens, token, Token::Immediate, "Immediate");
+        } else {
+            too_few_operands(
+                &self.file,
+                2,
+                0,
+                self.token(),
+                (self.column, self.line, self.token().len()),
+            );
+
+            return tokens;
         }
 
         if let Some(token) = tokens.front() {

@@ -70,6 +70,16 @@ impl Requirements for Neg {
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
         if let Some(token) = tokens.front() {
             expect!(self, tokens, token, Token::Register, "Register");
+        } else {
+            too_few_operands(
+                &self.file,
+                1,
+                0,
+                self.token(),
+                (self.column, self.line, self.token().len()),
+            );
+
+            return tokens;
         }
 
         if let Some(token) = tokens.front() {

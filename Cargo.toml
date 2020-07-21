@@ -24,7 +24,7 @@ codegen-units = 1
 # optimization for size
 opt-level = 's'
 # link time optimization using using whole-program analysis
-lto = true
+lto = "thin"
 
 [dev-dependencies]
 criterion = "^0.3"

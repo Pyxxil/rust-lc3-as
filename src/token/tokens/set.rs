@@ -92,19 +92,23 @@ impl Assemble for Set {
 
 impl Requirements for Set {
     fn require_range(&self) -> (u64, u64) {
-        (2, 2)
+        (2, 3)
     }
 
     fn memory_requirement(&self) -> u16 {
-        match self.operands.last().unwrap() {
-            Token::Immediate(immediate) => {
-                if immediate.value > 15 || immediate.value < -16 {
-                    3
-                } else {
-                    2
+        if self.operands.len() > 0 {
+            match self.operands.last().unwrap() {
+                Token::Immediate(immediate) => {
+                    if immediate.value > 15 || immediate.value < -16 {
+                        3
+                    } else {
+                        2
+                    }
                 }
+                _ => unreachable!(),
             }
-            _ => unreachable!(),
+        } else {
+            0
         }
     }
 
