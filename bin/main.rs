@@ -36,14 +36,14 @@ fn main() {
 
     files.into_iter().for_each(move |file| {
         Assembler::from_file(file.to_string())
-            .and_then(|assembler| {
-                Ok(assembler
+            .map(|assembler| {
+                assembler
                     .assemble(should_print_ast)
-                    .and_then(|(assembler, symbols, assembled)| {
-                        Some(assembler.write(symbols, assembled))
-                    })
-                    .and_then(|_| Some(println!("Assembly successful")))
-                    .or_else(|| Some(println!("Assembly failed for {}", file))))
+                    .map(|(assembler, symbols, assembled)| assembler.write(symbols, &assembled))
+                    .map_or_else(
+                        || println!("Assembly failed for {}", file),
+                        |_| println!("Assembly successful"),
+                    )
             })
             .expect("There was a problem with the file");
 

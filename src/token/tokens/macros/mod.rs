@@ -11,6 +11,7 @@ macro_rules! token {
         }
 
         impl $name {
+            #[must_use]
             pub fn new(token: String, file: String, column: u64, line: u64, $( $field: $type, )* ) -> Self {
                 Self {
                     token,
@@ -22,22 +23,27 @@ macro_rules! token {
                 }
             }
 
+            #[must_use]
             pub fn token(&self) -> &String {
                 &self.token
             }
 
+            #[must_use]
             pub fn column(&self) -> u64 {
                 self.column
             }
 
+            #[must_use]
             pub fn line(&self) -> u64 {
                 self.line
             }
 
+            #[must_use]
             pub fn file(&self) -> &String {
                 &self.file
             }
 
+            #[must_use]
             pub fn operands(&self) -> &Vec<Token> {
                 &self.operands
             }
@@ -59,6 +65,7 @@ macro_rules! token {
         }
 
         impl $name {
+            #[must_use]
             pub fn new(token: String, file: String, column: u64, line: u64, $( $field: $type, )* ) -> Self {
                 Self {
                     token,
@@ -69,18 +76,22 @@ macro_rules! token {
                 }
             }
 
+            #[must_use]
             pub fn token(&self) -> &String {
                 &self.token
             }
 
+            #[must_use]
             pub fn column(&self) -> u64 {
                 self.column
             }
 
+            #[must_use]
             pub fn line(&self) -> u64 {
                 self.line
             }
 
+            #[must_use]
             pub fn file(&self) -> &String {
                 &self.file
             }

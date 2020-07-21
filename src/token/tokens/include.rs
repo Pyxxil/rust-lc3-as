@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use token::tokens::traits::*;
+use token::tokens::traits::Requirements;
 use token::tokens::{expected, too_few_operands};
 use token::Token;
 

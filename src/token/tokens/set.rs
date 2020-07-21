@@ -1,10 +1,9 @@
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::tokens::traits::*;
+use token::tokens::traits::{Assemble, Requirements};
 use token::tokens::{expected, too_few_operands};
-use token::Symbol;
-use token::Token;
+use token::{Symbol, Token};
 
 token!(Set, 2);
 
@@ -96,7 +95,9 @@ impl Requirements for Set {
     }
 
     fn memory_requirement(&self) -> u16 {
-        if self.operands.len() > 0 {
+        if self.operands.is_empty() {
+            0
+        } else {
             match self.operands.last().unwrap() {
                 Token::Immediate(immediate) => {
                     if immediate.value > 15 || immediate.value < -16 {
@@ -107,8 +108,6 @@ impl Requirements for Set {
                 }
                 _ => unreachable!(),
             }
-        } else {
-            0
         }
     }
 

@@ -2,8 +2,12 @@ use std::collections::HashMap;
 pub use std::collections::VecDeque;
 use std::fmt;
 
-use token::tokens::traits::*;
-use token::tokens::*;
+use token::tokens::traits::{Assemble, Requirements};
+use token::tokens::{
+    add, and, blkw, br, character, end, expected, fill, getc, halt, immediate, include, jmp, jmpt,
+    jsr, jsrr, label, ld, ldi, ldr, lea, lshift, neg, not, orig, out, puts, putsp, r#in, register,
+    ret, rti, set, st, sti, str, string, stringz, sub, trap,
+};
 use token::Symbol;
 
 #[derive(PartialEq, Clone)]
@@ -59,6 +63,7 @@ pub enum Token {
 }
 
 impl Token {
+    #[must_use]
     pub fn token(&self) -> String {
         token_of!(
             self,
@@ -104,6 +109,7 @@ impl Token {
         )
     }
 
+    #[must_use]
     pub fn column(&self) -> u64 {
         column_of!(
             self,
@@ -149,6 +155,7 @@ impl Token {
         )
     }
 
+    #[must_use]
     pub fn line(&self) -> u64 {
         line_of!(
             self,
@@ -194,6 +201,7 @@ impl Token {
         )
     }
 
+    #[must_use]
     pub fn file(&self) -> &String {
         file_of!(
             self,

@@ -13,6 +13,7 @@ pub struct Lexer<'a> {
 }
 
 impl<'a> Lexer<'a> {
+    #[must_use]
     pub fn new(file: &'a str, content: &'a str) -> Lexer<'a> {
         Lexer {
             file,
@@ -33,12 +34,14 @@ impl<'a> Lexer<'a> {
     }
 
     #[inline]
+    #[must_use]
     pub fn tokens(self) -> Vec<Token> {
         self.tokens
     }
 
     #[inline]
-    pub fn is_okay(&self) -> bool {
+    #[must_use]
+    pub fn is_okay() -> bool {
         notifier::error_count() == 0
     }
 }

@@ -2,10 +2,9 @@ use std::collections::HashMap;
 use std::collections::VecDeque;
 use std::iter;
 
-use token::tokens::traits::*;
+use token::tokens::traits::{Assemble, Requirements};
 use token::tokens::{expected, too_few_operands};
-use token::Symbol;
-use token::Token;
+use token::{Symbol, Token};
 
 token!(Lshift, 2);
 
@@ -62,13 +61,13 @@ impl Requirements for Lshift {
     }
 
     fn memory_requirement(&self) -> u16 {
-        if self.operands.len() > 0 {
+        if self.operands.is_empty() {
+            0
+        } else {
             match self.operands.last().unwrap() {
                 Token::Immediate(imm) => imm.value as u16,
                 _ => unreachable!(),
             }
-        } else {
-            0
         }
     }
 

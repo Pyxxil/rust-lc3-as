@@ -15,6 +15,7 @@ pub struct Parser {
 }
 
 impl Parser {
+    #[must_use]
     pub fn new(tokens: Vec<Token>) -> Self {
         Self {
             tokens,
@@ -96,10 +97,12 @@ impl Parser {
         }
     }
 
-    pub fn is_okay(&self) -> bool {
+    #[must_use]
+    pub fn is_okay() -> bool {
         notifier::error_count() == 0
     }
 
+    #[must_use]
     pub fn tokens_and_symbols(self) -> (Vec<Token>, HashMap<String, Symbol>) {
         (self.tokens, self.symbols)
     }

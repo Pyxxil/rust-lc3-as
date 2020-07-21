@@ -1,10 +1,9 @@
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::tokens::traits::*;
-use token::tokens::*;
-use token::Symbol;
-use token::Token;
+use token::tokens::traits::{Assemble, Requirements};
+use token::tokens::{expected, too_few_operands};
+use token::{Symbol, Token};
 
 token!(Ldr, 3);
 

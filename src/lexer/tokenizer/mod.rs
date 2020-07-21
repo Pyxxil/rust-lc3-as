@@ -6,7 +6,11 @@ use std::str::Chars;
 use assembler::add_line;
 use notifier;
 use notifier::{DiagType, Diagnostic, Highlight, Pointer};
-use token::tokens::*;
+use token::tokens::{
+    add, and, blkw, br, character, end, fill, getc, halt, immediate, include, jmp, jmpt, jsr, jsrr,
+    label, ld, ldi, ldr, lea, lshift, neg, not, orig, out, puts, putsp, r#in, register, ret, rti,
+    set, st, sti, str, string, stringz, sub, trap,
+};
 use token::Token;
 
 macro_rules! err {
@@ -29,6 +33,7 @@ pub struct Tokenizer<'a> {
 }
 
 impl<'a> Tokenizer<'a> {
+    #[must_use]
     pub fn new(file: &'a str, line: &'a str, line_number: u64) -> Tokenizer<'a> {
         add_line(file, line.to_string());
         Tokenizer {
@@ -51,35 +56,42 @@ impl<'a> Tokenizer<'a> {
     }
 
     #[inline]
+    #[must_use]
     fn peek(&mut self) -> Option<&char> {
         self.line.peek()
     }
 
     #[inline]
+    #[must_use]
     fn is_label_character(ch: char) -> bool {
         ch.is_alphanumeric() || ch == '_' || ch == '.'
     }
 
     #[inline]
+    #[must_use]
     fn is_immediate_character(ch: char) -> bool {
         ch == '-' || ch == '#'
     }
 
     #[inline]
+    #[must_use]
     fn is_token_character(ch: char) -> bool {
         Self::is_label_character(ch) || Self::is_immediate_character(ch)
     }
 
     #[inline]
+    #[must_use]
     fn is_comment_character(ch: char) -> bool {
         ch == '/' || ch == ';'
     }
 
     #[inline]
+    #[must_use]
     fn is_terminator_character(ch: char) -> bool {
         ch.is_whitespace() || ch == ':' || ch == ',' || Self::is_comment_character(ch)
     }
 
+    #[must_use]
     fn tokenize_literal(&mut self, token: String, column: u64, line: u64) -> Option<Token> {
         if token.is_empty() {
             return None;
@@ -341,6 +353,7 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
+    #[must_use]
     fn tokenize_string_literal(&mut self) -> Option<Token> {
         let mut token = String::new();
         let mut terminated = false;
@@ -404,6 +417,7 @@ impl<'a> Tokenizer<'a> {
         )))
     }
 
+    #[must_use]
     fn tokenize_character_literal(&mut self) -> Option<Token> {
         let mut character = String::new();
         let token_start = self.column;
@@ -472,6 +486,7 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
+    #[must_use]
     pub fn is_valid_binary(token: &str) -> bool {
         let mut characters = token.chars();
 
@@ -494,6 +509,7 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
+    #[must_use]
     pub fn is_valid_decimal(token: &str) -> bool {
         let mut characters = token.chars().peekable();
 
@@ -512,6 +528,7 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
+    #[must_use]
     pub fn is_valid_hexadecimal(token: &str) -> bool {
         let mut characters = token.chars();
 
@@ -534,6 +551,7 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
+    #[must_use]
     pub fn is_valid_label(token: &str) -> bool {
         let mut characters = token.chars();
         if let Some(ch) = characters.next() {
@@ -774,7 +792,8 @@ impl<'a> Tokenizer<'a> {
     }
 
     #[inline]
-    pub fn is_okay(&self) -> bool {
+    #[must_use]
+    pub fn is_okay() -> bool {
         notifier::error_count() == 0
     }
 }

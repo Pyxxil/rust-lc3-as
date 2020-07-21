@@ -1,9 +1,8 @@
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::tokens::traits::*;
-use token::Symbol;
-use token::Token;
+use token::tokens::traits::{Assemble, Requirements};
+use token::{Symbol, Token};
 
 token!(Putsp);
 

@@ -60,6 +60,7 @@ pub struct Assembler {
 }
 
 impl Assembler {
+    #[must_use]
     pub fn from_file(file: String) -> Result<Self, Error> {
         add_file(file.to_string());
 
@@ -72,35 +73,39 @@ impl Assembler {
         Ok(Self { file, content })
     }
 
+    #[must_use]
     pub fn from_string(content: String) -> Self {
         let file = String::from("temp.asm");
         add_file(file.clone());
         Self { file, content }
     }
 
+    #[must_use]
     pub fn lex(&self) -> Option<Vec<Token>> {
         let mut lexer = Lexer::new(&self.file, &self.content);
 
         lexer.lex();
 
-        if lexer.is_okay() {
+        if Lexer::is_okay() {
             Some(lexer.tokens())
         } else {
             None
         }
     }
 
+    #[must_use]
     pub fn parse(&self, ast: Vec<Token>) -> Option<(Vec<Token>, HashMap<String, Symbol>)> {
         let mut parser = Parser::new(ast);
         parser.parse();
 
-        if parser.is_okay() {
+        if Parser::is_okay() {
             Some(parser.tokens_and_symbols())
         } else {
             None
         }
     }
 
+    #[must_use]
     pub fn assemble(
         self,
         _do_print_ast: bool,
@@ -110,7 +115,7 @@ impl Assembler {
         self.lex()
             .and_then(|ast| self.parse(ast))
             .and_then(|(tokens, symbols)| {
-                let assembled = self.do_second_pass(tokens, &symbols);
+                let assembled = Self::do_second_pass(tokens, &symbols);
 
                 if notifier::error_count() > 0 {
                     None
@@ -120,7 +125,7 @@ impl Assembler {
             })
     }
 
-    pub fn write(&self, symbols: HashMap<String, Symbol>, assembled: Vec<(u16, String)>) {
+    pub fn write(&self, symbols: HashMap<String, Symbol>, assembled: &[(u16, String)]) {
         let base_file_name: String = self
             .file
             .chars()
@@ -200,7 +205,6 @@ impl Assembler {
     }
 
     fn do_second_pass(
-        &self,
         tokens: Vec<token::Token>,
         symbols: &HashMap<String, Symbol>,
     ) -> Vec<(u16, String)> {

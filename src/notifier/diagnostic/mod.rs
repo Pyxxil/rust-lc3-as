@@ -2,7 +2,7 @@ extern crate colored;
 
 use assembler::get_line;
 
-use self::colored::*;
+use self::colored::Colorize;
 
 pub trait Colour {
     fn colour(&self) -> String;
@@ -31,6 +31,7 @@ pub struct Note {
 }
 
 impl Note {
+    #[must_use]
     pub fn new(diagnostic_type: DiagType, column: u64, line: u64, context: String) -> Self {
         Self {
             diagnostic_type,
@@ -82,6 +83,7 @@ pub struct Pointer {
 }
 
 impl Pointer {
+    #[must_use]
     pub fn new(
         diagnostic_type: DiagType,
         file: String,
@@ -113,7 +115,7 @@ impl Colour for Pointer {
             self.column,
             self.context,
             get_line(&self.file, self.line),
-            " ".repeat(self.column as usize - 1) + &"^"
+            " ".repeat(self.column as usize - 1) + "^"
         )
     }
 }
@@ -132,7 +134,7 @@ impl NoColour for Pointer {
             },
             self.context,
             get_line(&self.file, self.line),
-            " ".repeat(self.column as usize - 1) + &"^"
+            " ".repeat(self.column as usize - 1) + "^"
         )
     }
 }
@@ -147,6 +149,7 @@ pub struct Highlight {
 }
 
 impl Highlight {
+    #[must_use]
     pub fn new(
         diagnostic_type: DiagType,
         file: String,

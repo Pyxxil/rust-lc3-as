@@ -54,6 +54,7 @@ impl Notify for Notifier {
 }
 
 impl Notifier {
+    #[must_use]
     pub fn inner(&self) -> Vec<String> {
         match self {
             Self::Stringify(i) => i.clone(),
@@ -87,6 +88,7 @@ pub fn add_diagnostic(diagnostic: Diagnostic) {
 }
 
 #[inline]
+#[must_use]
 pub fn error_count() -> u64 {
     let guard = NOTIFICATION_CONTROLLER.lock().unwrap();
     guard
@@ -114,11 +116,10 @@ pub fn notifications() -> Vec<String> {
     guard
         .notifiers
         .iter()
-        .find(|(_, notifier)| match notifier {
-            Notifier::Stringify(_) => true,
-            _ => false,
+        .find_map(|(_, notifier)| match notifier {
+            Notifier::Stringify(_) => Some(notifier.inner()),
+            _ => None,
         })
-        .map(|(_, notifier)| notifier.inner())
         .unwrap_or_else(Vec::new)
 }
 

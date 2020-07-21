@@ -11,6 +11,7 @@ pub struct Immediate {
 }
 
 impl Immediate {
+    #[must_use]
     pub fn from_decimal(token: String, file: String, column: u64, line: u64) -> Self {
         let value = token
             .chars()
@@ -47,6 +48,7 @@ impl Immediate {
         }
     }
 
+    #[must_use]
     pub fn from_hexadecimal(token: String, file: String, column: u64, line: u64) -> Self {
         let value = u16::from_str_radix(
             token
@@ -84,6 +86,7 @@ impl Immediate {
         }
     }
 
+    #[must_use]
     pub fn from_binary(token: String, file: String, column: u64, line: u64) -> Self {
         let value = u16::from_str_radix(
             token
@@ -128,18 +131,22 @@ impl Immediate {
         }
     }
 
+    #[must_use]
     pub fn token(&self) -> &String {
         &self.token
     }
 
+    #[must_use]
     pub fn column(&self) -> u64 {
         self.column
     }
 
+    #[must_use]
     pub fn line(&self) -> u64 {
         self.line
     }
 
+    #[must_use]
     pub fn file(&self) -> &String {
         &self.file
     }
