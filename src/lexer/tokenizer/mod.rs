@@ -88,7 +88,11 @@ impl<'a> Tokenizer<'a> {
     #[inline]
     #[must_use]
     fn is_terminator_character(ch: char) -> bool {
-        ch.is_whitespace() || ch == ':' || ch == ',' || Self::is_comment_character(ch)
+        ch.is_whitespace()
+            || ch == ':'
+            || ch == ','
+            || Self::is_comment_character(ch)
+            || !Self::is_label_character(ch)
     }
 
     #[must_use]
@@ -406,15 +410,15 @@ impl<'a> Tokenizer<'a> {
                     "Unterminated string literal".to_owned()
                 ))
             );
-            return None;
+            None
+        } else {
+            Some(Token::String(string::String::new(
+                token,
+                self.file.to_string(),
+                self.line_number,
+                token_start,
+            )))
         }
-
-        Some(Token::String(string::String::new(
-            token,
-            self.file.to_string(),
-            self.line_number,
-            token_start,
-        )))
     }
 
     #[must_use]
@@ -686,7 +690,18 @@ impl<'a> Tokenizer<'a> {
                 column,
                 line,
             ))),
-            _ => None,
+            _ => {
+                if Self::is_valid_label(&token) {
+                    Some(Token::Label(label::Label::new(
+                        token,
+                        self.file.to_string(),
+                        column,
+                        line,
+                    )))
+                } else {
+                    None
+                }
+            }
         }
     }
 
