@@ -15,9 +15,7 @@ impl Requirements for Include {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        if let Some(token) = tokens.front() {
-            expect!(self, tokens, token, Token::String, "String");
-        }
+        expect!(self, tokens, Token::String, "String");
 
         operands_check!(self);
 

@@ -60,7 +60,6 @@ pub struct Assembler {
 }
 
 impl Assembler {
-    #[must_use]
     pub fn from_file(file: String) -> Result<Self, Error> {
         add_file(file.to_string());
 
@@ -199,7 +198,7 @@ impl Assembler {
             writeln!(hex_f, "{:04X}", binary).unwrap();
             writeln!(lst_f, "{}", listing).unwrap();
             obj_f
-                .write_all(&[(binary >> 8 & 0xFF as u16) as u8, (binary & 0xFF) as u8])
+                .write_all(&[(binary >> 8 & 0xFF) as u8, (binary & 0xFF) as u8])
                 .expect("There was a problem generating the binary file");
         });
     }

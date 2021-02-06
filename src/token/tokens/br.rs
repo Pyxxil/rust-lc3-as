@@ -65,17 +65,14 @@ impl Requirements for Br {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        if let Some(token) = tokens.front() {
-            expect!(
-                self,
-                tokens,
-                token,
-                Token::Label,
-                "Label",
-                Token::Immediate,
-                "Immediate"
-            );
-        }
+        expect!(
+            self,
+            tokens,
+            Token::Label,
+            "Label",
+            Token::Immediate,
+            "Immediate"
+        );
 
         operands_check!(self);
 

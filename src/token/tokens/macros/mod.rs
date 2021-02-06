@@ -104,16 +104,26 @@ macro_rules! token {
 }
 
 macro_rules! expect {
-    ( $self:expr, $tokens:expr, $got:expr, $( $token:path, $string:expr ),* ) => {
-        match $got {
-            $( $token(_) => { $self.operands.push($tokens.pop_front().unwrap()); } )+
-            tok => {
+    ( $self:expr, $tokens:expr, $( $token:path, $string:expr ),* ) => {
+        match $tokens.front() {
+            $( Some($token(_)) => { $self.operands.push($tokens.pop_front().unwrap()); } )+
+            Some(tok) => {
                 expected(
                     $self.file(),
                     &[
                         $( $string, )+
-                    ], &tok,
+                    ], Some(tok),
                     (tok.column(), tok.line(), tok.token().len())
+                );
+                return $tokens;
+            }
+            None => {
+                expected(
+                    $self.file(),
+                    &[
+                        $( $string, )+
+                    ], None,
+                    ($self.column(), $self.line(), $self.token().len())
                 );
                 return $tokens;
             }
@@ -122,9 +132,9 @@ macro_rules! expect {
 }
 
 macro_rules! maybe_expect {
-    ( $self:expr, $tokens:expr, $got:expr, $( $token:path ),* ) => {
-        match $got {
-            $( $token(_) => { $self.operands.push($tokens.pop_front().unwrap()); } )+
+    ( $self:expr, $tokens:expr, $( $token:path ),* ) => {
+        match $tokens.front() {
+            $( Some($token(_)) => { $self.operands.push($tokens.pop_front().unwrap()); } )+
             _ => {}
         }
     }

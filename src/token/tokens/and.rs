@@ -70,22 +70,16 @@ impl Requirements for And {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        if let Some(token) = tokens.front() {
-            expect!(self, tokens, token, Token::Register, "Register");
-        }
+        expect!(self, tokens, Token::Register, "Register");
 
-        if let Some(token) = tokens.front() {
-            maybe_expect!(self, tokens, token, Token::Register);
-        }
+        maybe_expect!(self, tokens, Token::Register);
 
-        if let Some(token) = tokens.front() {
-            // We want to allow AND R1, R2[, #2] but not AND R2, #2
-            if self.operands.len() == 2 {
-                // This will mean the above maybe_expect! succeeded, and so we can accept an immediate value here
-                maybe_expect!(self, tokens, token, Token::Immediate, Token::Register);
-            } else {
-                maybe_expect!(self, tokens, token, Token::Register);
-            }
+        // We want to allow AND R1, R2[, #2] but not AND R2, #2
+        if self.operands.len() == 2 {
+            // This will mean the above maybe_expect! succeeded, and so we can accept an immediate value here
+            maybe_expect!(self, tokens, Token::Immediate, Token::Register);
+        } else {
+            maybe_expect!(self, tokens, Token::Register);
         }
 
         operands_check!(self);

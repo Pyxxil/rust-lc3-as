@@ -72,24 +72,9 @@ impl Requirements for Lshift {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        if let Some(token) = tokens.front() {
-            expect!(self, tokens, token, Token::Register, "Register");
-        } else {
-            too_few_operands(
-                &self.file,
-                2,
-                0,
-                self.token(),
-                (self.column, self.line, self.token().len()),
-            );
+        expect!(self, tokens, Token::Register, "Register");
 
-            return tokens;
-        }
-
-        if let Some(token) = tokens.front() {
-            expect!(self, tokens, token, Token::Immediate, "Immediate");
-        } else {
-        }
+        expect!(self, tokens, Token::Immediate, "Immediate");
 
         operands_check!(self);
 

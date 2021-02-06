@@ -73,12 +73,10 @@ impl Parser {
                         Assembler::from_file(file)
                             .ok()
                             .and_then(|assembler| {
-                                assembler.lex().and_then(|ast| {
+                                assembler.lex().map(|ast| {
                                     let length = tokens.len();
                                     tokens.extend(ast.into_iter().rev());
                                     tokens.rotate_left(length);
-
-                                    Some(())
                                 })
                             })
                             .unwrap();

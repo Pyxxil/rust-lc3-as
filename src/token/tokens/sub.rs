@@ -158,17 +158,11 @@ impl Requirements for Sub {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        if let Some(token) = tokens.front() {
-            expect!(self, tokens, token, Token::Register, "Register");
-        }
+        expect!(self, tokens, Token::Register, "Register");
 
-        if let Some(token) = tokens.front() {
-            expect!(self, tokens, token, Token::Register, "Register");
-        }
+        expect!(self, tokens, Token::Register, "Register");
 
-        if let Some(token) = tokens.front() {
-            maybe_expect!(self, tokens, token, Token::Register);
-        }
+        maybe_expect!(self, tokens, Token::Register);
 
         operands_check!(self);
 

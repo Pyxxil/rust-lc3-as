@@ -92,7 +92,7 @@ impl<'a> Tokenizer<'a> {
             || ch == ':'
             || ch == ','
             || Self::is_comment_character(ch)
-            || !Self::is_label_character(ch)
+            || (!Self::is_label_character(ch) && !Self::is_token_character(ch))
     }
 
     #[must_use]
@@ -441,8 +441,15 @@ impl<'a> Tokenizer<'a> {
                     '\'' => character.push('\''),
                     '0' => character.push('\0'),
                     _ => {
+                        warn!(Diagnostic::Highlight(Highlight::new(
+                            DiagType::Warning,
+                            self.file.to_string(),
+                            self.column - 2,
+                            self.line_number,
+                            2,
+                            format!("Unknown escape sequence '\\{}'", ch),
+                        )));
                         character.push(ch);
-                        println!("Unrecognised escape sequence '\\{}'", ch);
                     }
                 };
             } else if ch == '\'' {
@@ -769,7 +776,6 @@ impl<'a> Tokenizer<'a> {
                             format!("Invalid token '{}'", token),
                         ))
                     );
-                    self.next();
                     return self.next_token();
                 }
                 '.' => {

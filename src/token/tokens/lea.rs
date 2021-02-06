@@ -67,21 +67,16 @@ impl Requirements for Lea {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        if let Some(token) = tokens.front() {
-            expect!(self, tokens, token, Token::Register, "Register");
-        }
+        expect!(self, tokens, Token::Register, "Register");
 
-        if let Some(token) = tokens.front() {
-            expect!(
-                self,
-                tokens,
-                token,
-                Token::Label,
-                "Label",
-                Token::Immediate,
-                "Immediate"
-            );
-        }
+        expect!(
+            self,
+            tokens,
+            Token::Label,
+            "Label",
+            Token::Immediate,
+            "Immediate"
+        );
 
         operands_check!(self);
 

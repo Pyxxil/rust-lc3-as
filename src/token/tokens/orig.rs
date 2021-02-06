@@ -48,9 +48,7 @@ impl Requirements for Orig {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        if let Some(token) = tokens.front() {
-            expect!(self, tokens, token, Token::Immediate, "Immediate");
-        }
+        expect!(self, tokens, Token::Immediate, "Immediate");
 
         operands_check!(self);
 

@@ -67,21 +67,16 @@ impl Requirements for Ld {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        if let Some(token) = tokens.front() {
-            expect!(self, tokens, token, Token::Register, "Register");
-        }
+        expect!(self, tokens, Token::Register, "Register");
 
-        if let Some(token) = tokens.front() {
-            expect!(
-                self,
-                tokens,
-                token,
-                Token::Immediate,
-                "Immediate",
-                Token::Label,
-                "Label"
-            );
-        }
+        expect!(
+            self,
+            tokens,
+            Token::Immediate,
+            "Immediate",
+            Token::Label,
+            "Label"
+        );
 
         operands_check!(self);
 

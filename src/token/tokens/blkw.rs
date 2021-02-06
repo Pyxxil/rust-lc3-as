@@ -81,30 +81,15 @@ impl Requirements for Blkw {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        if let Some(token) = tokens.front() {
-            expect!(self, tokens, token, Token::Immediate, "Immediate");
-        } else {
-            too_few_operands(
-                &self.file,
-                2,
-                0,
-                self.token(),
-                (self.column, self.line, self.token().len()),
-            );
+        expect!(self, tokens, Token::Immediate, "Immediate");
 
-            return tokens;
-        }
-
-        if let Some(token) = tokens.front() {
-            maybe_expect!(
-                self,
-                tokens,
-                token,
-                Token::Immediate,
-                Token::Character,
-                Token::Label
-            );
-        }
+        maybe_expect!(
+            self,
+            tokens,
+            Token::Immediate,
+            Token::Character,
+            Token::Label
+        );
 
         operands_check!(self);
 

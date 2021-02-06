@@ -60,7 +60,7 @@ macro_rules! consume {
                 expected(
                     $self.file(),
                     &["Instruction", "Directive", "Label"],
-                    $self,
+                    None,
                     (token.column(), token.line(), token.token().len()),
                 );
                 $tokens
