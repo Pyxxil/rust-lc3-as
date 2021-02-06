@@ -769,6 +769,7 @@ impl<'a> Tokenizer<'a> {
                             format!("Invalid token '{}'", token),
                         ))
                     );
+                    self.next();
                     return self.next_token();
                 }
                 '.' => {
