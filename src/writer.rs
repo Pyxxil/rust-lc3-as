@@ -64,11 +64,15 @@ impl<W: Write> Writer<W> {
         }
     }
 
+    /// Register a writer for a format, e.g. provide a file that will
+    /// have the binary representation of the program written to it
     pub fn register(mut self, ty: Format, writer: W) -> Self {
         self.outputs.push((ty, writer));
         self
     }
 
+    /// Write the program to each of the registered writers in their respective
+    /// formats
     pub fn write(mut self, program: Program) -> Result<(), Error> {
         let (symbols, listings) = program;
 
@@ -93,6 +97,8 @@ impl<W: Write> Writer<W> {
 }
 
 impl Writer<File> {
+    /// Register all of the formats with a specific base file
+    /// This is currently only used by the assembler
     #[must_use]
     pub fn register_all(mut self, file: &str) -> Self {
         let base_file_name: String = file
