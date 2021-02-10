@@ -1,4 +1,3 @@
-#![feature(const_fn)]
 #![feature(test)]
 #![allow(clippy::cast_possible_truncation)]
 #![allow(clippy::cast_sign_loss)]
