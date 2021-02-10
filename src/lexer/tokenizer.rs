@@ -611,7 +611,7 @@ impl<'a> Tokenizer<'a> {
                 '/' => {
                     self.next(); // Skip this character
                     if let Some('/') = self.next() {
-                        Some(Token::EOL) // Line comment
+                        Some(Token::Eol) // Line comment
                     } else {
                         warn!(Diagnostic::Pointer(Pointer::new(
                             DiagType::Warning,
@@ -621,10 +621,10 @@ impl<'a> Tokenizer<'a> {
                             "Expected another '/' here. Treating it as a comment anyways"
                                 .to_owned(),
                         )));
-                        Some(Token::EOL)
+                        Some(Token::Eol)
                     }
                 }
-                ';' => Some(Token::EOL), // Line comment
+                ';' => Some(Token::Eol), // Line comment
                 ':' | ',' => {
                     self.next();
                     return self.next_token();
@@ -686,7 +686,7 @@ impl<'a> Tokenizer<'a> {
             };
         }
 
-        Some(Token::EOL)
+        Some(Token::Eol)
     }
 
     #[inline]
@@ -703,7 +703,7 @@ impl<'a> Iterator for Tokenizer<'a> {
             None
         } else {
             match self.next_token() {
-                Some(Token::EOL) => None,
+                Some(Token::Eol) => None,
                 token => token,
             }
         }

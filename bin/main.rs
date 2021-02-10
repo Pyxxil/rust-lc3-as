@@ -36,6 +36,7 @@ fn main() {
     files.into_iter().for_each(move |file| {
         Assembler::from_file(file.to_string())
             .map(|assembler| {
+                println!("Assembling file {}", file);
                 assembler
                     .assemble(should_print_ast)
                     .map(|program| Writer::new().register_all(file).write(program))

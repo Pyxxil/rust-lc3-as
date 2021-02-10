@@ -105,8 +105,6 @@ impl Assembler {
 
     #[must_use]
     pub fn assemble(self, _do_print_ast: bool) -> Option<Program> {
-        println!("Assembling file {}", self.file);
-
         self.lex()
             .and_then(Self::parse)
             .and_then(Self::do_second_pass)
