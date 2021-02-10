@@ -3,8 +3,7 @@ extern crate lc3lib;
 
 use clap::{App, Arg};
 
-use lc3lib::assembler::Assembler;
-use lc3lib::notifier;
+use lc3lib::{assembler::Assembler, notifier, writer::Writer};
 
 fn main() {
     let args = App::new("LC3AS")
@@ -39,7 +38,7 @@ fn main() {
             .map(|assembler| {
                 assembler
                     .assemble(should_print_ast)
-                    .map(|(assembler, symbols, assembled)| assembler.write(symbols, &assembled))
+                    .map(|program| Writer::new().register_all(file).write(program))
                     .map_or_else(
                         || println!("Assembly failed for {}", file),
                         |_| println!("Assembly successful"),

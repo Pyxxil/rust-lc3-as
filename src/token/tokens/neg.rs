@@ -8,6 +8,7 @@ use token::{Symbol, Token};
 token!(Neg, 2);
 
 impl Assemble for Neg {
+    #[allow(clippy::cast_sign_loss)]
     fn assembled(
         self,
         program_counter: &mut i16,
