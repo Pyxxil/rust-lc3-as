@@ -1,8 +1,9 @@
-use std::collections::HashMap;
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 
-use token::Symbol;
-use token::Token;
+use crate::{
+    token::{Symbol, Token},
+    types::Listings,
+};
 
 pub trait Assemble {
     fn assembled(
@@ -10,27 +11,18 @@ pub trait Assemble {
         program_counter: &mut i16,
         symbols: &HashMap<String, Symbol>,
         symbol: &str,
-    ) -> Vec<(u16, String)>;
+    ) -> Listings;
 }
 
 pub trait Requirements {
-    /* The amount of tokens that this token requires for operands
-     *
-     * @return A tuple in the form (min, max)
-     */
+    /// The amount of tokens that this token requires for operands
+    /// in the form of (min, max)
     fn require_range(&self) -> (u64, u64);
 
-    /* The amount of memory that is required by this token
-     *
-     * @return The memory requirement
-     */
+    /// Get the memory requirement for this token
     fn memory_requirement(&self) -> u16;
 
-    /* Consume a range of tokens corresponding to Requirements::require_range.1 (at most).
-     *
-     * @param: tokens The queue containing the tokens we can consume from.
-     *
-     * @return The tokens not consumed
-     */
+    /// Consume from the token stream until we have all the required
+    /// operands for this token
     fn consume(&mut self, tokens: VecDeque<Token>) -> VecDeque<Token>;
 }

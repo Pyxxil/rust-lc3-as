@@ -1,10 +1,18 @@
-use std::collections::HashMap;
-use std::collections::VecDeque;
-use std::iter;
+use std::{
+    collections::{HashMap, VecDeque},
+    iter,
+};
 
-use token::tokens::traits::{Assemble, Requirements};
-use token::tokens::{expected, too_few_operands};
-use token::{Symbol, Token};
+use crate::{
+    token::{
+        tokens::{
+            expected, too_few_operands,
+            traits::{Assemble, Requirements},
+        },
+        Symbol, Token,
+    },
+    types::Listings,
+};
 
 token!(Lshift, 2);
 
@@ -14,7 +22,7 @@ impl Assemble for Lshift {
         program_counter: &mut i16,
         _symbols: &HashMap<String, Symbol>,
         symbol: &str,
-    ) -> Vec<(u16, String)> {
+    ) -> Listings {
         let register = match self.operands.remove(0) {
             Token::Register(register) => register.register,
             _ => unreachable!(),

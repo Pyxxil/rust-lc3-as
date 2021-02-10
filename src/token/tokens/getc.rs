@@ -1,8 +1,12 @@
-use std::collections::HashMap;
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 
-use token::tokens::traits::{Assemble, Requirements};
-use token::{Symbol, Token};
+use crate::{
+    token::{
+        tokens::traits::{Assemble, Requirements},
+        Symbol, Token,
+    },
+    types::Listings,
+};
 
 token!(Getc);
 
@@ -12,7 +16,7 @@ impl Assemble for Getc {
         program_counter: &mut i16,
         _symbols: &HashMap<String, Symbol>,
         symbol: &str,
-    ) -> Vec<(u16, String)> {
+    ) -> Listings {
         *program_counter += 1;
 
         vec![(

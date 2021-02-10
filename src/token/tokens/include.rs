@@ -1,8 +1,9 @@
 use std::collections::VecDeque;
 
-use token::tokens::traits::Requirements;
-use token::tokens::{expected, too_few_operands};
-use token::Token;
+use crate::token::{
+    tokens::{expected, too_few_operands, traits::Requirements},
+    Token,
+};
 
 token!(Include, 1);
 

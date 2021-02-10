@@ -6,10 +6,8 @@ use std::{
 };
 
 use crate::{
-    lexer::Lexer,
-    notifier,
-    parser::Parser,
-    token::{self, tokens::traits::Assemble, Token},
+    lexer, notifier, parser,
+    token::{tokens::traits::Assemble, Token},
     types::{Program, SymbolTable},
 };
 
@@ -64,9 +62,7 @@ impl Assembler {
 
         let mut content = String::new();
 
-        BufReader::new(File::open(file.clone())?)
-            .read_to_string(&mut content)
-            .unwrap();
+        BufReader::new(File::open(file.clone())?).read_to_string(&mut content)?;
 
         Ok(Self { file, content })
     }
@@ -79,28 +75,13 @@ impl Assembler {
     }
 
     #[must_use]
-    pub fn lex(&self) -> Option<Vec<Token>> {
-        let mut lexer = Lexer::new(&self.file, &self.content);
-
-        lexer.lex();
-
-        if Lexer::is_okay() {
-            Some(lexer.tokens())
-        } else {
-            None
-        }
+    pub(crate) fn lex(&self) -> Option<Vec<Token>> {
+        lexer::lex(&self.file, &self.content)
     }
 
     #[must_use]
-    pub fn parse(ast: Vec<Token>) -> Option<(Vec<Token>, SymbolTable)> {
-        let mut parser = Parser::new(ast);
-        parser.parse();
-
-        if Parser::is_okay() {
-            Some(parser.tokens_and_symbols())
-        } else {
-            None
-        }
+    fn parse(ast: Vec<Token>) -> Option<(Vec<Token>, SymbolTable)> {
+        parser::parse(ast)
     }
 
     #[must_use]
@@ -110,7 +91,7 @@ impl Assembler {
             .and_then(Self::do_second_pass)
     }
 
-    fn do_second_pass((tokens, symbols): (Vec<token::Token>, SymbolTable)) -> Option<Program> {
+    fn do_second_pass((tokens, symbols): (Vec<Token>, SymbolTable)) -> Option<Program> {
         let mut program_counter: i16 = 0;
         let listings = tokens
             .into_iter()
@@ -124,10 +105,10 @@ impl Assembler {
             })
             .collect();
 
-        if notifier::error_count() > 0 {
-            None
-        } else {
+        if notifier::error_count() == 0 {
             Some((symbols, listings))
+        } else {
+            None
         }
     }
 }

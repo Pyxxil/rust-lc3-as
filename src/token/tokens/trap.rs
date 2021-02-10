@@ -1,9 +1,16 @@
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::tokens::traits::{Assemble, Requirements};
-use token::tokens::{expected, too_few_operands};
-use token::{Symbol, Token};
+use crate::{
+    token::{
+        tokens::{
+            expected, too_few_operands,
+            traits::{Assemble, Requirements},
+        },
+        Symbol, Token,
+    },
+    types::Listings,
+};
 
 token!(Trap, 1);
 
@@ -13,7 +20,7 @@ impl Assemble for Trap {
         program_counter: &mut i16,
         _symbols: &HashMap<String, Symbol>,
         symbol: &str,
-    ) -> Vec<(u16, String)> {
+    ) -> Listings {
         *program_counter += 1;
 
         let instruction = 0xF000

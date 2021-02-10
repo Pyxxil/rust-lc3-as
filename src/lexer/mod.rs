@@ -1,47 +1,20 @@
-use std::iter::Iterator;
-
-use lexer::tokenizer::Tokenizer;
-use notifier;
-use token::Token;
-
 pub mod tokenizer;
 
-pub struct Lexer<'a> {
-    file: &'a str,
-    content: &'a str,
-    tokens: Vec<Token>,
-}
+use std::iter::Iterator;
 
-impl<'a> Lexer<'a> {
-    #[must_use]
-    pub fn new(file: &'a str, content: &'a str) -> Lexer<'a> {
-        Lexer {
-            file,
-            content,
-            tokens: Vec::new(),
-        }
-    }
+use crate::{lexer::tokenizer::Tokenizer, notifier, token::Token};
 
-    pub fn lex(&mut self) {
-        self.tokens = self
-            .content
-            .lines()
-            .enumerate()
-            .flat_map(|(line_number, line)| {
-                Tokenizer::new(self.file, &line, (line_number + 1) as u64).collect::<Vec<_>>()
-            })
-            .collect();
-    }
+#[must_use]
+pub fn lex(file: &str, content: &str) -> Option<Vec<Token>> {
+    let tokens = content
+        .lines()
+        .enumerate()
+        .flat_map(|(line_number, line)| Tokenizer::new(file, &line, (line_number + 1) as u64))
+        .collect();
 
-    #[inline]
-    #[must_use]
-    pub fn tokens(self) -> Vec<Token> {
-        self.tokens
-    }
-
-    #[inline]
-    #[must_use]
-    pub fn is_okay() -> bool {
-        notifier::error_count() == 0
+    if notifier::error_count() == 0 {
+        Some(tokens)
+    } else {
+        None
     }
 }

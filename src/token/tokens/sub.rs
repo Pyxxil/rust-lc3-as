@@ -1,10 +1,16 @@
-use std::collections::HashMap;
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 
-use token::r#type::Token;
-use token::tokens::traits::{Assemble, Requirements};
-use token::tokens::{expected, too_few_operands};
-use token::Symbol;
+use crate::{
+    token::{
+        r#type::Token,
+        tokens::{
+            expected, too_few_operands,
+            traits::{Assemble, Requirements},
+        },
+        Symbol,
+    },
+    types::Listings,
+};
 
 token!(Sub, 3);
 
@@ -14,7 +20,7 @@ impl Assemble for Sub {
         program_counter: &mut i16,
         _symbols: &HashMap<String, Symbol>,
         symbol: &str,
-    ) -> Vec<(u16, String)> {
+    ) -> Listings {
         let destination_register = match self.operands.first().unwrap() {
             Token::Register(register) => register.register,
             _ => unreachable!(),

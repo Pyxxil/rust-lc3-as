@@ -1,9 +1,15 @@
-use std::collections::HashMap;
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 
-use token::tokens::traits::{Assemble, Requirements};
-use token::tokens::{expected, too_few_operands};
-use token::{Symbol, Token};
+use crate::{
+    token::{
+        tokens::{
+            expected, too_few_operands,
+            traits::{Assemble, Requirements},
+        },
+        Symbol, Token,
+    },
+    types::Listings,
+};
 
 token!(Stringz, 1);
 
@@ -13,7 +19,7 @@ impl Assemble for Stringz {
         program_counter: &mut i16,
         _symbols: &HashMap<String, Symbol>,
         symbol: &str,
-    ) -> Vec<(u16, String)> {
+    ) -> Listings {
         let mut assembled = Vec::new();
 
         match self.operands.first().unwrap() {

@@ -1,9 +1,15 @@
-use std::collections::HashMap;
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 
-use token::tokens::traits::{Assemble, Requirements};
-use token::tokens::{expected, too_few_operands};
-use token::{Symbol, Token};
+use crate::{
+    token::{
+        tokens::{
+            expected, too_few_operands,
+            traits::{Assemble, Requirements},
+        },
+        Symbol, Token,
+    },
+    types::Listings,
+};
 
 token!(Set, 2);
 
@@ -13,7 +19,7 @@ impl Assemble for Set {
         program_counter: &mut i16,
         _symbols: &HashMap<String, Symbol>,
         symbol: &str,
-    ) -> Vec<(u16, String)> {
+    ) -> Listings {
         let immediate = match self.operands.last().unwrap() {
             Token::Immediate(immediate) => immediate.value,
             _ => unreachable!(),
@@ -26,27 +32,28 @@ impl Assemble for Set {
 
         if immediate >= -16 && immediate <= 15 {
             *program_counter += 2;
-            let and_instruction = 0x5020 | register << 9 | register << 6;
-            let add_instruction =
+            let clear_instruction = 0x5020 | register << 9 | register << 6;
+            let set_instruction =
                 0x1020 | register << 9 | register << 6 | (immediate as u16 & 0x1F);
+
             vec![
                 (
-                    and_instruction,
+                    clear_instruction,
                     format!(
                         "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} AND R{4} R{4} #0",
                         *program_counter - 2,
-                        and_instruction,
+                        clear_instruction,
                         self.line,
                         symbol,
                         register
                     ),
                 ),
                 (
-                    add_instruction,
+                    set_instruction,
                     format!(
                         "({0:04X}) {1:04X} {1:016b} ({2: >4})                      ADD R{3} R{3} #{4}",
                         *program_counter - 1,
-                        add_instruction,
+                        set_instruction,
                         self.line,
                         register,
                         immediate

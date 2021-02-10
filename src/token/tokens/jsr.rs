@@ -1,11 +1,16 @@
 use std::collections::{HashMap, VecDeque};
 
-use token::tokens::traits::{Assemble, Requirements};
-use token::tokens::{expected, too_few_operands};
-use token::{Symbol, Token};
-
-use crate::notifier;
-use crate::notifier::{DiagType, Diagnostic, Highlight};
+use crate::{
+    notifier::{self, DiagType, Diagnostic, Highlight},
+    token::{
+        tokens::{
+            expected, too_few_operands,
+            traits::{Assemble, Requirements},
+        },
+        Symbol, Token,
+    },
+    types::Listings,
+};
 
 token!(Jsr, 1);
 
@@ -15,7 +20,7 @@ impl Assemble for Jsr {
         program_counter: &mut i16,
         symbols: &HashMap<String, Symbol>,
         symbol: &str,
-    ) -> Vec<(u16, String)> {
+    ) -> Listings {
         *program_counter += 1;
 
         let value = match self.operands.first().unwrap() {
