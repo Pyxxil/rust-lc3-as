@@ -12,8 +12,9 @@ const FILES: &[&str] = &[
     "Examples/Recursive_Fibonacci.asm",
     "Examples/input.asm",
     "Examples/Compare.asm",
-    "Examples/Features.asm",
+    // "Examples/Features.asm", // Currently broken
     "Examples/Multi_Word_Addition.asm",
+    "Examples/2048.asm",
 ];
 
 fn lex(file: &str) {

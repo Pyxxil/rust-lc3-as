@@ -59,7 +59,7 @@ pub enum Token {
     Stringz(stringz::Stringz),
     Sub(sub::Sub),
 
-    EOL,
+    Eol,
 }
 
 impl Token {

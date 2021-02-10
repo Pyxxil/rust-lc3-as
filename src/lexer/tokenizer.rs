@@ -1,17 +1,20 @@
-extern crate colored;
+use std::{iter::Peekable, str::Chars};
 
-use std::iter::Peekable;
-use std::str::Chars;
-
-use assembler::add_line;
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight, Pointer};
-use token::tokens::{
-    add, and, blkw, br, character, end, fill, getc, halt, immediate, include, jmp, jmpt, jsr, jsrr,
-    label, ld, ldi, ldr, lea, lshift, neg, not, orig, out, puts, putsp, r#in, register, ret, rti,
-    set, st, sti, str, string, stringz, sub, trap,
+use crate::{
+    assembler::add_line,
+    notifier::{self, DiagType, Diagnostic, Highlight, Pointer},
+    token::{
+        tokens::{
+            add::Add, and::And, blkw::Blkw, br::Br, character::Character, end::End, fill::Fill,
+            getc::Getc, halt::Halt, immediate::Immediate, include::Include, jmp::Jmp, jmpt::Jmpt,
+            jsr::Jsr, jsrr::Jsrr, label::Label, ld::Ld, ldi::Ldi, ldr::Ldr, lea::Lea,
+            lshift::Lshift, neg::Neg, not::Not, orig::Orig, out::Out, puts::Puts, putsp::Putsp,
+            r#in::In, register::Register, ret::Ret, rti::Rti, set::Set, st::St, sti::Sti, str::Str,
+            string, stringz::Stringz, sub::Sub, trap::Trap,
+        },
+        Token,
+    },
 };
-use token::Token;
 
 macro_rules! err {
     ($tokenizer:expr, $diagnostic:expr) => {
@@ -102,252 +105,146 @@ impl<'a> Tokenizer<'a> {
         }
 
         match token.to_ascii_uppercase().as_ref() {
-            "ADD" => Some(Token::Add(add::Add::new(
+            "ADD" => Some(Token::Add(Add::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "AND" => Some(Token::And(and::And::new(
+            "AND" => Some(Token::And(And::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "NOT" => Some(Token::Not(not::Not::new(
+            "NOT" => Some(Token::Not(Not::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "BRNZP" | "BRNPZ" | "BRZPN" | "BRZNP" | "BRPNZ" | "BRPZN" | "BR" => Some(Token::Br(
-                br::Br::new(token, self.file.to_string(), column, line, true, true, true),
+            "BRNZP" | "BRNPZ" | "BRZPN" | "BRZNP" | "BRPNZ" | "BRPZN" | "BR" | "BRN" | "BRZ"
+            | "BRP" | "BRNZ" | "BRZN" | "BRNP" | "BRPN" | "BRZP" | "BRPZ" => Some(Token::Br(
+                Br::from_str(token, self.file.to_string(), column, line),
             )),
-            "BRN" => Some(Token::Br(br::Br::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-                true,
-                false,
-                false,
-            ))),
-            "BRZ" => Some(Token::Br(br::Br::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-                false,
-                true,
-                false,
-            ))),
-            "BRP" => Some(Token::Br(br::Br::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-                false,
-                false,
-                true,
-            ))),
-            "BRNZ" | "BRZN" => Some(Token::Br(br::Br::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-                true,
-                true,
-                false,
-            ))),
-            "BRNP" | "BRPN" => Some(Token::Br(br::Br::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-                true,
-                false,
-                true,
-            ))),
-            "BRZP" | "BRPZ" => Some(Token::Br(br::Br::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-                false,
-                true,
-                true,
-            ))),
-            "JMP" => Some(Token::Jmp(jmp::Jmp::new(
+            "JMP" => Some(Token::Jmp(Jmp::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "JMPT" => Some(Token::Jmpt(jmpt::Jmpt::new(
+            "JMPT" => Some(Token::Jmpt(Jmpt::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "JSR" => Some(Token::Jsr(jsr::Jsr::new(
+            "JSR" => Some(Token::Jsr(Jsr::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "JSRR" => Some(Token::Jsrr(jsrr::Jsrr::new(
+            "JSRR" => Some(Token::Jsrr(Jsrr::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "RET" => Some(Token::Ret(ret::Ret::new(
+            "RET" => Some(Token::Ret(Ret::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "RTI" => Some(Token::Rti(rti::Rti::new(
+            "RTI" => Some(Token::Rti(Rti::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "LD" => Some(Token::Ld(ld::Ld::new(
+            "LD" => Some(Token::Ld(Ld::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "LDR" => Some(Token::Ldr(ldr::Ldr::new(
+            "LDR" => Some(Token::Ldr(Ldr::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "LDI" => Some(Token::Ldi(ldi::Ldi::new(
+            "LDI" => Some(Token::Ldi(Ldi::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "LEA" => Some(Token::Lea(lea::Lea::new(
+            "LEA" => Some(Token::Lea(Lea::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "ST" => Some(Token::St(st::St::new(
+            "ST" => Some(Token::St(St::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "STR" => Some(Token::Str(str::Str::new(
+            "STR" => Some(Token::Str(Str::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "STI" => Some(Token::Sti(sti::Sti::new(
+            "STI" => Some(Token::Sti(Sti::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "R0" => Some(Token::Register(register::Register::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-                0,
-            ))),
-            "R1" => Some(Token::Register(register::Register::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-                1,
-            ))),
-            "R2" => Some(Token::Register(register::Register::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-                2,
-            ))),
-            "R3" => Some(Token::Register(register::Register::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-                3,
-            ))),
-            "R4" => Some(Token::Register(register::Register::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-                4,
-            ))),
-            "R5" => Some(Token::Register(register::Register::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-                5,
-            ))),
-            "R6" => Some(Token::Register(register::Register::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-                6,
-            ))),
-            "R7" => Some(Token::Register(register::Register::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-                7,
-            ))),
-            "HALT" => Some(Token::Halt(halt::Halt::new(
+            "R0" | "R1" | "R2" | "R3" | "R4" | "R5" | "R6" | "R7" => Some(Token::Register(
+                Register::from_str(token, self.file.to_string(), column, line),
+            )),
+            "HALT" => Some(Token::Halt(Halt::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "TRAP" => Some(Token::Trap(trap::Trap::new(
+            "TRAP" => Some(Token::Trap(Trap::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "PUTS" => Some(Token::Puts(puts::Puts::new(
+            "PUTS" => Some(Token::Puts(Puts::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "PUTSP" => Some(Token::Putsp(putsp::Putsp::new(
+            "PUTSP" => Some(Token::Putsp(Putsp::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "PUTC" | "OUT" => Some(Token::Out(out::Out::new(
+            "PUTC" | "OUT" => Some(Token::Out(Out::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "IN" => Some(Token::In(r#in::In::new(
+            "IN" => Some(Token::In(In::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            "GETC" => Some(Token::Getc(getc::Getc::new(
+            "GETC" => Some(Token::Getc(Getc::new(
                 token,
                 self.file.to_string(),
                 column,
@@ -398,7 +295,14 @@ impl<'a> Tokenizer<'a> {
             previous = ch;
         }
 
-        if !terminated {
+        if terminated {
+            Some(Token::String(string::String::new(
+                token,
+                self.file.to_string(),
+                self.line_number,
+                token_start,
+            )))
+        } else {
             err!(
                 self,
                 Diagnostic::Highlight(Highlight::new(
@@ -411,13 +315,6 @@ impl<'a> Tokenizer<'a> {
                 ))
             );
             None
-        } else {
-            Some(Token::String(string::String::new(
-                token,
-                self.file.to_string(),
-                self.line_number,
-                token_start,
-            )))
         }
     }
 
@@ -488,7 +385,7 @@ impl<'a> Tokenizer<'a> {
             );
             None
         } else {
-            Some(Token::Character(character::Character::new(
+            Some(Token::Character(Character::new(
                 character,
                 self.file.to_string(),
                 token_start,
@@ -501,23 +398,17 @@ impl<'a> Tokenizer<'a> {
     pub fn is_valid_binary(token: &str) -> bool {
         let mut characters = token.chars();
 
-        if let Some(ch) = characters.next() {
-            match ch.to_ascii_uppercase() {
+        characters
+            .next()
+            .map_or(false, |ch| match ch.to_ascii_uppercase() {
                 'B' => token.len() > 1 && characters.all(|c| c.is_digit(2)),
-                '0' => {
-                    if let Some(c) = characters.next() {
-                        'B' == c.to_ascii_uppercase()
-                            && token.len() > 2
-                            && characters.all(|c| c.is_digit(2))
-                    } else {
-                        false
-                    }
-                }
+                '0' => characters.next().map_or(false, |c| {
+                    'B' == c.to_ascii_uppercase()
+                        && token.len() > 2
+                        && characters.all(|c| c.is_digit(2))
+                }),
                 _ => false,
-            }
-        } else {
-            false
-        }
+            })
     }
 
     #[must_use]
@@ -528,53 +419,38 @@ impl<'a> Tokenizer<'a> {
             let _ = characters.next();
         }
 
-        if let Some(ch) = characters.next() {
-            match ch {
-                '0'..='9' => characters.all(|c| c.is_digit(10)),
-                '-' => characters.peek().is_some() && !characters.any(|x| !x.is_digit(10)),
-                _ => false,
-            }
-        } else {
-            false
-        }
+        characters.next().map_or(false, |ch| match ch {
+            '0'..='9' => characters.all(|c| c.is_digit(10)),
+            '-' => characters.peek().is_some() && !characters.any(|x| !x.is_digit(10)),
+            _ => false,
+        })
     }
 
     #[must_use]
     pub fn is_valid_hexadecimal(token: &str) -> bool {
         let mut characters = token.chars();
-
-        if let Some(ch) = characters.next() {
-            match ch.to_ascii_uppercase() {
+        characters
+            .next()
+            .map_or(false, |ch| match ch.to_ascii_uppercase() {
                 'X' => token.len() > 1 && characters.all(|c| c.is_digit(16)),
-                '0' => {
-                    if let Some(c) = characters.next() {
-                        'X' == c.to_ascii_uppercase()
-                            && token.len() > 2
-                            && characters.all(|c| c.is_digit(16))
-                    } else {
-                        false
-                    }
-                }
+                '0' => characters.next().map_or(false, |c| {
+                    'X' == c.to_ascii_uppercase()
+                        && token.len() > 2
+                        && characters.all(|c| c.is_digit(16))
+                }),
                 _ => false,
-            }
-        } else {
-            false
-        }
+            })
     }
 
     #[must_use]
     pub fn is_valid_label(token: &str) -> bool {
         let mut characters = token.chars();
-        if let Some(ch) = characters.next() {
-            match ch {
-                '.' | '_' | 'a'..='z' | 'A'..='Z' => {
-                    characters.all(|c| c.is_alphanumeric() || c == '_')
-                }
-                _ => false,
+        characters.next().map_or(false, |ch| match ch {
+            '.' | '_' | 'a'..='z' | 'A'..='Z' => {
+                characters.all(|c| c.is_alphanumeric() || c == '_')
             }
-        } else {
-            false
-        }
+            _ => false,
+        })
     }
 
     fn tokenize_immediate_literal(
@@ -588,28 +464,28 @@ impl<'a> Tokenizer<'a> {
         }
 
         if Self::is_valid_decimal(&token) {
-            Some(Token::Immediate(immediate::Immediate::from_decimal(
+            Some(Token::Immediate(Immediate::from_decimal(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             )))
         } else if Self::is_valid_hexadecimal(&token) {
-            Some(Token::Immediate(immediate::Immediate::from_hexadecimal(
+            Some(Token::Immediate(Immediate::from_hexadecimal(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             )))
         } else if Self::is_valid_binary(&token) {
-            Some(Token::Immediate(immediate::Immediate::from_binary(
+            Some(Token::Immediate(Immediate::from_binary(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             )))
         } else if Self::is_valid_label(&token) {
-            Some(Token::Label(label::Label::new(
+            Some(Token::Label(Label::new(
                 token,
                 self.file.to_string(),
                 column,
@@ -636,62 +512,62 @@ impl<'a> Tokenizer<'a> {
 
     fn tokenize_directive(&mut self, token: String, column: u64, line: u64) -> Option<Token> {
         match token.to_ascii_uppercase().as_ref() {
-            ".ORIG" => Some(Token::Orig(orig::Orig::new(
+            ".ORIG" => Some(Token::Orig(Orig::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
                 0,
             ))),
-            ".END" => Some(Token::End(end::End::new(
+            ".END" => Some(Token::End(End::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            ".STRINGZ" => Some(Token::Stringz(stringz::Stringz::new(
+            ".STRINGZ" => Some(Token::Stringz(Stringz::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            ".BLKW" => Some(Token::Blkw(blkw::Blkw::new(
+            ".BLKW" => Some(Token::Blkw(Blkw::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            ".FILL" => Some(Token::Fill(fill::Fill::new(
+            ".FILL" => Some(Token::Fill(Fill::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            ".INCLUDE" => Some(Token::Include(include::Include::new(
+            ".INCLUDE" => Some(Token::Include(Include::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            ".SET" => Some(Token::Set(set::Set::new(
+            ".SET" => Some(Token::Set(Set::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            ".LSHIFT" => Some(Token::Lshift(lshift::Lshift::new(
+            ".LSHIFT" => Some(Token::Lshift(Lshift::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            ".NEG" => Some(Token::Neg(neg::Neg::new(
+            ".NEG" => Some(Token::Neg(Neg::new(
                 token,
                 self.file.to_string(),
                 column,
                 line,
             ))),
-            ".SUB" => Some(Token::Sub(sub::Sub::new(
+            ".SUB" => Some(Token::Sub(Sub::new(
                 token,
                 self.file.to_string(),
                 column,
@@ -699,7 +575,7 @@ impl<'a> Tokenizer<'a> {
             ))),
             _ => {
                 if Self::is_valid_label(&token) {
-                    Some(Token::Label(label::Label::new(
+                    Some(Token::Label(Label::new(
                         token,
                         self.file.to_string(),
                         column,
@@ -735,7 +611,7 @@ impl<'a> Tokenizer<'a> {
                 '/' => {
                     self.next(); // Skip this character
                     if let Some('/') = self.next() {
-                        Some(Token::EOL) // Line comment
+                        Some(Token::Eol) // Line comment
                     } else {
                         warn!(Diagnostic::Pointer(Pointer::new(
                             DiagType::Warning,
@@ -745,10 +621,10 @@ impl<'a> Tokenizer<'a> {
                             "Expected another '/' here. Treating it as a comment anyways"
                                 .to_owned(),
                         )));
-                        Some(Token::EOL)
+                        Some(Token::Eol)
                     }
                 }
-                ';' => Some(Token::EOL), // Line comment
+                ';' => Some(Token::Eol), // Line comment
                 ':' | ',' => {
                     self.next();
                     return self.next_token();
@@ -758,7 +634,7 @@ impl<'a> Tokenizer<'a> {
                 '#' | '-' => {
                     let token = self.read_word();
                     if Self::is_valid_decimal(&token) {
-                        return Some(Token::Immediate(immediate::Immediate::from_decimal(
+                        return Some(Token::Immediate(Immediate::from_decimal(
                             token,
                             self.file.to_string(),
                             token_start,
@@ -810,7 +686,7 @@ impl<'a> Tokenizer<'a> {
             };
         }
 
-        Some(Token::EOL)
+        Some(Token::Eol)
     }
 
     #[inline]
@@ -827,7 +703,7 @@ impl<'a> Iterator for Tokenizer<'a> {
             None
         } else {
             match self.next_token() {
-                Some(Token::EOL) => None,
+                Some(Token::Eol) => None,
                 token => token,
             }
         }

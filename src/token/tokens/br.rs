@@ -9,6 +9,17 @@ use crate::notifier::{DiagType, Diagnostic, Highlight};
 
 token!(Br, 1, n: bool, z: bool, p: bool);
 
+impl Br {
+    #[must_use]
+    pub fn from_str(token: String, file: String, column: u64, line: u64) -> Self {
+        let n = token.contains('N');
+        let z = token.contains('Z');
+        let p = token.contains('P');
+
+        Self::new(token, file, column, line, n, z, p)
+    }
+}
+
 impl Assemble for Br {
     fn assembled(
         self,
