@@ -64,4 +64,51 @@ mod testing {
             .iter()
             .for_each(|hexadecimal| assert!(!Tokenizer::is_valid_hexadecimal(hexadecimal)))
     }
+
+    #[test]
+    fn branch_instructions() {
+        let assembler = Assembler::from_string(String::from(
+            "
+            BRnzp   #0
+            BR      #0
+
+            BRn     #0
+            BRz     #0
+            BRp     #0
+            
+            BRnz    #0
+            BRzn    #0
+
+            BRnp    #0
+            BRpn    #0
+
+            BRzp    #0
+            BRpz    #0
+             ",
+        ));
+
+        let program = assembler.assemble(false);
+
+        assert!(program.is_some());
+
+        let (symbols, listings) = program.unwrap();
+
+        // Make sure none of them come up as symbols
+        assert!(symbols.is_empty());
+
+        // Make sure all of them are captured
+        assert!(listings.len() == 11);
+
+        assert!(listings[0].0 == 0x0E00);
+        assert!(listings[1].0 == 0x0E00);
+        assert!(listings[2].0 == 0x0800);
+        assert!(listings[3].0 == 0x0400);
+        assert!(listings[4].0 == 0x0200);
+        assert!(listings[5].0 == 0x0C00);
+        assert!(listings[6].0 == 0x0C00);
+        assert!(listings[7].0 == 0x0A00);
+        assert!(listings[8].0 == 0x0A00);
+        assert!(listings[9].0 == 0x0600);
+        assert!(listings[10].0 == 0x0600);
+    }
 }
