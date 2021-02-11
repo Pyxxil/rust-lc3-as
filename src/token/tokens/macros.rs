@@ -96,6 +96,8 @@ macro_rules! token {
                 &self.file
             }
         }
+
+        impl Requirements for $name {}
     };
 
     ( $name:ident ) => {
@@ -104,14 +106,14 @@ macro_rules! token {
 }
 
 macro_rules! expect {
-    ( $self:expr, $tokens:expr, $( $token:path, $string:expr ),* ) => {
+    ( $self:expr, $tokens:expr, $( $token:ident ),* ) => {
         match $tokens.front() {
-            $( Some($token(_)) => { $self.operands.push($tokens.pop_front().unwrap()); } )+
+            $( Some(Token::$token(_)) => { $self.operands.push($tokens.pop_front().unwrap()); } )+
             Some(tok) => {
                 expected(
                     $self.file(),
                     &[
-                        $( $string, )+
+                        $( stringify!($token), )+
                     ], Some(tok),
                     (tok.column(), tok.line(), tok.token().len())
                 );
@@ -121,7 +123,7 @@ macro_rules! expect {
                 expected(
                     $self.file(),
                     &[
-                        $( $string, )+
+                        $( stringify!($token), )+
                     ], None,
                     ($self.column(), $self.line(), $self.token().len())
                 );
@@ -132,9 +134,9 @@ macro_rules! expect {
 }
 
 macro_rules! maybe_expect {
-    ( $self:expr, $tokens:expr, $( $token:path ),* ) => {
+    ( $self:expr, $tokens:expr, $( $token:ident ),* ) => {
         match $tokens.front() {
-            $( Some($token(_)) => { $self.operands.push($tokens.pop_front().unwrap()); } )+
+            $( Some(Token::$token(_)) => { $self.operands.push($tokens.pop_front().unwrap()); } )+
             _ => {}
         }
     }
@@ -142,7 +144,7 @@ macro_rules! maybe_expect {
 
 macro_rules! operands_check {
     ( $self:expr ) => {
-        let (min, _) = $self.require_range();
+        let min = $self.min_operands();
         let received = $self.operands.len() as u64;
 
         if received < min {

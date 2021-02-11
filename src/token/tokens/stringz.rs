@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
 
 use crate::{
     token::{
@@ -6,9 +6,9 @@ use crate::{
             expected, too_few_operands,
             traits::{Assemble, Requirements},
         },
-        Symbol, Token,
+        Token,
     },
-    types::Listings,
+    types::{Listings, SymbolTable},
 };
 
 token!(Stringz, 1);
@@ -17,7 +17,7 @@ impl Assemble for Stringz {
     fn assembled(
         self,
         program_counter: &mut i16,
-        _symbols: &HashMap<String, Symbol>,
+        _symbols: &SymbolTable,
         symbol: &str,
     ) -> Listings {
         let mut assembled = Vec::new();
@@ -85,8 +85,8 @@ impl Assemble for Stringz {
 }
 
 impl Requirements for Stringz {
-    fn require_range(&self) -> (u64, u64) {
-        (1, 1)
+    fn min_operands(&self) -> u64 {
+        1
     }
 
     fn memory_requirement(&self) -> u16 {
@@ -97,7 +97,7 @@ impl Requirements for Stringz {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        expect!(self, tokens, Token::String, "String");
+        expect!(self, tokens, String);
 
         // Get all of the strings that belong to this .STRINGZ
         while let Some(Token::String(_)) = tokens.front() {

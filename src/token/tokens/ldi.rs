@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
 
 use crate::{
     notifier::{self, DiagType, Diagnostic, Highlight},
@@ -7,20 +7,15 @@ use crate::{
             expected, too_few_operands,
             traits::{Assemble, Requirements},
         },
-        Symbol, Token,
+        Token,
     },
-    types::Listings,
+    types::{Listings, SymbolTable},
 };
 
 token!(Ldi, 2);
 
 impl Assemble for Ldi {
-    fn assembled(
-        self,
-        program_counter: &mut i16,
-        symbols: &HashMap<String, Symbol>,
-        symbol: &str,
-    ) -> Listings {
+    fn assembled(self, program_counter: &mut i16, symbols: &SymbolTable, symbol: &str) -> Listings {
         *program_counter += 1;
 
         let destination_register = match self.operands.first().unwrap() {
@@ -63,25 +58,14 @@ impl Assemble for Ldi {
 }
 
 impl Requirements for Ldi {
-    fn require_range(&self) -> (u64, u64) {
-        (2, 2)
-    }
-
-    fn memory_requirement(&self) -> u16 {
-        1
+    fn min_operands(&self) -> u64 {
+        2
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        expect!(self, tokens, Token::Register, "Register");
+        expect!(self, tokens, Register);
 
-        expect!(
-            self,
-            tokens,
-            Token::Label,
-            "Label",
-            Token::Immediate,
-            "Immediate"
-        );
+        expect!(self, tokens, Label, Immediate);
 
         operands_check!(self);
 

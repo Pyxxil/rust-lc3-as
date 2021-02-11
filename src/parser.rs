@@ -4,14 +4,15 @@ use crate::{
     assembler::Assembler,
     notifier::{self, DiagType, Diagnostic, Highlight},
     token::{traits::Requirements, Symbol, Token},
+    types::SymbolTable,
 };
 
 #[must_use]
-pub fn parse(mut tokens: Vec<Token>) -> Option<(Vec<Token>, HashMap<String, Symbol>)> {
+pub fn parse(mut tokens: Vec<Token>) -> Option<(Vec<Token>, SymbolTable)> {
     let mut address = 0;
     let mut parsed_tokens: VecDeque<Token> = tokens.drain(..).collect();
 
-    let mut symbols: HashMap<String, Symbol> = HashMap::new();
+    let mut symbols: SymbolTable = HashMap::new();
 
     while let Some(mut token) = parsed_tokens.pop_front() {
         parsed_tokens = token.consume(parsed_tokens);

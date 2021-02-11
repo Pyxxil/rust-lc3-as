@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
 
 use crate::{
     notifier::{self, DiagType, Diagnostic, Highlight},
@@ -7,9 +7,9 @@ use crate::{
             expected, too_few_operands,
             traits::{Assemble, Requirements},
         },
-        Symbol, Token,
+        Token,
     },
-    types::Listings,
+    types::{Listings, SymbolTable},
 };
 
 token!(Br, 1, n: bool, z: bool, p: bool);
@@ -26,12 +26,7 @@ impl Br {
 }
 
 impl Assemble for Br {
-    fn assembled(
-        self,
-        program_counter: &mut i16,
-        symbols: &HashMap<String, Symbol>,
-        symbol: &str,
-    ) -> Listings {
+    fn assembled(self, program_counter: &mut i16, symbols: &SymbolTable, symbol: &str) -> Listings {
         *program_counter += 1;
 
         let value = match self.operands.first().unwrap() {
@@ -72,23 +67,12 @@ impl Assemble for Br {
 }
 
 impl Requirements for Br {
-    fn require_range(&self) -> (u64, u64) {
-        (1, 1)
-    }
-
-    fn memory_requirement(&self) -> u16 {
+    fn min_operands(&self) -> u64 {
         1
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        expect!(
-            self,
-            tokens,
-            Token::Label,
-            "Label",
-            Token::Immediate,
-            "Immediate"
-        );
+        expect!(self, tokens, Label, Immediate);
 
         operands_check!(self);
 

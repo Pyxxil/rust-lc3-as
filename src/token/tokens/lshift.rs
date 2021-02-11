@@ -1,7 +1,4 @@
-use std::{
-    collections::{HashMap, VecDeque},
-    iter,
-};
+use std::{collections::VecDeque, iter};
 
 use crate::{
     token::{
@@ -9,9 +6,9 @@ use crate::{
             expected, too_few_operands,
             traits::{Assemble, Requirements},
         },
-        Symbol, Token,
+        Token,
     },
-    types::Listings,
+    types::{Listings, SymbolTable},
 };
 
 token!(Lshift, 2);
@@ -20,7 +17,7 @@ impl Assemble for Lshift {
     fn assembled(
         mut self,
         program_counter: &mut i16,
-        _symbols: &HashMap<String, Symbol>,
+        _symbols: &SymbolTable,
         symbol: &str,
     ) -> Listings {
         let register = match self.operands.remove(0) {
@@ -64,25 +61,21 @@ impl Assemble for Lshift {
 }
 
 impl Requirements for Lshift {
-    fn require_range(&self) -> (u64, u64) {
-        (2, 2)
+    fn min_operands(&self) -> u64 {
+        2
     }
 
     fn memory_requirement(&self) -> u16 {
-        if self.operands.is_empty() {
-            0
-        } else {
-            match self.operands.last().unwrap() {
-                Token::Immediate(imm) => imm.value as u16,
-                _ => unreachable!(),
-            }
+        match self.operands.last().unwrap() {
+            Token::Immediate(imm) => imm.value as u16,
+            _ => unreachable!(),
         }
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        expect!(self, tokens, Token::Register, "Register");
+        expect!(self, tokens, Register);
 
-        expect!(self, tokens, Token::Immediate, "Immediate");
+        expect!(self, tokens, Immediate);
 
         operands_check!(self);
 

@@ -1,11 +1,6 @@
-use std::collections::{HashMap, VecDeque};
-
 use crate::{
-    token::{
-        tokens::traits::{Assemble, Requirements},
-        Symbol, Token,
-    },
-    types::Listings,
+    token::tokens::traits::{Assemble, Requirements},
+    types::{Listings, SymbolTable},
 };
 
 token!(Halt);
@@ -14,7 +9,7 @@ impl Assemble for Halt {
     fn assembled(
         self,
         program_counter: &mut i16,
-        _symbols: &HashMap<String, Symbol>,
+        _symbols: &SymbolTable,
         symbol: &str,
     ) -> Listings {
         *program_counter += 1;
@@ -28,20 +23,5 @@ impl Assemble for Halt {
                 symbol
             ),
         )]
-    }
-}
-
-impl Requirements for Halt {
-    fn require_range(&self) -> (u64, u64) {
-        (0, 0)
-    }
-
-    fn memory_requirement(&self) -> u16 {
-        1
-    }
-
-    // As HALT takes no operands, just do nothing here.
-    fn consume(&mut self, tokens: VecDeque<Token>) -> VecDeque<Token> {
-        tokens
     }
 }

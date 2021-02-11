@@ -1,20 +1,14 @@
-use std::{
-    collections::{HashMap, VecDeque},
-    fmt,
-};
+use std::{collections::VecDeque, fmt};
 
 use crate::{
-    token::{
-        tokens::{
-            add, and, blkw, br, character, end, expected, fill, getc, halt, immediate, include,
-            jmp, jmpt, jsr, jsrr, label, ld, ldi, ldr, lea, lshift, neg, not, orig, out, puts,
-            putsp, r#in, register, ret, rti, set, st, sti, str, string, stringz, sub,
-            traits::{Assemble, Requirements},
-            trap,
-        },
-        Symbol,
+    token::tokens::{
+        add, and, blkw, br, character, end, expected, fill, getc, halt, immediate, include, jmp,
+        jmpt, jsr, jsrr, label, ld, ldi, ldr, lea, lshift, neg, not, orig, out, puts, putsp, r#in,
+        register, ret, rti, set, st, sti, str, string, stringz, sub,
+        traits::{Assemble, Requirements},
+        trap,
     },
-    types::Listings,
+    types::{Listings, SymbolTable},
 };
 
 #[derive(PartialEq, Clone)]
@@ -304,10 +298,6 @@ impl fmt::Debug for Token {
 }
 
 impl Requirements for Token {
-    fn require_range(&self) -> (u64, u64) {
-        (0, 0)
-    }
-
     fn memory_requirement(&self) -> u16 {
         memory_requirement_of!(
             self,
@@ -394,12 +384,7 @@ impl Requirements for Token {
 }
 
 impl Assemble for Token {
-    fn assembled(
-        self,
-        program_counter: &mut i16,
-        symbols: &HashMap<String, Symbol>,
-        symbol: &str,
-    ) -> Listings {
+    fn assembled(self, program_counter: &mut i16, symbols: &SymbolTable, symbol: &str) -> Listings {
         assembled!(
             self,
             program_counter,

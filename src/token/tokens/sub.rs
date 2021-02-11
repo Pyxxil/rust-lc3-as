@@ -1,15 +1,12 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
 
 use crate::{
-    token::{
-        r#type::Token,
-        tokens::{
-            expected, too_few_operands,
-            traits::{Assemble, Requirements},
-        },
-        Symbol,
+    token::tokens::{
+        expected, too_few_operands,
+        traits::{Assemble, Requirements},
+        Token,
     },
-    types::Listings,
+    types::{Listings, SymbolTable},
 };
 
 token!(Sub, 3);
@@ -18,7 +15,7 @@ impl Assemble for Sub {
     fn assembled(
         self,
         program_counter: &mut i16,
-        _symbols: &HashMap<String, Symbol>,
+        _symbols: &SymbolTable,
         symbol: &str,
     ) -> Listings {
         let destination_register = match self.operands.first().unwrap() {
@@ -130,8 +127,8 @@ impl Assemble for Sub {
 }
 
 impl Requirements for Sub {
-    fn require_range(&self) -> (u64, u64) {
-        (2, 3)
+    fn min_operands(&self) -> u64 {
+        2
     }
 
     fn memory_requirement(&self) -> u16 {
@@ -164,11 +161,11 @@ impl Requirements for Sub {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        expect!(self, tokens, Token::Register, "Register");
+        expect!(self, tokens, Register);
 
-        expect!(self, tokens, Token::Register, "Register");
+        expect!(self, tokens, Register);
 
-        maybe_expect!(self, tokens, Token::Register);
+        maybe_expect!(self, tokens, Register);
 
         operands_check!(self);
 
