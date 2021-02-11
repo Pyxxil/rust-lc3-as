@@ -1,4 +1,5 @@
 use crate::{
+    listing,
     token::tokens::traits::{Assemble, Requirements},
     types::{Listings, SymbolTable},
 };
@@ -14,14 +15,12 @@ impl Assemble for Out {
     ) -> Listings {
         *program_counter += 1;
 
-        vec![(
+        vec![listing!(
             0xF021,
-            format!(
-                "({:04X}) F021 1111000000100001 ({: >4}) {: <20} OUT",
-                *program_counter - 1,
-                self.line,
-                symbol
-            ),
+            *program_counter - 1,
+            self.line,
+            symbol,
+            "OUT"
         )]
     }
 }

@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
+    listing,
     token::{
         tokens::{
             expected, too_few_operands,
@@ -42,18 +43,15 @@ impl Assemble for Str {
 
         let instruction: u16 = 0x7000 | destination_register << 9 | source_one << 6 | source_two;
 
-        vec![(
+        vec![listing!(
             instruction,
-            format!(
-                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} STR R{4} R{5} #{6}",
-                *program_counter - 1,
-                instruction,
-                self.line,
-                symbol,
-                destination_register,
-                source_one,
-                (source_two << 10) as i16 >> 10,
-            ),
+            *program_counter - 1,
+            self.line,
+            symbol,
+            "STR",
+            format!("R{}", destination_register),
+            format!("R{}", source_one),
+            format!("#{}", (source_two << 10) as i16 >> 10)
         )]
     }
 }

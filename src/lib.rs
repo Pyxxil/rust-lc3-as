@@ -8,10 +8,10 @@ extern crate lazy_static;
 
 pub mod assembler;
 pub mod lexer;
+pub mod macros;
 pub mod notifier;
 pub mod parser;
 pub mod types;
 pub mod writer;
-
 #[macro_use]
 pub mod token;

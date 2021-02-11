@@ -33,21 +33,21 @@ impl Notify for Notifier {
         match *self {
             Self::Standard(ref stdout) => match stdout {
                 Stdout::NoColour => match *diagnostic {
-                    Diagnostic::Note(ref d) => println!("{}", d.no_colour()),
-                    Diagnostic::Highlight(ref d) => println!("{}", d.no_colour()),
-                    Diagnostic::Pointer(ref d) => println!("{}", d.no_colour()),
+                    Diagnostic::Note(ref d) => println!("{}", d.uncoloured()),
+                    Diagnostic::Highlight(ref d) => println!("{}", d.uncoloured()),
+                    Diagnostic::Pointer(ref d) => println!("{}", d.uncoloured()),
                 },
                 Stdout::Colour => match *diagnostic {
-                    Diagnostic::Note(ref d) => println!("{}", d.colour()),
-                    Diagnostic::Highlight(ref d) => println!("{}", d.colour()),
-                    Diagnostic::Pointer(ref d) => println!("{}", d.colour()),
+                    Diagnostic::Note(ref d) => println!("{}", d.coloured()),
+                    Diagnostic::Highlight(ref d) => println!("{}", d.coloured()),
+                    Diagnostic::Pointer(ref d) => println!("{}", d.coloured()),
                 },
                 Stdout::Quiet => {}
             },
             Self::Stringify(ref mut strings) => match *diagnostic {
-                Diagnostic::Note(ref d) => strings.push(d.no_colour()),
-                Diagnostic::Highlight(ref d) => strings.push(d.no_colour()),
-                Diagnostic::Pointer(ref d) => strings.push(d.no_colour()),
+                Diagnostic::Note(ref d) => strings.push(d.uncoloured()),
+                Diagnostic::Highlight(ref d) => strings.push(d.uncoloured()),
+                Diagnostic::Pointer(ref d) => strings.push(d.uncoloured()),
             },
         }
     }

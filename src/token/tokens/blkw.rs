@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
+    listing,
     notifier::{self, DiagType, Diagnostic, Highlight},
     token::{
         tokens::{
@@ -33,12 +34,15 @@ impl Assemble for Blkw {
             }
         };
 
-        let mut assembled = vec![(
+        let val = format!("#{}", value as i16);
+
+        let mut assembled = vec![listing!(
             value,
-            format!(
-                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} .FILL #{1}",
-                *program_counter, value as i16, self.line, symbol,
-            ),
+            *program_counter,
+            self.line,
+            symbol,
+            ".FILL",
+            val
         )];
 
         let count = if let Token::Immediate(immediate) = self.operands.first().unwrap() {
@@ -49,12 +53,13 @@ impl Assemble for Blkw {
 
         (1..count).for_each(|_| {
             *program_counter += 1;
-            assembled.push((
+            assembled.push(listing!(
                 value,
-                format!(
-                    "({0:4X}) {1:04X} {1:016b} ({2: >4})                      .FILL #{1}",
-                    *program_counter, value as i16, self.line,
-                ),
+                *program_counter,
+                self.line,
+                "",
+                ".FILL",
+                val
             ));
         });
 

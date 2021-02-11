@@ -1,8 +1,8 @@
-pub mod tokenizer;
-
 use std::iter::Iterator;
 
 use crate::{lexer::tokenizer::Tokenizer, notifier, token::Token};
+
+pub mod tokenizer;
 
 #[must_use]
 pub fn lex(file: &str, content: &str) -> Option<Vec<Token>> {

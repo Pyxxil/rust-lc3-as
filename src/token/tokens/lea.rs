@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
+    listing,
     notifier::{self, DiagType, Diagnostic, Highlight},
     token::{
         tokens::{
@@ -40,21 +41,18 @@ impl Assemble for Lea {
 
         let instruction = 0xE000 | destination_register << 9 | offset & 0x1FF;
 
-        vec![(
+        vec![listing!(
             instruction,
-            format!(
-                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} LEA R{4} {5}",
-                *program_counter - 1,
-                instruction,
-                self.line,
-                symbol,
-                destination_register,
-                match self.operands.last().unwrap() {
-                    Token::Immediate(imm) => format!("#{}", imm.value),
-                    Token::Label(label) => label.token().to_string(),
-                    _ => unreachable!(),
-                }
-            ),
+            *program_counter - 1,
+            self.line,
+            symbol,
+            "LEA",
+            format!("R{}", destination_register),
+            match self.operands.last().unwrap() {
+                Token::Immediate(imm) => format!("#{}", imm.value),
+                Token::Label(label) => label.token().to_string(),
+                _ => unreachable!(),
+            }
         )]
     }
 }

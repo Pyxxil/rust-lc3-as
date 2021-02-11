@@ -1,4 +1,7 @@
-use crate::notifier::{self, DiagType, Diagnostic, Highlight};
+use crate::{
+    err,
+    notifier::{self, DiagType, Diagnostic, Highlight},
+};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Immediate {
@@ -18,8 +21,8 @@ impl Immediate {
             .collect::<String>()
             .parse::<i16>()
             .unwrap_or_else(|_| {
-                notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                    DiagType::Error,
+                err!(
+                    Highlight,
                     file.clone(),
                     column,
                     line,
@@ -27,8 +30,8 @@ impl Immediate {
                     format!(
                         "Value {} is too large to be represented in signed 16 bits",
                         token
-                    ),
-                )));
+                    )
+                );
                 0
             });
 
@@ -63,8 +66,8 @@ impl Immediate {
             16,
         )
         .unwrap_or_else(|_| {
-            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                DiagType::Error,
+            err!(
+                Highlight,
                 file.clone(),
                 column,
                 line,
@@ -72,8 +75,8 @@ impl Immediate {
                 format!(
                     "Value {} is too large to be represented in signed 16 bits",
                     token
-                ),
-            )));
+                )
+            );
             0
         }) as i16;
         Self {
@@ -101,8 +104,8 @@ impl Immediate {
             2,
         )
         .unwrap_or_else(|_| {
-            notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                DiagType::Error,
+            err!(
+                Highlight,
                 file.clone(),
                 column,
                 line,
@@ -110,8 +113,8 @@ impl Immediate {
                 format!(
                     "Value {} is too large to be represented in signed 16 bits",
                     token
-                ),
-            )));
+                )
+            );
             0
         }) as i16;
 

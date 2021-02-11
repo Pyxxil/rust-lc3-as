@@ -1,4 +1,5 @@
 use crate::{
+    listing,
     token::tokens::traits::{Assemble, Requirements},
     types::{Listings, SymbolTable},
 };
@@ -14,14 +15,12 @@ impl Assemble for Putsp {
     ) -> Listings {
         *program_counter += 1;
 
-        vec![(
+        vec![listing!(
             0xF024,
-            format!(
-                "({:04X}) F024 1111000000100100 ({: >4}) {: <20} PUTSP",
-                *program_counter - 1,
-                self.line,
-                symbol
-            ),
+            *program_counter - 1,
+            self.line,
+            symbol,
+            "PUTSP"
         )]
     }
 }

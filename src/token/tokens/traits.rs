@@ -10,7 +10,7 @@ pub trait Assemble {
 }
 
 pub trait Requirements {
-    /// The minimum operands this token will require
+    /// The minimum operands a token will require
     fn min_operands(&self) -> u64 {
         0
     }

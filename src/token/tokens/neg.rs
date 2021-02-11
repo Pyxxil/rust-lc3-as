@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
+    listing,
     token::{
         tokens::{
             expected, too_few_operands,
@@ -14,7 +15,6 @@ use crate::{
 token!(Neg, 2);
 
 impl Assemble for Neg {
-    #[allow(clippy::cast_sign_loss)]
     fn assembled(
         self,
         program_counter: &mut i16,
@@ -38,30 +38,28 @@ impl Assemble for Neg {
 
         let not_instruction = 0x903F | destination_register << 9 | source_register << 6;
         let add_instruction = 0x1021 | destination_register << 9 | source_register << 6;
+        let dest = format!("R{}", destination_register);
+        let source = format!("R{}", source_register);
 
         vec![
-            (
+            listing!(
                 not_instruction,
-                format!(
-                    "({0:04X}) {1:04X} {1:0>16b} ({2: >4}) {3: <20} NOT R{4} R{5}",
-                    *program_counter - 2,
-                    not_instruction,
-                    self.line,
-                    symbol,
-                    destination_register,
-                    source_register,
-                ),
+                *program_counter - 2,
+                self.line,
+                symbol,
+                "NOT",
+                dest,
+                source
             ),
-            (
+            listing!(
                 add_instruction,
-                format!(
-                    "({0:04X}) {1:04X} {1:0>16b} ({2: >4})                      ADD R{3} R{4} #1",
-                    *program_counter - 1,
-                    add_instruction,
-                    self.line,
-                    destination_register,
-                    source_register,
-                ),
+                *program_counter - 1,
+                self.line,
+                "",
+                "ADD",
+                dest,
+                source,
+                "#1"
             ),
         ]
     }

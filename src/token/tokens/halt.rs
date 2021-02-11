@@ -1,4 +1,5 @@
 use crate::{
+    listing,
     token::tokens::traits::{Assemble, Requirements},
     types::{Listings, SymbolTable},
 };
@@ -14,14 +15,12 @@ impl Assemble for Halt {
     ) -> Listings {
         *program_counter += 1;
 
-        vec![(
+        vec![listing!(
             0xF025,
-            format!(
-                "({:04X}) F025 1111000000100101 ({: >4}) {: <20} HALT",
-                *program_counter - 1,
-                self.line,
-                symbol
-            ),
+            *program_counter - 1,
+            self.line,
+            symbol,
+            "HALT"
         )]
     }
 }

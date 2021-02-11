@@ -1,15 +1,14 @@
 extern crate colored;
+use self::colored::Colorize;
 
 use assembler::get_line;
 
-use self::colored::Colorize;
-
 pub trait Colour {
-    fn colour(&self) -> String;
+    fn coloured(&self) -> String;
 }
 
 pub trait NoColour {
-    fn no_colour(&self) -> String;
+    fn uncoloured(&self) -> String;
 }
 
 #[derive(PartialEq)]
@@ -17,6 +16,27 @@ pub enum DiagType {
     Note,
     Warning,
     Error,
+}
+
+impl ToString for DiagType {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Note => String::from("Note"),
+            Self::Warning => String::from("Warning"),
+            Self::Error => String::from("Error"),
+        }
+    }
+}
+
+impl Colour for DiagType {
+    fn coloured(&self) -> String {
+        (match self {
+            DiagType::Note => self.to_string().bright_white(),
+            DiagType::Warning => self.to_string().yellow(),
+            DiagType::Error => self.to_string().red(),
+        })
+        .to_string()
+    }
 }
 
 pub trait Type {
@@ -43,14 +63,10 @@ impl Note {
 }
 
 impl Colour for Note {
-    fn colour(&self) -> String {
+    fn coloured(&self) -> String {
         format!(
             "{}:{}:{}: {}",
-            match self.diagnostic_type {
-                DiagType::Note => "Note".bright_white(),
-                DiagType::Warning => "Warning".yellow(),
-                DiagType::Error => "Error".red(),
-            },
+            self.diagnostic_type.coloured(),
             self.line,
             self.column,
             self.context
@@ -59,14 +75,10 @@ impl Colour for Note {
 }
 
 impl NoColour for Note {
-    fn no_colour(&self) -> String {
+    fn uncoloured(&self) -> String {
         format!(
             "{}:{}:{}: {}",
-            match self.diagnostic_type {
-                DiagType::Note => "Note",
-                DiagType::Warning => "Warning",
-                DiagType::Error => "Error",
-            },
+            self.diagnostic_type.to_string(),
             self.line,
             self.column,
             self.context
@@ -102,14 +114,10 @@ impl Pointer {
 }
 
 impl Colour for Pointer {
-    fn colour(&self) -> String {
+    fn coloured(&self) -> String {
         format!(
             "{}:{}:{}: {}: {}\n{}\n{}",
-            match self.diagnostic_type {
-                DiagType::Note => "Note".bright_white(),
-                DiagType::Warning => "Warning".yellow(),
-                DiagType::Error => "Error".red(),
-            },
+            self.diagnostic_type.coloured(),
             self.file,
             self.line,
             self.column,
@@ -121,17 +129,13 @@ impl Colour for Pointer {
 }
 
 impl NoColour for Pointer {
-    fn no_colour(&self) -> String {
+    fn uncoloured(&self) -> String {
         format!(
             "{}:{}:{}: {}: {}\n{}\n{}",
             self.file,
             self.line,
             self.column,
-            match self.diagnostic_type {
-                DiagType::Note => "Note",
-                DiagType::Warning => "Warning",
-                DiagType::Error => "Error",
-            },
+            self.diagnostic_type.to_string(),
             self.context,
             get_line(&self.file, self.line),
             " ".repeat(self.column as usize - 1) + "^"
@@ -170,17 +174,13 @@ impl Highlight {
 }
 
 impl Colour for Highlight {
-    fn colour(&self) -> String {
+    fn coloured(&self) -> String {
         format!(
             "{}:{}:{}: {}: {}\n{}\n{}",
             self.file,
             self.line,
             self.column,
-            match self.diagnostic_type {
-                DiagType::Note => "Note".bright_white(),
-                DiagType::Warning => "Warning".yellow(),
-                DiagType::Error => "Error".red(),
-            },
+            self.diagnostic_type.coloured(),
             self.context,
             get_line(&self.file, self.line),
             " ".repeat(self.column as usize - 1) + &"~".repeat(self.width)
@@ -189,17 +189,13 @@ impl Colour for Highlight {
 }
 
 impl NoColour for Highlight {
-    fn no_colour(&self) -> String {
+    fn uncoloured(&self) -> String {
         format!(
             "{}:{}:{}: {}: {}\n{}\n{}",
             self.file,
             self.line,
             self.column,
-            match self.diagnostic_type {
-                DiagType::Note => "Note",
-                DiagType::Warning => "Warning",
-                DiagType::Error => "Error",
-            },
+            self.diagnostic_type.to_string(),
             self.context,
             get_line(&self.file, self.line),
             " ".repeat(self.column as usize - 1) + &"~".repeat(self.width)

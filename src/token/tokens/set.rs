@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
+    listing,
     token::{
         tokens::{
             expected, too_few_operands,
@@ -32,6 +33,8 @@ impl Assemble for Set {
             unreachable!()
         };
 
+        let reg = format!("R{}", register);
+
         if immediate >= -16 && immediate <= 15 {
             *program_counter += 2;
             let clear_instruction = 0x5020 | register << 9 | register << 6;
@@ -39,59 +42,54 @@ impl Assemble for Set {
                 0x1020 | register << 9 | register << 6 | (immediate as u16 & 0x1F);
 
             vec![
-                (
+                listing!(
                     clear_instruction,
-                    format!(
-                        "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} AND R{4} R{4} #0",
-                        *program_counter - 2,
-                        clear_instruction,
-                        self.line,
-                        symbol,
-                        register
-                    ),
+                    *program_counter - 2,
+                    self.line,
+                    symbol,
+                    "AND",
+                    reg,
+                    reg,
+                    reg
                 ),
-                (
+                listing!(
                     set_instruction,
-                    format!(
-                        "({0:04X}) {1:04X} {1:016b} ({2: >4})                      ADD R{3} R{3} #{4}",
-                        *program_counter - 1,
-                        set_instruction,
-                        self.line,
-                        register,
-                        immediate
-                    ),
+                    *program_counter - 1,
+                    self.line,
+                    "",
+                    "ADD",
+                    register,
+                    register,
+                    format!("#{}", immediate)
                 ),
             ]
         } else {
             *program_counter += 3;
             vec![
-                (
+                listing!(
                     0x0E01,
-                    format!(
-                        "({0:04X}) 0E01 0000111000000001 ({1: >4}) {2: <20} BRnzp #1",
-                        *program_counter - 3,
-                        self.line,
-                        symbol
-                    ),
+                    *program_counter - 3,
+                    self.line,
+                    symbol,
+                    "BRnzp",
+                    "#1"
                 ),
-                (
+                listing!(
                     immediate as u16,
-                    format!(
-                        "({0:04X}) {1:04X} {1:016b} ({2: >4})                      .FILL #{1}",
-                        *program_counter - 2,
-                        immediate as i16,
-                        self.line
-                    ),
+                    *program_counter - 2,
+                    self.line,
+                    "",
+                    ".FILL",
+                    format!("#{}", immediate)
                 ),
-                (
-                    0x21FE,
-                    format!(
-                        "({0:04X}) {1:04X} {1:016b} ({2: >4})                      LD R{3} #-2",
-                        *program_counter - 1,
-                        0x21FE | register << 9,
-                        self.line,
-                        register,
-                    ),
+                listing!(
+                    0x21FE | register << 9,
+                    *program_counter - 1,
+                    self.line,
+                    "",
+                    "LD",
+                    register,
+                    "#-2"
                 ),
             ]
         }

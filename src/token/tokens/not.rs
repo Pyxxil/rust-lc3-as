@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
+    listing,
     token::{
         tokens::{
             expected, too_few_operands,
@@ -36,17 +37,14 @@ impl Assemble for Not {
 
         let instruction = 0x903F | destination_register << 9 | source_register << 6;
 
-        vec![(
+        vec![listing!(
             instruction,
-            format!(
-                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} NOT R{4} R{5}",
-                *program_counter - 1,
-                instruction,
-                self.line,
-                symbol,
-                destination_register,
-                source_register,
-            ),
+            *program_counter - 1,
+            self.line,
+            symbol,
+            "NOT",
+            format!("R{}", destination_register),
+            format!("R{}", source_register)
         )]
     }
 }

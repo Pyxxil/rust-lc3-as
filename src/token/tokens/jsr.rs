@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
+    listing,
     notifier::{self, DiagType, Diagnostic, Highlight},
     token::{
         tokens::{
@@ -33,20 +34,17 @@ impl Assemble for Jsr {
 
         let instruction = 0x4800 | value & 0x7FF;
 
-        vec![(
+        vec![listing!(
             instruction,
-            format!(
-                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} JSR {4}",
-                *program_counter - 1,
-                instruction,
-                self.line,
-                symbol,
-                match self.operands.first().unwrap() {
-                    Token::Immediate(imm) => format!("#{}", imm.value),
-                    Token::Label(label) => label.token().to_string(),
-                    _ => unreachable!(),
-                }
-            ),
+            *program_counter - 1,
+            self.line,
+            symbol,
+            "JSR",
+            match self.operands.first().unwrap() {
+                Token::Immediate(imm) => format!("#{}", imm.value),
+                Token::Label(label) => label.token().to_string(),
+                _ => unreachable!(),
+            }
         )]
     }
 }

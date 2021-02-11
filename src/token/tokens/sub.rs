@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
+    listing,
     token::tokens::{
         expected, too_few_operands,
         traits::{Assemble, Requirements},
@@ -45,17 +46,15 @@ impl Assemble for Sub {
 
         if source_register_one == source_register_two {
             let instruction = 0x5000 | destination_register << 9 | source_register_one << 6 | 0x20;
-            vec![(
+            vec![listing!(
                 instruction,
-                format!(
-                    "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} AND R{4} R{5} #0",
-                    *program_counter - 1,
-                    instruction,
-                    self.line,
-                    symbol,
-                    destination_register,
-                    source_register_one,
-                ),
+                *program_counter - 1,
+                self.line,
+                symbol,
+                "AND",
+                format!("R{}", destination_register),
+                format!("R{}", source_register_one),
+                "#0"
             )]
         } else {
             *program_counter += 2;
@@ -64,61 +63,60 @@ impl Assemble for Sub {
             let subtract_instruction =
                 0x1000 | destination_register << 9 | source_register_one << 6 | source_register_two;
 
-            let mut assembled = vec![(
+            let source_two = format!("R{}", source_register_two);
+
+            let mut assembled = vec![
+                listing!(
                     not_instruction,
-                    format!(
-                        "({0:04X}) {1:04X} {1:0>16b} ({2: >4}) {3: <20} NOT R{4} R{4}",
-                        *program_counter - 3,
-                        not_instruction,
-                        self.line,
-                        symbol,
-                        source_register_two
-                    ),
+                    *program_counter - 3,
+                    self.line,
+                    symbol,
+                    "NOT",
+                    source_two,
+                    source_two
                 ),
-                (
+                listing!(
                     add_instruction,
-                    format!(
-                        "({0:04X}) {1:04X} {1:0>16b} ({2: >4})                      ADD R{3} R{3} #1",
-                        *program_counter - 2,
-                        add_instruction,
-                        self.line,
-                        source_register_two,
-                    ),
+                    *program_counter - 2,
+                    self.line,
+                    "",
+                    "ADD",
+                    source_two,
+                    source_two,
+                    "#1"
                 ),
-                (
+                listing!(
                     subtract_instruction,
-                    format!(
-                        "({0:04X}) {1:04X} {1:0>16b} ({2: >4})                      ADD R{3} R{4} R{5}",
-                        *program_counter - 1,
-                        subtract_instruction,
-                        self.line,
-                        destination_register,
-                        source_register_one,
-                        source_register_two,
-                    ),
-                )];
+                    *program_counter - 1,
+                    self.line,
+                    "",
+                    "ADD",
+                    format!("R{}", destination_register),
+                    format!("R{}", source_register_one),
+                    source_two
+                ),
+            ];
 
             if destination_register != source_register_two {
                 *program_counter += 2;
-                assembled.push((
+                assembled.push(listing!(
                     not_instruction,
-                    format!(
-                        "({0:04X}) {1:04X} {1:0>16b} ({2: >4})                      NOT R{3} R{3}",
-                        *program_counter - 2,
-                        not_instruction,
-                        self.line,
-                        source_register_two
-                    ),
+                    *program_counter - 2,
+                    self.line,
+                    "",
+                    "NOT",
+                    source_two,
+                    source_two
                 ));
-                assembled.push((
+                assembled.push(listing!(
                     add_instruction,
-                    format!(
-                        "({0:04X}) {1:04X} {1:0>16b} ({2: >4})                      ADD R{3} R{3} #1",
-                        *program_counter - 1,
-                        add_instruction,
-                        self.line,
-                        source_register_two,
-                    ),
+                    *program_counter - 1,
+                    self.line,
+                    "",
+                    "ADD",
+                    source_two,
+                    source_two,
+                    "#1"
                 ));
             }
 

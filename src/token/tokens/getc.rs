@@ -1,4 +1,5 @@
 use crate::{
+    listing,
     token::tokens::traits::{Assemble, Requirements},
     types::{Listings, SymbolTable},
 };
@@ -14,14 +15,12 @@ impl Assemble for Getc {
     ) -> Listings {
         *program_counter += 1;
 
-        vec![(
+        vec![listing!(
             0xF020,
-            format!(
-                "({:04X}) F020 1111000000100000 ({: >4}) {: <20} GETC",
-                *program_counter - 1,
-                self.line,
-                symbol
-            ),
+            *program_counter - 1,
+            self.line,
+            symbol,
+            "GETC"
         )]
     }
 }

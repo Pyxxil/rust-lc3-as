@@ -1,4 +1,5 @@
 use crate::{
+    listing,
     token::tokens::traits::Assemble,
     types::{Listings, SymbolTable},
 };
@@ -16,15 +17,12 @@ impl Assemble for Rti {
     ) -> Listings {
         *program_counter += 1;
 
-        vec![(
+        vec![listing!(
             0x8000,
-            format!(
-                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} RTI",
-                *program_counter - 1,
-                0x8000,
-                self.line,
-                symbol
-            ),
+            *program_counter - 1,
+            self.line,
+            symbol,
+            "RTI"
         )]
     }
 }

@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
+    listing,
     token::{
         tokens::{
             expected, too_few_operands,
@@ -28,16 +29,13 @@ impl Assemble for Trap {
             unreachable!()
         };
 
-        vec![(
+        vec![listing!(
             instruction,
-            format!(
-                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} TRAP 0x{4:02X}",
-                *program_counter - 1,
-                instruction,
-                self.line,
-                symbol,
-                instruction & 0xFF,
-            ),
+            *program_counter - 1,
+            self.line,
+            symbol,
+            "TRAP",
+            format!("0x{:02X}", instruction & 0xFF)
         )]
     }
 }

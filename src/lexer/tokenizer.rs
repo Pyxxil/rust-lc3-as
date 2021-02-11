@@ -2,6 +2,7 @@ use std::{iter::Peekable, str::Chars};
 
 use crate::{
     assembler::add_line,
+    err,
     notifier::{self, DiagType, Diagnostic, Highlight, Pointer},
     token::{
         tokens::{
@@ -14,51 +15,8 @@ use crate::{
         },
         Token,
     },
+    warn,
 };
-
-macro_rules! err {
-    ($ty:ident, $file:expr, $column:expr, $line:expr, $width:expr, $message:expr) => {
-        notifier::add_diagnostic(Diagnostic::$ty($ty::new(
-            DiagType::Error,
-            $file,
-            $column,
-            $line,
-            $width,
-            $message,
-        )));
-    };
-    ($ty:ident, $file:expr, $column:expr, $line:expr, $message:expr) => {
-        notifier::add_diagnostic(Diagnostic::$ty($ty::new(
-            DiagType::Error,
-            $file,
-            $column,
-            $line,
-            $message,
-        )));
-    };
-}
-
-macro_rules! warn {
-    ($ty:ident, $file:expr, $column:expr, $line:expr, $width:expr, $message:expr) => {
-        notifier::add_diagnostic(Diagnostic::$ty($ty::new(
-            DiagType::Warning,
-            $file,
-            $column,
-            $line,
-            $width,
-            $message,
-        )));
-    };
-    ($ty:ident, $file:expr, $column:expr, $line:expr, $message:expr) => {
-        notifier::add_diagnostic(Diagnostic::$ty($ty::new(
-            DiagType::Warning,
-            $file,
-            $column,
-            $line,
-            $message,
-        )));
-    };
-}
 
 macro_rules! token {
     ($ty:ident, $token:expr, $file:expr, $column:expr, $line:expr) => {
