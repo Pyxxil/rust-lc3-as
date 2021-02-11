@@ -17,9 +17,15 @@ token!(Br, 1, n: bool, z: bool, p: bool);
 impl Br {
     #[must_use]
     pub fn from_str(token: String, file: String, column: u64, line: u64) -> Self {
-        let n = token.contains('N');
-        let z = token.contains('Z');
-        let p = token.contains('P');
+        let (n, z, p) = if token.len() == 2 {
+            (true, true, true)
+        } else {
+            (
+                token.contains('N') || token.contains('n'),
+                token.contains('Z') || token.contains('z'),
+                token.contains('P') || token.contains('p'),
+            )
+        };
 
         Self::new(token, file, column, line, n, z, p)
     }
