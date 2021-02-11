@@ -40,7 +40,7 @@ impl Assemble for Br {
                 if let Some(symbol) = symbols.get(label.token()) {
                     symbol.address() as i16 - *program_counter
                 } else {
-                    undefined!(self, label);
+                    undefined!(label);
                     0
                 }
             }

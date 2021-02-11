@@ -19,6 +19,7 @@ pub enum Format {
 }
 
 impl Format {
+    /// Write the symbol table header to the writer
     fn write_header<W: Write>(&self, out: &mut W) -> Result<(), Error> {
         if let Format::SymbolTable = self {
             writeln!(
@@ -31,6 +32,7 @@ impl Format {
         Ok(())
     }
 
+    /// Write a symbol to the symbol table if that's the specified format
     fn write_symbol<W: Write>(&self, out: &mut W, symbol: &Symbol) -> Result<(), Error> {
         if let Format::SymbolTable = self {
             writeln!(out, "{: <20} {:04X}", symbol.symbol(), symbol.address())?
@@ -39,6 +41,7 @@ impl Format {
         Ok(())
     }
 
+    /// Write the listing to the writer in the specified format
     fn write_listing<W: Write>(&self, out: &mut W, listing: &Listing) -> Result<(), Error> {
         let (binary, listing) = listing;
 
@@ -73,6 +76,9 @@ impl<W: Write> Writer<W> {
 
     /// Write the program to each of the registered writers in their respective
     /// formats
+    ///
+    /// # Errors
+    ///   Fails if there is an error writing to the writer
     pub fn write(mut self, program: Program) -> Result<(), Error> {
         let (symbols, listings) = program;
 

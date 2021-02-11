@@ -30,7 +30,7 @@ impl Assemble for Blkw {
                     if let Some(symbol) = symbols.get(label.token()) {
                         symbol.address()
                     } else {
-                        undefined!(self, label);
+                        undefined!(label);
                         0
                     }
                 }

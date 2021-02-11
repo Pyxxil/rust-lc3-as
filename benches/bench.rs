@@ -17,29 +17,17 @@ const FILES: &[&str] = &[
     "Examples/2048.asm",
 ];
 
-fn lex(file: &str) {
-    Assembler::from_file(String::from(file))
-        .map(|assembler| assembler.lex())
-        .unwrap();
-}
-
 fn assemble(file: &str) {
     Assembler::from_file(String::from(file))
         .map(|assembler| assembler.assemble(false))
         .unwrap();
 }
 
-fn bench_lexer(c: &mut Criterion) {
-    FILES.iter().for_each(|file| {
-        c.bench_function(&format!("Lex {}", file), |b| b.iter(|| lex(file)));
-    });
-}
-
-fn bench_lexer_and_parser(c: &mut Criterion) {
+fn bench_assembly(c: &mut Criterion) {
     FILES.iter().for_each(|file| {
         c.bench_function(&format!("Assemble {}", file), |b| b.iter(|| assemble(file)));
     });
 }
 
-criterion_group!(benches, bench_lexer, bench_lexer_and_parser);
+criterion_group!(benches, bench_assembly);
 criterion_main!(benches);

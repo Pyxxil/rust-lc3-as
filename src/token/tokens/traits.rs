@@ -19,7 +19,9 @@ pub trait Requirements {
     /// in the form of (min, max)
     fn require_range(&self) -> (u64, u64);
 
-    /// Get the memory requirement for this token
+    /// Every token will have specific requirements for memory,
+    /// and we need to be able to know what that is so we can
+    /// place symbols appropriately.
     fn memory_requirement(&self) -> u16;
 
     /// Consume from the token stream until we have all the required

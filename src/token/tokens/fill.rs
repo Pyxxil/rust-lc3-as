@@ -31,7 +31,7 @@ impl Assemble for Fill {
                 {
                     symbol.1.address()
                 } else {
-                    undefined!(self, label);
+                    undefined!(label);
                     0
                 }
             }

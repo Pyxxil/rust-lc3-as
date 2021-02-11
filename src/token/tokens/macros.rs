@@ -55,7 +55,7 @@ macro_rules! token {
     };
 
     ( $name:ident, $( $field:ident: $type: ty),* ) => {
-                #[derive(Debug, PartialEq, Clone)]
+        #[derive(Debug, PartialEq, Clone)]
         pub struct $name {
             token: String,
             column: u64,
@@ -158,7 +158,7 @@ macro_rules! operands_check {
 }
 
 macro_rules! undefined {
-    ( $self:expr, $label:expr ) => {
+    ( $label:expr ) => {
         notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
             DiagType::Error,
             $label.file().to_string(),
@@ -167,14 +167,5 @@ macro_rules! undefined {
             $label.token().len(),
             String::from("Undefined reference to label"),
         )));
-
-        notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-            DiagType::Note,
-            $self.file.to_string(),
-            $self.column(),
-            $self.line(),
-            $self.token().len(),
-            String::from("Undefined reference found here"),
-        )))
     };
 }

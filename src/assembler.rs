@@ -7,11 +7,11 @@ use std::{
 
 use crate::{
     lexer, notifier, parser,
-    token::{tokens::traits::Assemble, Token},
+    token::{tokens::traits::Assemble, traits::Requirements, Token},
     types::{Program, SymbolTable},
 };
 
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct FileController {
     files: HashMap<String, Vec<String>>,
 }
@@ -57,6 +57,10 @@ pub struct Assembler {
 }
 
 impl Assembler {
+    /// Create an assembler for a specific file
+    ///
+    /// # Errors
+    ///   If the file fails to be opened/read from
     pub fn from_file(file: String) -> Result<Self, Error> {
         add_file(file.to_string());
 
@@ -93,13 +97,30 @@ impl Assembler {
 
     fn do_second_pass((tokens, symbols): (Vec<Token>, SymbolTable)) -> Option<Program> {
         let mut program_counter: i16 = 0;
+
+        // Initially order the symbols by their addresses, so that the search for a
+        // symbol is O(1)
+        let mut syms = symbols.values().collect::<Vec<_>>();
+        syms.sort_by_key(|sym| sym.address());
+
+        let mut syms = syms.iter().peekable();
+
         let listings = tokens
             .into_iter()
             .flat_map(|token| {
-                let symbol = symbols
-                    .iter()
-                    .find(|(_, sym)| sym.address() == program_counter as u16)
-                    .map_or("", |(_, symbol)| symbol.symbol());
+                // Ignore anything that doesn't have a memory requirement (which should basically be just
+                // labels, origins and ends)
+                let symbol = if token.memory_requirement() > 0 {
+                    match syms.peek() {
+                        Some(&&symbol) if symbol.address() == program_counter as u16 => {
+                            let _ = syms.next();
+                            symbol.symbol()
+                        }
+                        _ => "",
+                    }
+                } else {
+                    ""
+                };
 
                 token.assembled(&mut program_counter, &symbols, symbol)
             })
