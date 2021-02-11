@@ -1,107 +1,85 @@
-use std::collections::HashMap;
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 
-use assembler::Assembler;
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
-use token::traits::Requirements;
-use token::Symbol;
-use token::Token;
+use crate::{
+    assembler::Assembler,
+    notifier::{self, DiagType, Diagnostic, Highlight},
+    token::{traits::Requirements, Symbol, Token},
+    types::SymbolTable,
+};
 
-#[derive(Debug)]
-pub struct Parser {
-    tokens: Vec<Token>,
-    symbols: HashMap<String, Symbol>,
-}
+#[must_use]
+pub fn parse(mut tokens: Vec<Token>) -> Option<(Vec<Token>, SymbolTable)> {
+    let mut address = 0;
+    let mut parsed_tokens: VecDeque<Token> = tokens.drain(..).collect();
 
-impl Parser {
-    #[must_use]
-    pub fn new(tokens: Vec<Token>) -> Self {
-        Self {
-            tokens,
-            symbols: HashMap::new(),
-        }
-    }
+    let mut symbols: SymbolTable = HashMap::new();
 
-    pub fn parse(&mut self) {
-        let mut address = 0;
-        let mut tokens: VecDeque<Token> = self.tokens.drain(..).collect();
+    while let Some(mut token) = parsed_tokens.pop_front() {
+        parsed_tokens = token.consume(parsed_tokens);
 
-        while let Some(mut token) = tokens.pop_front() {
-            tokens = token.consume(tokens);
-
-            match &token {
-                Token::Label(ref tok) => {
-                    if self.symbols.contains_key(tok.token()) {
-                        notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                            DiagType::Error,
-                            (*tok.file()).clone(),
-                            tok.column(),
-                            tok.line(),
-                            tok.token().len(),
-                            format!("Duplicate symbol found {}", tok.token()),
-                        )));
-                    } else if self
-                        .symbols
-                        .values()
-                        .any(|symbol| symbol.address() == address)
-                    {
-                        notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                            DiagType::Warning,
-                            (*tok.file()).clone(),
-                            tok.column(),
-                            tok.line(),
-                            tok.token().len(),
-                            format!("Multiple symbols found for address {:#X}", address),
-                        )));
-                    } else {
-                        self.symbols.insert(
-                            tok.token().to_string(),
-                            Symbol::new(address, tok.token().to_string()),
-                        );
-                    }
-                }
-                Token::Include(ref token) => match token.operands().first().unwrap() {
-                    Token::String(string) => {
-                        let file = string
-                            .file()
-                            .chars()
-                            .take(string.file().rfind(|c| c == '/').unwrap() + 1)
-                            .collect::<String>()
-                            + string.token();
-
-                        Assembler::from_file(file)
-                            .ok()
-                            .and_then(|assembler| {
-                                assembler.lex().map(|ast| {
-                                    let length = tokens.len();
-                                    tokens.extend(ast.into_iter().rev());
-                                    tokens.rotate_left(length);
-                                })
-                            })
-                            .unwrap();
-                    }
-                    _ => unreachable!(),
-                },
-                Token::Orig(ref tok) => {
-                    address = tok.memory_requirement();
-                }
-                token => {
-                    address += token.memory_requirement();
+        match &token {
+            Token::Label(ref tok) => {
+                if symbols.contains_key(tok.token()) {
+                    notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                        DiagType::Error,
+                        (*tok.file()).clone(),
+                        tok.column(),
+                        tok.line(),
+                        tok.token().len(),
+                        format!("Duplicate symbol found {}", tok.token()),
+                    )));
+                } else if symbols.values().any(|symbol| symbol.address() == address) {
+                    notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
+                        DiagType::Warning,
+                        (*tok.file()).clone(),
+                        tok.column(),
+                        tok.line(),
+                        tok.token().len(),
+                        format!("Multiple symbols found for address {:#X}", address),
+                    )));
+                } else {
+                    symbols.insert(
+                        tok.token().to_string(),
+                        Symbol::new(address, tok.token().to_string()),
+                    );
                 }
             }
+            Token::Include(ref token) => match token.operands().first().unwrap() {
+                Token::String(string) => {
+                    let file = string
+                        .file()
+                        .chars()
+                        .take(string.file().rfind(|c| c == '/').unwrap() + 1)
+                        .collect::<String>()
+                        + string.token();
 
-            self.tokens.push(token);
+                    Assembler::from_file(file)
+                        .ok()
+                        .and_then(|assembler| {
+                            assembler.lex().map(|ast| {
+                                let length = parsed_tokens.len();
+                                parsed_tokens.extend(ast.into_iter().rev());
+                                parsed_tokens.rotate_left(length);
+                            })
+                        })
+                        .unwrap();
+                }
+                _ => unreachable!(),
+            },
+            Token::Orig(ref tok) => {
+                address = tok.memory_requirement();
+            }
+            token => {
+                address += token.memory_requirement();
+            }
         }
+
+        tokens.push(token);
     }
 
-    #[must_use]
-    pub fn is_okay() -> bool {
-        notifier::error_count() == 0
-    }
-
-    #[must_use]
-    pub fn tokens_and_symbols(self) -> (Vec<Token>, HashMap<String, Symbol>) {
-        (self.tokens, self.symbols)
+    if notifier::error_count() == 0 {
+        Some((tokens, symbols))
+    } else {
+        None
     }
 }

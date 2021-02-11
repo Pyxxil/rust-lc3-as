@@ -12,7 +12,7 @@ pub trait NoColour {
     fn no_colour(&self) -> String;
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq)]
 pub enum DiagType {
     Note,
     Warning,

@@ -6,14 +6,12 @@ use std::{
 };
 
 use crate::{
-    lexer::Lexer,
-    notifier,
-    parser::Parser,
-    token::{self, tokens::traits::Assemble, Token},
+    lexer, notifier, parser,
+    token::{tokens::traits::Assemble, traits::Requirements, Token},
     types::{Program, SymbolTable},
 };
 
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct FileController {
     files: HashMap<String, Vec<String>>,
 }
@@ -59,14 +57,16 @@ pub struct Assembler {
 }
 
 impl Assembler {
+    /// Create an assembler for a specific file
+    ///
+    /// # Errors
+    ///   If the file fails to be opened/read from
     pub fn from_file(file: String) -> Result<Self, Error> {
         add_file(file.to_string());
 
         let mut content = String::new();
 
-        BufReader::new(File::open(file.clone())?)
-            .read_to_string(&mut content)
-            .unwrap();
+        BufReader::new(File::open(file.clone())?).read_to_string(&mut content)?;
 
         Ok(Self { file, content })
     }
@@ -79,28 +79,13 @@ impl Assembler {
     }
 
     #[must_use]
-    pub fn lex(&self) -> Option<Vec<Token>> {
-        let mut lexer = Lexer::new(&self.file, &self.content);
-
-        lexer.lex();
-
-        if Lexer::is_okay() {
-            Some(lexer.tokens())
-        } else {
-            None
-        }
+    pub(crate) fn lex(&self) -> Option<Vec<Token>> {
+        lexer::lex(&self.file, &self.content)
     }
 
     #[must_use]
-    pub fn parse(ast: Vec<Token>) -> Option<(Vec<Token>, SymbolTable)> {
-        let mut parser = Parser::new(ast);
-        parser.parse();
-
-        if Parser::is_okay() {
-            Some(parser.tokens_and_symbols())
-        } else {
-            None
-        }
+    fn parse(ast: Vec<Token>) -> Option<(Vec<Token>, SymbolTable)> {
+        parser::parse(ast)
     }
 
     #[must_use]
@@ -110,24 +95,41 @@ impl Assembler {
             .and_then(Self::do_second_pass)
     }
 
-    fn do_second_pass((tokens, symbols): (Vec<token::Token>, SymbolTable)) -> Option<Program> {
+    fn do_second_pass((tokens, symbols): (Vec<Token>, SymbolTable)) -> Option<Program> {
         let mut program_counter: i16 = 0;
+
+        // Initially order the symbols by their addresses, so that the search for a
+        // symbol is O(1)
+        let mut syms = symbols.values().collect::<Vec<_>>();
+        syms.sort_by_key(|sym| sym.address());
+
+        let mut syms = syms.iter().peekable();
+
         let listings = tokens
             .into_iter()
             .flat_map(|token| {
-                let symbol = symbols
-                    .iter()
-                    .find(|(_, sym)| sym.address() == program_counter as u16)
-                    .map_or("", |(_, symbol)| symbol.symbol());
+                // Ignore anything that doesn't have a memory requirement (which should basically be just
+                // labels, origins and ends)
+                let symbol = if token.memory_requirement() > 0 {
+                    match syms.peek() {
+                        Some(&&symbol) if symbol.address() == program_counter as u16 => {
+                            let _ = syms.next();
+                            symbol.symbol()
+                        }
+                        _ => "",
+                    }
+                } else {
+                    ""
+                };
 
                 token.assembled(&mut program_counter, &symbols, symbol)
             })
             .collect();
 
-        if notifier::error_count() > 0 {
-            None
-        } else {
+        if notifier::error_count() == 0 {
             Some((symbols, listings))
+        } else {
+            None
         }
     }
 }

@@ -1,9 +1,15 @@
-use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::tokens::traits::{Assemble, Requirements};
-use token::tokens::{expected, too_few_operands};
-use token::{Symbol, Token};
+use crate::{
+    token::{
+        tokens::{
+            expected, too_few_operands,
+            traits::{Assemble, Requirements},
+        },
+        Token,
+    },
+    types::{Listings, SymbolTable},
+};
 
 token!(Neg, 2);
 
@@ -12,19 +18,22 @@ impl Assemble for Neg {
     fn assembled(
         self,
         program_counter: &mut i16,
-        _symbols: &HashMap<String, Symbol>,
+        _symbols: &SymbolTable,
         symbol: &str,
-    ) -> Vec<(u16, String)> {
+    ) -> Listings {
         *program_counter += self.memory_requirement() as i16;
 
-        let destination_register = match self.operands.first().unwrap() {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let destination_register = if let Token::Register(register) = self.operands.first().unwrap()
+        {
+            register.register
+        } else {
+            unreachable!()
         };
 
-        let source_register = match self.operands.last().unwrap() {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let source_register = if let Token::Register(register) = self.operands.last().unwrap() {
+            register.register
+        } else {
+            unreachable!()
         };
 
         let not_instruction = 0x903F | destination_register << 9 | source_register << 6;
@@ -59,8 +68,8 @@ impl Assemble for Neg {
 }
 
 impl Requirements for Neg {
-    fn require_range(&self) -> (u64, u64) {
-        (1, 2)
+    fn min_operands(&self) -> u64 {
+        1
     }
 
     fn memory_requirement(&self) -> u16 {
@@ -68,9 +77,9 @@ impl Requirements for Neg {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        expect!(self, tokens, Token::Register, "Register");
+        expect!(self, tokens, Register);
 
-        maybe_expect!(self, tokens, Token::Register);
+        maybe_expect!(self, tokens, Register);
 
         operands_check!(self);
 

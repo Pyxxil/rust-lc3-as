@@ -1,5 +1,4 @@
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
+use crate::notifier::{self, DiagType, Diagnostic, Highlight};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Immediate {

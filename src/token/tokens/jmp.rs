@@ -1,9 +1,15 @@
-use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::tokens::traits::{Assemble, Requirements};
-use token::tokens::{expected, too_few_operands};
-use token::{Symbol, Token};
+use crate::{
+    token::{
+        tokens::{
+            expected, too_few_operands,
+            traits::{Assemble, Requirements},
+        },
+        Token,
+    },
+    types::{Listings, SymbolTable},
+};
 
 token!(Jmp, 1);
 
@@ -11,14 +17,15 @@ impl Assemble for Jmp {
     fn assembled(
         self,
         program_counter: &mut i16,
-        _symbols: &HashMap<String, Symbol>,
+        _symbols: &SymbolTable,
         symbol: &str,
-    ) -> Vec<(u16, String)> {
+    ) -> Listings {
         *program_counter += 1;
 
-        let register = match self.operands.first().unwrap() {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let register = if let Token::Register(register) = self.operands.first().unwrap() {
+            register.register
+        } else {
+            unreachable!()
         };
 
         let instruction = 0xC000 | register << 6;
@@ -38,15 +45,12 @@ impl Assemble for Jmp {
 }
 
 impl Requirements for Jmp {
-    fn require_range(&self) -> (u64, u64) {
-        (1, 1)
-    }
-    fn memory_requirement(&self) -> u16 {
-        0
+    fn min_operands(&self) -> u64 {
+        1
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        expect!(self, tokens, Token::Register, "Register");
+        expect!(self, tokens, Register);
 
         operands_check!(self);
 

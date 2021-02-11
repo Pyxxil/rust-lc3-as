@@ -1,26 +1,27 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
 
-use token::tokens::traits::{Assemble, Requirements};
-use token::tokens::{expected, too_few_operands};
-use token::{Symbol, Token};
-
-use crate::notifier;
-use crate::notifier::{DiagType, Diagnostic, Highlight};
+use crate::{
+    notifier::{self, DiagType, Diagnostic, Highlight},
+    token::{
+        tokens::{
+            expected, too_few_operands,
+            traits::{Assemble, Requirements},
+        },
+        Token,
+    },
+    types::{Listings, SymbolTable},
+};
 
 token!(St, 2);
 
 impl Assemble for St {
-    fn assembled(
-        self,
-        program_counter: &mut i16,
-        symbols: &HashMap<String, Symbol>,
-        symbol: &str,
-    ) -> Vec<(u16, String)> {
+    fn assembled(self, program_counter: &mut i16, symbols: &SymbolTable, symbol: &str) -> Listings {
         *program_counter += 1;
 
-        let source_register = match self.operands.first().unwrap() {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let source_register = if let Token::Register(register) = self.operands.first().unwrap() {
+            register.register
+        } else {
+            unreachable!()
         };
 
         let offset = match self.operands.last().unwrap() {
@@ -29,7 +30,7 @@ impl Assemble for St {
                 if let Some(symbol) = symbols.get(label.token()) {
                     symbol.address() as i16 - *program_counter
                 } else {
-                    undefined!(self, label);
+                    undefined!(label);
                     0
                 }
             }
@@ -58,25 +59,14 @@ impl Assemble for St {
 }
 
 impl Requirements for St {
-    fn require_range(&self) -> (u64, u64) {
-        (2, 2)
-    }
-
-    fn memory_requirement(&self) -> u16 {
-        1
+    fn min_operands(&self) -> u64 {
+        2
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        expect!(self, tokens, Token::Register, "Register");
+        expect!(self, tokens, Register);
 
-        expect!(
-            self,
-            tokens,
-            Token::Immediate,
-            "Immediate",
-            Token::Label,
-            "Label"
-        );
+        expect!(self, tokens, Immediate, Label);
 
         operands_check!(self);
 

@@ -1,8 +1,7 @@
-use std::collections::HashMap;
-use std::collections::VecDeque;
-
-use token::tokens::traits::{Assemble, Requirements};
-use token::{Symbol, Token};
+use crate::{
+    token::tokens::traits::{Assemble, Requirements},
+    types::{Listings, SymbolTable},
+};
 
 token!(Ret);
 
@@ -10,9 +9,9 @@ impl Assemble for Ret {
     fn assembled(
         self,
         program_counter: &mut i16,
-        _symbols: &HashMap<String, Symbol>,
+        _symbols: &SymbolTable,
         symbol: &str,
-    ) -> Vec<(u16, String)> {
+    ) -> Listings {
         *program_counter += 1;
 
         vec![(
@@ -24,20 +23,5 @@ impl Assemble for Ret {
                 symbol
             ),
         )]
-    }
-}
-
-impl Requirements for Ret {
-    fn require_range(&self) -> (u64, u64) {
-        (0, 0)
-    }
-
-    fn memory_requirement(&self) -> u16 {
-        1
-    }
-
-    // As RET takes no operands, just do nothing here.
-    fn consume(&mut self, tokens: VecDeque<Token>) -> VecDeque<Token> {
-        tokens
     }
 }

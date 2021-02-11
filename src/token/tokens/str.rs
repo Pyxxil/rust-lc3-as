@@ -1,9 +1,15 @@
-use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::tokens::traits::{Assemble, Requirements};
-use token::tokens::{expected, too_few_operands};
-use token::{Symbol, Token};
+use crate::{
+    token::{
+        tokens::{
+            expected, too_few_operands,
+            traits::{Assemble, Requirements},
+        },
+        Token,
+    },
+    types::{Listings, SymbolTable},
+};
 
 token!(Str, 3);
 
@@ -11,25 +17,28 @@ impl Assemble for Str {
     fn assembled(
         mut self,
         program_counter: &mut i16,
-        _symbols: &HashMap<String, Symbol>,
+        _symbols: &SymbolTable,
         symbol: &str,
-    ) -> Vec<(u16, String)> {
+    ) -> Listings {
         *program_counter += 1;
 
-        let destination_register = match self.operands.remove(0) {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let destination_register = if let Token::Register(register) = self.operands.remove(0) {
+            register.register
+        } else {
+            unreachable!()
         };
 
-        let source_one = match self.operands.remove(0) {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let source_one = if let Token::Register(register) = self.operands.remove(0) {
+            register.register
+        } else {
+            unreachable!()
         };
 
-        let source_two = match self.operands.remove(0) {
-            Token::Immediate(imm) => imm.value & 0x3F,
-            _ => unreachable!(),
-        } as u16;
+        let source_two = if let Token::Immediate(immediate) = self.operands.remove(0) {
+            (immediate.value & 0x3F) as u16
+        } else {
+            unreachable!()
+        };
 
         let instruction: u16 = 0x7000 | destination_register << 9 | source_one << 6 | source_two;
 
@@ -50,20 +59,16 @@ impl Assemble for Str {
 }
 
 impl Requirements for Str {
-    fn require_range(&self) -> (u64, u64) {
-        (3, 3)
-    }
-
-    fn memory_requirement(&self) -> u16 {
-        1
+    fn min_operands(&self) -> u64 {
+        3
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        expect!(self, tokens, Token::Register, "Register");
+        expect!(self, tokens, Register);
 
-        expect!(self, tokens, Token::Register, "Register");
+        expect!(self, tokens, Register);
 
-        expect!(self, tokens, Token::Immediate, "Immediate");
+        expect!(self, tokens, Immediate);
 
         operands_check!(self);
 

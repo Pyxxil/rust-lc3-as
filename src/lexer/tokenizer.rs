@@ -17,14 +17,52 @@ use crate::{
 };
 
 macro_rules! err {
-    ($tokenizer:expr, $diagnostic:expr) => {
-        notifier::add_diagnostic($diagnostic);
+    ($ty:ident, $file:expr, $column:expr, $line:expr, $width:expr, $message:expr) => {
+        notifier::add_diagnostic(Diagnostic::$ty($ty::new(
+            DiagType::Error,
+            $file,
+            $column,
+            $line,
+            $width,
+            $message,
+        )));
+    };
+    ($ty:ident, $file:expr, $column:expr, $line:expr, $message:expr) => {
+        notifier::add_diagnostic(Diagnostic::$ty($ty::new(
+            DiagType::Error,
+            $file,
+            $column,
+            $line,
+            $message,
+        )));
     };
 }
 
 macro_rules! warn {
-    ($diagnostic:expr) => {
-        notifier::add_diagnostic($diagnostic);
+    ($ty:ident, $file:expr, $column:expr, $line:expr, $width:expr, $message:expr) => {
+        notifier::add_diagnostic(Diagnostic::$ty($ty::new(
+            DiagType::Warning,
+            $file,
+            $column,
+            $line,
+            $width,
+            $message,
+        )));
+    };
+    ($ty:ident, $file:expr, $column:expr, $line:expr, $message:expr) => {
+        notifier::add_diagnostic(Diagnostic::$ty($ty::new(
+            DiagType::Warning,
+            $file,
+            $column,
+            $line,
+            $message,
+        )));
+    };
+}
+
+macro_rules! token {
+    ($ty:ident, $token:expr, $file:expr, $column:expr, $line:expr) => {
+        Token::$ty($ty::new($token, $file, $column, $line))
     };
 }
 
@@ -39,17 +77,12 @@ impl<'a> Tokenizer<'a> {
     #[must_use]
     pub fn new(file: &'a str, line: &'a str, line_number: u64) -> Tokenizer<'a> {
         add_line(file, line.to_string());
-        Tokenizer {
+        Self {
             line: line.chars().peekable(),
             column: 1,
             line_number,
             file,
         }
-    }
-
-    #[inline]
-    fn at_end(&mut self) -> bool {
-        self.peek() == None
     }
 
     #[inline]
@@ -105,151 +138,36 @@ impl<'a> Tokenizer<'a> {
         }
 
         match token.to_ascii_uppercase().as_ref() {
-            "ADD" => Some(Token::Add(Add::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "AND" => Some(Token::And(And::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "NOT" => Some(Token::Not(Not::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
+            "ADD" => Some(token!(Add, token, self.file.to_string(), column, line)),
+            "AND" => Some(token!(And, token, self.file.to_string(), column, line)),
+            "NOT" => Some(token!(Not, token, self.file.to_string(), column, line)),
+            "JMP" => Some(token!(Jmp, token, self.file.to_string(), column, line)),
+            "JMPT" => Some(token!(Jmpt, token, self.file.to_string(), column, line)),
+            "JSR" => Some(token!(Jsr, token, self.file.to_string(), column, line)),
+            "JSRR" => Some(token!(Jsrr, token, self.file.to_string(), column, line)),
+            "RET" => Some(token!(Ret, token, self.file.to_string(), column, line)),
+            "RTI" => Some(token!(Rti, token, self.file.to_string(), column, line)),
+            "LD" => Some(token!(Ld, token, self.file.to_string(), column, line)),
+            "LDR" => Some(token!(Ldr, token, self.file.to_string(), column, line)),
+            "LDI" => Some(token!(Ldi, token, self.file.to_string(), column, line)),
+            "LEA" => Some(token!(Lea, token, self.file.to_string(), column, line)),
+            "ST" => Some(token!(St, token, self.file.to_string(), column, line)),
+            "STR" => Some(token!(Str, token, self.file.to_string(), column, line)),
+            "STI" => Some(token!(Sti, token, self.file.to_string(), column, line)),
+            "HALT" => Some(token!(Halt, token, self.file.to_string(), column, line)),
+            "TRAP" => Some(token!(Trap, token, self.file.to_string(), column, line)),
+            "PUTS" => Some(token!(Puts, token, self.file.to_string(), column, line)),
+            "PUTSP" => Some(token!(Putsp, token, self.file.to_string(), column, line)),
+            "PUTC" | "OUT" => Some(token!(Out, token, self.file.to_string(), column, line)),
+            "IN" => Some(token!(In, token, self.file.to_string(), column, line)),
+            "GETC" => Some(token!(Getc, token, self.file.to_string(), column, line)),
             "BRNZP" | "BRNPZ" | "BRZPN" | "BRZNP" | "BRPNZ" | "BRPZN" | "BR" | "BRN" | "BRZ"
             | "BRP" | "BRNZ" | "BRZN" | "BRNP" | "BRPN" | "BRZP" | "BRPZ" => Some(Token::Br(
                 Br::from_str(token, self.file.to_string(), column, line),
             )),
-            "JMP" => Some(Token::Jmp(Jmp::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "JMPT" => Some(Token::Jmpt(Jmpt::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "JSR" => Some(Token::Jsr(Jsr::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "JSRR" => Some(Token::Jsrr(Jsrr::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "RET" => Some(Token::Ret(Ret::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "RTI" => Some(Token::Rti(Rti::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "LD" => Some(Token::Ld(Ld::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "LDR" => Some(Token::Ldr(Ldr::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "LDI" => Some(Token::Ldi(Ldi::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "LEA" => Some(Token::Lea(Lea::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "ST" => Some(Token::St(St::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "STR" => Some(Token::Str(Str::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "STI" => Some(Token::Sti(Sti::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
             "R0" | "R1" | "R2" | "R3" | "R4" | "R5" | "R6" | "R7" => Some(Token::Register(
                 Register::from_str(token, self.file.to_string(), column, line),
             )),
-            "HALT" => Some(Token::Halt(Halt::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "TRAP" => Some(Token::Trap(Trap::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "PUTS" => Some(Token::Puts(Puts::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "PUTSP" => Some(Token::Putsp(Putsp::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "PUTC" | "OUT" => Some(Token::Out(Out::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "IN" => Some(Token::In(In::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            "GETC" => Some(Token::Getc(Getc::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
             _ => self.tokenize_immediate_literal(token, column, line),
         }
     }
@@ -273,14 +191,14 @@ impl<'a> Tokenizer<'a> {
                     '0' => token.push('\0'),
                     '\\' => token.push('\\'),
                     _ => {
-                        warn!(Diagnostic::Highlight(Highlight::new(
-                            DiagType::Warning,
+                        warn!(
+                            Highlight,
                             self.file.to_string(),
                             self.column - 2,
                             self.line_number,
                             2,
-                            format!("Unknown escape sequence '\\{}'", ch),
-                        )));
+                            format!("Unknown escape sequence '\\{}'", ch)
+                        );
                         token.push('\\');
                         token.push(ch);
                     }
@@ -304,15 +222,12 @@ impl<'a> Tokenizer<'a> {
             )))
         } else {
             err!(
-                self,
-                Diagnostic::Highlight(Highlight::new(
-                    DiagType::Error,
-                    self.file.to_string(),
-                    token_start,
-                    self.line_number,
-                    token.len() + 1,
-                    "Unterminated string literal".to_owned()
-                ))
+                Highlight,
+                self.file.to_string(),
+                token_start,
+                self.line_number,
+                token.len() + 1,
+                "Unterminated string literal".to_owned()
             );
             None
         }
@@ -338,14 +253,14 @@ impl<'a> Tokenizer<'a> {
                     '\'' => character.push('\''),
                     '0' => character.push('\0'),
                     _ => {
-                        warn!(Diagnostic::Highlight(Highlight::new(
-                            DiagType::Warning,
+                        warn!(
+                            Highlight,
                             self.file.to_string(),
                             self.column - 2,
                             self.line_number,
                             2,
-                            format!("Unknown escape sequence '\\{}'", ch),
-                        )));
+                            format!("Unknown escape sequence '\\{}'", ch)
+                        );
                         character.push(ch);
                     }
                 };
@@ -360,37 +275,32 @@ impl<'a> Tokenizer<'a> {
 
         if !terminated {
             err!(
-                self,
-                Diagnostic::Highlight(Highlight::new(
-                    DiagType::Error,
-                    self.file.to_string(),
-                    token_start,
-                    self.line_number,
-                    character.len(),
-                    "Unterminated character literal".to_owned()
-                ))
+                Highlight,
+                self.file.to_string(),
+                token_start,
+                self.line_number,
+                character.len(),
+                "Unterminated character literal".to_owned()
             );
             None
         } else if character.len() > 1 {
             err!(
-                self,
-                Diagnostic::Highlight(Highlight::new(
-                    DiagType::Error,
-                    self.file.to_string(),
-                    token_start,
-                    self.line_number,
-                    character.len(),
-                    "Invalid character literal".to_owned()
-                ))
-            );
-            None
-        } else {
-            Some(Token::Character(Character::new(
-                character,
+                Highlight,
                 self.file.to_string(),
                 token_start,
                 self.line_number,
-            )))
+                character.len(),
+                "Invalid character literal".to_owned()
+            );
+            None
+        } else {
+            Some(token!(
+                Character,
+                character,
+                self.file.to_string(),
+                token_start,
+                self.line_number
+            ))
         }
     }
 
@@ -485,12 +395,7 @@ impl<'a> Tokenizer<'a> {
                 line,
             )))
         } else if Self::is_valid_label(&token) {
-            Some(Token::Label(Label::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            )))
+            Some(token!(Label, token, self.file.to_string(), column, line))
         } else {
             None
         }
@@ -525,62 +430,17 @@ impl<'a> Tokenizer<'a> {
                 column,
                 line,
             ))),
-            ".STRINGZ" => Some(Token::Stringz(Stringz::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            ".BLKW" => Some(Token::Blkw(Blkw::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            ".FILL" => Some(Token::Fill(Fill::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            ".INCLUDE" => Some(Token::Include(Include::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            ".SET" => Some(Token::Set(Set::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            ".LSHIFT" => Some(Token::Lshift(Lshift::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            ".NEG" => Some(Token::Neg(Neg::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
-            ".SUB" => Some(Token::Sub(Sub::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
+            ".STRINGZ" => Some(token!(Stringz, token, self.file.to_string(), column, line)),
+            ".BLKW" => Some(token!(Blkw, token, self.file.to_string(), column, line)),
+            ".FILL" => Some(token!(Fill, token, self.file.to_string(), column, line)),
+            ".INCLUDE" => Some(token!(Include, token, self.file.to_string(), column, line)),
+            ".SET" => Some(token!(Set, token, self.file.to_string(), column, line)),
+            ".LSHIFT" => Some(token!(Lshift, token, self.file.to_string(), column, line)),
+            ".NEG" => Some(token!(Neg, token, self.file.to_string(), column, line)),
+            ".SUB" => Some(token!(Sub, token, self.file.to_string(), column, line)),
             _ => {
                 if Self::is_valid_label(&token) {
-                    Some(Token::Label(Label::new(
-                        token,
-                        self.file.to_string(),
-                        column,
-                        line,
-                    )))
+                    Some(token!(Label, token, self.file.to_string(), column, line))
                 } else {
                     None
                 }
@@ -613,99 +473,81 @@ impl<'a> Tokenizer<'a> {
                     if let Some('/') = self.next() {
                         Some(Token::Eol) // Line comment
                     } else {
-                        warn!(Diagnostic::Pointer(Pointer::new(
-                            DiagType::Warning,
+                        warn!(
+                            Pointer,
                             self.file.to_string(),
                             token_start,
                             self.line_number,
                             "Expected another '/' here. Treating it as a comment anyways"
-                                .to_owned(),
-                        )));
+                                .to_owned()
+                        );
                         Some(Token::Eol)
                     }
                 }
                 ';' => Some(Token::Eol), // Line comment
                 ':' | ',' => {
                     self.next();
-                    return self.next_token();
+                    self.next_token()
                 }
-                '"' => return self.tokenize_string_literal(),
-                '\'' => return self.tokenize_character_literal(),
+                '"' => self.tokenize_string_literal(),
+                '\'' => self.tokenize_character_literal(),
                 '#' | '-' => {
                     let token = self.read_word();
                     if Self::is_valid_decimal(&token) {
-                        return Some(Token::Immediate(Immediate::from_decimal(
+                        Some(Token::Immediate(Immediate::from_decimal(
                             token,
                             self.file.to_string(),
                             token_start,
                             self.line_number,
-                        )));
-                    }
-                    err!(
-                        self,
-                        Diagnostic::Highlight(Highlight::new(
-                            DiagType::Error,
+                        )))
+                    } else {
+                        err!(
+                            Highlight,
                             self.file.to_string(),
                             token_start,
                             self.line_number,
                             token.len(),
-                            format!("Invalid token '{}'", token),
-                        ))
-                    );
-                    return self.next_token();
+                            format!("Invalid token '{}'", token)
+                        );
+                        self.next_token()
+                    }
                 }
                 '.' => {
                     let token = self.read_word();
-                    return self.tokenize_directive(token, token_start, self.line_number);
+                    self.tokenize_directive(token, token_start, self.line_number)
                 }
                 ch => {
                     if ch.is_digit(10) {
                         let token = self.read_word();
-                        return self.tokenize_immediate_literal(
-                            token,
-                            token_start,
-                            self.line_number,
-                        );
+                        self.tokenize_immediate_literal(token, token_start, self.line_number)
                     } else if Self::is_token_character(ch) {
                         let token = self.read_word();
-                        return self.tokenize_literal(token, token_start, self.line_number);
-                    }
-                    err!(
-                        self,
-                        Diagnostic::Pointer(Pointer::new(
-                            DiagType::Error,
+                        self.tokenize_literal(token, token_start, self.line_number)
+                    } else {
+                        err!(
+                            Pointer,
                             self.file.to_string(),
                             token_start,
                             self.line_number,
-                            format!("Unknown character literal '{}'", ch),
-                        ))
-                    );
-                    self.next();
-                    return self.next_token();
+                            format!("Unknown character literal '{}'", ch)
+                        );
+                        self.next();
+                        self.next_token()
+                    }
                 }
-            };
+            }
+        } else {
+            Some(Token::Eol)
         }
-
-        Some(Token::Eol)
-    }
-
-    #[inline]
-    #[must_use]
-    pub fn is_okay() -> bool {
-        notifier::error_count() == 0
     }
 }
 
 impl<'a> Iterator for Tokenizer<'a> {
     type Item = Token;
-    fn next(&mut self) -> Option<Token> {
-        if self.at_end() {
-            None
-        } else {
-            match self.next_token() {
-                Some(Token::Eol) => None,
-                token => token,
-            }
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.next_token() {
+            Some(Token::Eol) => None,
+            token => token,
         }
     }
 }

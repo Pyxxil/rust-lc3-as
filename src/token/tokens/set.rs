@@ -1,9 +1,15 @@
-use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::tokens::traits::{Assemble, Requirements};
-use token::tokens::{expected, too_few_operands};
-use token::{Symbol, Token};
+use crate::{
+    token::{
+        tokens::{
+            expected, too_few_operands,
+            traits::{Assemble, Requirements},
+        },
+        Token,
+    },
+    types::{Listings, SymbolTable},
+};
 
 token!(Set, 2);
 
@@ -11,42 +17,45 @@ impl Assemble for Set {
     fn assembled(
         self,
         program_counter: &mut i16,
-        _symbols: &HashMap<String, Symbol>,
+        _symbols: &SymbolTable,
         symbol: &str,
-    ) -> Vec<(u16, String)> {
-        let immediate = match self.operands.last().unwrap() {
-            Token::Immediate(immediate) => immediate.value,
-            _ => unreachable!(),
+    ) -> Listings {
+        let immediate = if let Token::Immediate(immediate) = self.operands.last().unwrap() {
+            immediate.value
+        } else {
+            unreachable!()
         };
 
-        let register = match self.operands.first().unwrap() {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let register = if let Token::Register(register) = self.operands.first().unwrap() {
+            register.register
+        } else {
+            unreachable!()
         };
 
         if immediate >= -16 && immediate <= 15 {
             *program_counter += 2;
-            let and_instruction = 0x5020 | register << 9 | register << 6;
-            let add_instruction =
+            let clear_instruction = 0x5020 | register << 9 | register << 6;
+            let set_instruction =
                 0x1020 | register << 9 | register << 6 | (immediate as u16 & 0x1F);
+
             vec![
                 (
-                    and_instruction,
+                    clear_instruction,
                     format!(
                         "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} AND R{4} R{4} #0",
                         *program_counter - 2,
-                        and_instruction,
+                        clear_instruction,
                         self.line,
                         symbol,
                         register
                     ),
                 ),
                 (
-                    add_instruction,
+                    set_instruction,
                     format!(
                         "({0:04X}) {1:04X} {1:016b} ({2: >4})                      ADD R{3} R{3} #{4}",
                         *program_counter - 1,
-                        add_instruction,
+                        set_instruction,
                         self.line,
                         register,
                         immediate
@@ -90,40 +99,26 @@ impl Assemble for Set {
 }
 
 impl Requirements for Set {
-    fn require_range(&self) -> (u64, u64) {
-        (2, 3)
+    fn min_operands(&self) -> u64 {
+        2
     }
 
     fn memory_requirement(&self) -> u16 {
-        if self.operands.is_empty() {
-            0
-        } else {
-            match self.operands.last().unwrap() {
-                Token::Immediate(immediate) => {
-                    if immediate.value > 15 || immediate.value < -16 {
-                        3
-                    } else {
-                        2
-                    }
-                }
-                _ => unreachable!(),
+        if let Token::Immediate(immediate) = self.operands.last().unwrap() {
+            if immediate.value > 15 || immediate.value < -16 {
+                3
+            } else {
+                2
             }
+        } else {
+            unreachable!()
         }
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        expect!(self, tokens, Token::Register, "Register");
+        expect!(self, tokens, Register);
 
-        expect!(
-            self,
-            tokens,
-            Token::Register,
-            "Register",
-            Token::Immediate,
-            "Immediate",
-            Token::Label,
-            "Label"
-        );
+        expect!(self, tokens, Register, Immediate, Label);
 
         operands_check!(self);
 

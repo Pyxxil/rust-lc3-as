@@ -1,9 +1,15 @@
-use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::tokens::traits::{Assemble, Requirements};
-use token::tokens::{expected, too_few_operands};
-use token::{Symbol, Token};
+use crate::{
+    token::{
+        tokens::{
+            expected, too_few_operands,
+            traits::{Assemble, Requirements},
+        },
+        Token,
+    },
+    types::{Listings, SymbolTable},
+};
 
 token!(Trap, 1);
 
@@ -11,16 +17,16 @@ impl Assemble for Trap {
     fn assembled(
         self,
         program_counter: &mut i16,
-        _symbols: &HashMap<String, Symbol>,
+        _symbols: &SymbolTable,
         symbol: &str,
-    ) -> Vec<(u16, String)> {
+    ) -> Listings {
         *program_counter += 1;
 
-        let instruction = 0xF000
-            | (match self.operands.first().unwrap() {
-                Token::Immediate(imm) => imm.value,
-                _ => unreachable!(),
-            } & 0xFF) as u16;
+        let instruction = if let Token::Immediate(immediate) = self.operands.first().unwrap() {
+            0xF000 | (immediate.value as u16 & 0xFF)
+        } else {
+            unreachable!()
+        };
 
         vec![(
             instruction,
@@ -37,16 +43,12 @@ impl Assemble for Trap {
 }
 
 impl Requirements for Trap {
-    fn require_range(&self) -> (u64, u64) {
-        (1, 1)
-    }
-
-    fn memory_requirement(&self) -> u16 {
+    fn min_operands(&self) -> u64 {
         1
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        expect!(self, tokens, Token::Immediate, "Immediate");
+        expect!(self, tokens, Immediate);
 
         operands_check!(self);
 

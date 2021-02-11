@@ -1,22 +1,21 @@
-use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::tokens::traits::{Assemble, Requirements};
-use token::tokens::{expected, too_few_operands};
-use token::{Symbol, Token};
-
-use crate::notifier;
-use crate::notifier::{DiagType, Diagnostic, Highlight};
+use crate::{
+    notifier::{self, DiagType, Diagnostic, Highlight},
+    token::{
+        tokens::{
+            expected, too_few_operands,
+            traits::{Assemble, Requirements},
+        },
+        Token,
+    },
+    types::{Listings, SymbolTable},
+};
 
 token!(Fill, 1);
 
 impl Assemble for Fill {
-    fn assembled(
-        self,
-        program_counter: &mut i16,
-        symbols: &HashMap<String, Symbol>,
-        symbol: &str,
-    ) -> Vec<(u16, String)> {
+    fn assembled(self, program_counter: &mut i16, symbols: &SymbolTable, symbol: &str) -> Listings {
         *program_counter += 1;
 
         let value = match self.operands.first().unwrap() {
@@ -27,7 +26,7 @@ impl Assemble for Fill {
                 {
                     symbol.1.address()
                 } else {
-                    undefined!(self, label);
+                    undefined!(label);
                     0
                 }
             }
@@ -50,25 +49,12 @@ impl Assemble for Fill {
 }
 
 impl Requirements for Fill {
-    fn require_range(&self) -> (u64, u64) {
-        (1, 0)
-    }
-
-    fn memory_requirement(&self) -> u16 {
+    fn min_operands(&self) -> u64 {
         1
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        expect!(
-            self,
-            tokens,
-            Token::Immediate,
-            "Immediate",
-            Token::Character,
-            "Character",
-            Token::Label,
-            "Label"
-        );
+        expect!(self, tokens, Immediate, Character, Label);
 
         operands_check!(self);
 

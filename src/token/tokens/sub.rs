@@ -1,10 +1,13 @@
-use std::collections::HashMap;
 use std::collections::VecDeque;
 
-use token::r#type::Token;
-use token::tokens::traits::{Assemble, Requirements};
-use token::tokens::{expected, too_few_operands};
-use token::Symbol;
+use crate::{
+    token::tokens::{
+        expected, too_few_operands,
+        traits::{Assemble, Requirements},
+        Token,
+    },
+    types::{Listings, SymbolTable},
+};
 
 token!(Sub, 3);
 
@@ -12,30 +15,35 @@ impl Assemble for Sub {
     fn assembled(
         self,
         program_counter: &mut i16,
-        _symbols: &HashMap<String, Symbol>,
+        _symbols: &SymbolTable,
         symbol: &str,
-    ) -> Vec<(u16, String)> {
-        let destination_register = match self.operands.first().unwrap() {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+    ) -> Listings {
+        *program_counter += 1;
+
+        let destination_register = if let Token::Register(register) = self.operands.first().unwrap()
+        {
+            register.register
+        } else {
+            unreachable!()
         };
 
         let source_register_one = if self.operands.len() > 2 {
-            match &self.operands[1] {
-                Token::Register(ref register) => register.register,
-                _ => unreachable!(),
+            if let Token::Register(register) = &self.operands[1] {
+                register.register
+            } else {
+                unreachable!()
             }
         } else {
             destination_register
         };
 
-        let source_register_two = match self.operands.last().unwrap() {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let source_register_two = if let Token::Register(register) = self.operands.last().unwrap() {
+            register.register
+        } else {
+            unreachable!()
         };
 
         if source_register_one == source_register_two {
-            *program_counter += 1;
             let instruction = 0x5000 | destination_register << 9 | source_register_one << 6 | 0x20;
             vec![(
                 instruction,
@@ -50,15 +58,13 @@ impl Assemble for Sub {
                 ),
             )]
         } else {
-            *program_counter += 3;
+            *program_counter += 2;
             let not_instruction = 0x903F | source_register_two << 9 | source_register_two << 6;
             let add_instruction = 0x1021 | source_register_two << 9 | source_register_two << 6;
-
             let subtract_instruction =
                 0x1000 | destination_register << 9 | source_register_one << 6 | source_register_two;
 
-            let mut assembled = vec![
-                (
+            let mut assembled = vec![(
                     not_instruction,
                     format!(
                         "({0:04X}) {1:04X} {1:0>16b} ({2: >4}) {3: <20} NOT R{4} R{4}",
@@ -90,8 +96,7 @@ impl Assemble for Sub {
                         source_register_one,
                         source_register_two,
                     ),
-                ),
-            ];
+                )];
 
             if destination_register != source_register_two {
                 *program_counter += 2;
@@ -105,8 +110,7 @@ impl Assemble for Sub {
                         source_register_two
                     ),
                 ));
-                assembled.push(
-                (
+                assembled.push((
                     add_instruction,
                     format!(
                         "({0:04X}) {1:04X} {1:0>16b} ({2: >4})                      ADD R{3} R{3} #1",
@@ -124,28 +128,32 @@ impl Assemble for Sub {
 }
 
 impl Requirements for Sub {
-    fn require_range(&self) -> (u64, u64) {
-        (2, 3)
+    fn min_operands(&self) -> u64 {
+        2
     }
 
     fn memory_requirement(&self) -> u16 {
-        let destination_register = match self.operands.first().unwrap() {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let destination_register = if let Token::Register(register) = self.operands.first().unwrap()
+        {
+            register.register
+        } else {
+            unreachable!()
         };
 
         let source_register_one = if self.operands.len() > 2 {
-            match &self.operands[1] {
-                Token::Register(ref register) => register.register,
-                _ => unreachable!(),
+            if let Token::Register(ref register) = &self.operands[1] {
+                register.register
+            } else {
+                unreachable!()
             }
         } else {
             destination_register
         };
 
-        let source_register_two = match self.operands.last().unwrap() {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let source_register_two = if let Token::Register(register) = self.operands.last().unwrap() {
+            register.register
+        } else {
+            unreachable!()
         };
 
         if source_register_one == source_register_two {
@@ -158,11 +166,11 @@ impl Requirements for Sub {
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        expect!(self, tokens, Token::Register, "Register");
+        expect!(self, tokens, Register);
 
-        expect!(self, tokens, Token::Register, "Register");
+        expect!(self, tokens, Register);
 
-        maybe_expect!(self, tokens, Token::Register);
+        maybe_expect!(self, tokens, Register);
 
         operands_check!(self);
 

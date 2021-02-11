@@ -1,21 +1,21 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
 
-use token::tokens::traits::{Assemble, Requirements};
-use token::tokens::{expected, too_few_operands};
-use token::{Symbol, Token};
-
-use crate::notifier;
-use crate::notifier::{DiagType, Diagnostic, Highlight};
+use crate::{
+    notifier::{self, DiagType, Diagnostic, Highlight},
+    token::{
+        tokens::{
+            expected, too_few_operands,
+            traits::{Assemble, Requirements},
+        },
+        Token,
+    },
+    types::{Listings, SymbolTable},
+};
 
 token!(Jsr, 1);
 
 impl Assemble for Jsr {
-    fn assembled(
-        self,
-        program_counter: &mut i16,
-        symbols: &HashMap<String, Symbol>,
-        symbol: &str,
-    ) -> Vec<(u16, String)> {
+    fn assembled(self, program_counter: &mut i16, symbols: &SymbolTable, symbol: &str) -> Listings {
         *program_counter += 1;
 
         let value = match self.operands.first().unwrap() {
@@ -24,7 +24,7 @@ impl Assemble for Jsr {
                 if let Some(symbol) = symbols.get(label.token()) {
                     symbol.address() as i16 - *program_counter
                 } else {
-                    undefined!(self, label);
+                    undefined!(label);
                     0
                 }
             }
@@ -52,23 +52,12 @@ impl Assemble for Jsr {
 }
 
 impl Requirements for Jsr {
-    fn require_range(&self) -> (u64, u64) {
-        (1, 1)
-    }
-
-    fn memory_requirement(&self) -> u16 {
+    fn min_operands(&self) -> u64 {
         1
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        expect!(
-            self,
-            tokens,
-            Token::Label,
-            "Label",
-            Token::Immediate,
-            "Immediate"
-        );
+        expect!(self, tokens, Label, Immediate);
 
         operands_check!(self);
 

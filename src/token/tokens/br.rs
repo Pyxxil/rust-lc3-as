@@ -1,32 +1,38 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
 
-use token::tokens::traits::{Assemble, Requirements};
-use token::tokens::{expected, too_few_operands};
-use token::{Symbol, Token};
-
-use crate::notifier;
-use crate::notifier::{DiagType, Diagnostic, Highlight};
+use crate::{
+    notifier::{self, DiagType, Diagnostic, Highlight},
+    token::{
+        tokens::{
+            expected, too_few_operands,
+            traits::{Assemble, Requirements},
+        },
+        Token,
+    },
+    types::{Listings, SymbolTable},
+};
 
 token!(Br, 1, n: bool, z: bool, p: bool);
 
 impl Br {
     #[must_use]
     pub fn from_str(token: String, file: String, column: u64, line: u64) -> Self {
-        let n = token.contains('N');
-        let z = token.contains('Z');
-        let p = token.contains('P');
+        let (n, z, p) = if token.len() == 2 {
+            (true, true, true)
+        } else {
+            (
+                token.contains('N') || token.contains('n'),
+                token.contains('Z') || token.contains('z'),
+                token.contains('P') || token.contains('p'),
+            )
+        };
 
         Self::new(token, file, column, line, n, z, p)
     }
 }
 
 impl Assemble for Br {
-    fn assembled(
-        self,
-        program_counter: &mut i16,
-        symbols: &HashMap<String, Symbol>,
-        symbol: &str,
-    ) -> Vec<(u16, String)> {
+    fn assembled(self, program_counter: &mut i16, symbols: &SymbolTable, symbol: &str) -> Listings {
         *program_counter += 1;
 
         let value = match self.operands.first().unwrap() {
@@ -35,7 +41,7 @@ impl Assemble for Br {
                 if let Some(symbol) = symbols.get(label.token()) {
                     symbol.address() as i16 - *program_counter
                 } else {
-                    undefined!(self, label);
+                    undefined!(label);
                     0
                 }
             }
@@ -67,23 +73,12 @@ impl Assemble for Br {
 }
 
 impl Requirements for Br {
-    fn require_range(&self) -> (u64, u64) {
-        (1, 1)
-    }
-
-    fn memory_requirement(&self) -> u16 {
+    fn min_operands(&self) -> u64 {
         1
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        expect!(
-            self,
-            tokens,
-            Token::Label,
-            "Label",
-            Token::Immediate,
-            "Immediate"
-        );
+        expect!(self, tokens, Label, Immediate);
 
         operands_check!(self);
 

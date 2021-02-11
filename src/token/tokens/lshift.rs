@@ -1,10 +1,15 @@
-use std::collections::HashMap;
-use std::collections::VecDeque;
-use std::iter;
+use std::{collections::VecDeque, iter};
 
-use token::tokens::traits::{Assemble, Requirements};
-use token::tokens::{expected, too_few_operands};
-use token::{Symbol, Token};
+use crate::{
+    token::{
+        tokens::{
+            expected, too_few_operands,
+            traits::{Assemble, Requirements},
+        },
+        Token,
+    },
+    types::{Listings, SymbolTable},
+};
 
 token!(Lshift, 2);
 
@@ -12,17 +17,19 @@ impl Assemble for Lshift {
     fn assembled(
         mut self,
         program_counter: &mut i16,
-        _symbols: &HashMap<String, Symbol>,
+        _symbols: &SymbolTable,
         symbol: &str,
-    ) -> Vec<(u16, String)> {
-        let register = match self.operands.remove(0) {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+    ) -> Listings {
+        let register = if let Token::Register(register) = self.operands.remove(0) {
+            register.register
+        } else {
+            unreachable!()
         };
 
-        let count = match self.operands.remove(0) {
-            Token::Immediate(immediate) => immediate.value as u16,
-            _ => unreachable!(),
+        let count = if let Token::Immediate(immediate) = self.operands.remove(0) {
+            immediate.value as u16
+        } else {
+            unreachable!()
         };
 
         let instruction = 0x1000 | register << 9 | register << 6 | register;
@@ -56,25 +63,21 @@ impl Assemble for Lshift {
 }
 
 impl Requirements for Lshift {
-    fn require_range(&self) -> (u64, u64) {
-        (2, 2)
+    fn min_operands(&self) -> u64 {
+        2
     }
 
     fn memory_requirement(&self) -> u16 {
-        if self.operands.is_empty() {
-            0
-        } else {
-            match self.operands.last().unwrap() {
-                Token::Immediate(imm) => imm.value as u16,
-                _ => unreachable!(),
-            }
+        match self.operands.last().unwrap() {
+            Token::Immediate(imm) => imm.value as u16,
+            _ => unreachable!(),
         }
     }
 
     fn consume(&mut self, mut tokens: VecDeque<Token>) -> VecDeque<Token> {
-        expect!(self, tokens, Token::Register, "Register");
+        expect!(self, tokens, Register);
 
-        expect!(self, tokens, Token::Immediate, "Immediate");
+        expect!(self, tokens, Immediate);
 
         operands_check!(self);
 

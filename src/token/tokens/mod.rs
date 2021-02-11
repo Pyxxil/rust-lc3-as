@@ -1,6 +1,7 @@
-use notifier;
-use notifier::{DiagType, Diagnostic, Highlight};
-use token::r#type::Token;
+use crate::{
+    notifier::{self, DiagType, Diagnostic, Highlight},
+    token::r#type::Token,
+};
 
 #[macro_use]
 pub mod macros;
