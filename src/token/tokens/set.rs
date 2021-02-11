@@ -20,14 +20,16 @@ impl Assemble for Set {
         _symbols: &SymbolTable,
         symbol: &str,
     ) -> Listings {
-        let immediate = match self.operands.last().unwrap() {
-            Token::Immediate(immediate) => immediate.value,
-            _ => unreachable!(),
+        let immediate = if let Token::Immediate(immediate) = self.operands.last().unwrap() {
+            immediate.value
+        } else {
+            unreachable!()
         };
 
-        let register = match self.operands.first().unwrap() {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let register = if let Token::Register(register) = self.operands.first().unwrap() {
+            register.register
+        } else {
+            unreachable!()
         };
 
         if immediate >= -16 && immediate <= 15 {
@@ -102,15 +104,14 @@ impl Requirements for Set {
     }
 
     fn memory_requirement(&self) -> u16 {
-        match self.operands.last().unwrap() {
-            Token::Immediate(immediate) => {
-                if immediate.value > 15 || immediate.value < -16 {
-                    3
-                } else {
-                    2
-                }
+        if let Token::Immediate(immediate) = self.operands.last().unwrap() {
+            if immediate.value > 15 || immediate.value < -16 {
+                3
+            } else {
+                2
             }
-            _ => unreachable!(),
+        } else {
+            unreachable!()
         }
     }
 

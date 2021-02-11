@@ -20,10 +20,11 @@ impl Assemble for Orig {
         _symbols: &SymbolTable,
         symbol: &str,
     ) -> Listings {
-        let instruction = match self.operands.remove(0) {
-            Token::Immediate(imm) => imm.value,
-            _ => unreachable!(),
-        } as u16;
+        let instruction = if let Token::Immediate(immediate) = self.operands.remove(0) {
+            immediate.value as u16
+        } else {
+            unreachable!()
+        };
 
         *program_counter = instruction as i16;
 
@@ -43,9 +44,10 @@ impl Requirements for Orig {
     }
 
     fn memory_requirement(&self) -> u16 {
-        match self.operands.first().unwrap() {
-            Token::Immediate(imm) => imm.value as u16,
-            _ => unreachable!(),
+        if let Token::Immediate(imm) = self.operands.first().unwrap() {
+            imm.value as u16
+        } else {
+            unreachable!()
         }
     }
 

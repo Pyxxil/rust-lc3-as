@@ -23,14 +23,17 @@ impl Assemble for Neg {
     ) -> Listings {
         *program_counter += self.memory_requirement() as i16;
 
-        let destination_register = match self.operands.first().unwrap() {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let destination_register = if let Token::Register(register) = self.operands.first().unwrap()
+        {
+            register.register
+        } else {
+            unreachable!()
         };
 
-        let source_register = match self.operands.last().unwrap() {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let source_register = if let Token::Register(register) = self.operands.last().unwrap() {
+            register.register
+        } else {
+            unreachable!()
         };
 
         let not_instruction = 0x903F | destination_register << 9 | source_register << 6;

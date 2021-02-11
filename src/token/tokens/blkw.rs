@@ -41,10 +41,11 @@ impl Assemble for Blkw {
             ),
         )];
 
-        let count = match self.operands.first().unwrap() {
-            Token::Immediate(imm) => imm.value,
-            _ => unreachable!(),
-        } as usize;
+        let count = if let Token::Immediate(immediate) = self.operands.first().unwrap() {
+            immediate.value as usize
+        } else {
+            unreachable!()
+        };
 
         (1..count).for_each(|_| {
             *program_counter += 1;

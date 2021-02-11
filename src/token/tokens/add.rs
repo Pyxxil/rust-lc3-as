@@ -22,29 +22,23 @@ impl Assemble for Add {
     ) -> Listings {
         *program_counter += 1;
 
-        let destination_register = match self.operands.remove(0) {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let destination_register = if let Token::Register(register) = self.operands.remove(0) {
+            register.register
+        } else {
+            unreachable!()
         };
 
-        let source_one = if let Some(token) = self.operands.first() {
-            if let Token::Register(register) = token {
-                register.register
-            } else {
-                unreachable!()
-            }
-        } else {
-            destination_register
+        let source_one = match self.operands.first() {
+            Some(Token::Register(register)) => register.register,
+            Some(_) => unreachable!(),
+            None => destination_register,
         };
 
-        let source_two = if let Some(token) = self.operands.last() {
-            match token {
-                Token::Register(register) => register.register,
-                Token::Immediate(imm) => (0x20 | (imm.value & 0x1F)) as u16,
-                _ => unreachable!(),
-            }
-        } else {
-            source_one
+        let source_two = match self.operands.last() {
+            Some(Token::Register(register)) => register.register,
+            Some(Token::Immediate(imm)) => (0x20 | (imm.value & 0x1F)) as u16,
+            Some(_) => unreachable!(),
+            None => source_one,
         };
 
         let instruction: u16 = 0x1000 | destination_register << 9 | source_one << 6 | source_two;

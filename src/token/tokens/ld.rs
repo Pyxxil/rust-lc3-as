@@ -18,9 +18,11 @@ impl Assemble for Ld {
     fn assembled(self, program_counter: &mut i16, symbols: &SymbolTable, symbol: &str) -> Listings {
         *program_counter += 1;
 
-        let destination_register = match self.operands.first().unwrap() {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let destination_register = if let Token::Register(register) = self.operands.first().unwrap()
+        {
+            register.register
+        } else {
+            unreachable!()
         };
 
         let offset = match self.operands.last().unwrap() {

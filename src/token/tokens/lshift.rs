@@ -20,14 +20,16 @@ impl Assemble for Lshift {
         _symbols: &SymbolTable,
         symbol: &str,
     ) -> Listings {
-        let register = match self.operands.remove(0) {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let register = if let Token::Register(register) = self.operands.remove(0) {
+            register.register
+        } else {
+            unreachable!()
         };
 
-        let count = match self.operands.remove(0) {
-            Token::Immediate(immediate) => immediate.value as u16,
-            _ => unreachable!(),
+        let count = if let Token::Immediate(immediate) = self.operands.remove(0) {
+            immediate.value as u16
+        } else {
+            unreachable!()
         };
 
         let instruction = 0x1000 | register << 9 | register << 6 | register;

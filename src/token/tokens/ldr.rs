@@ -22,20 +22,23 @@ impl Assemble for Ldr {
     ) -> Listings {
         *program_counter += 1;
 
-        let destination_register = match self.operands.remove(0) {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let destination_register = if let Token::Register(register) = self.operands.remove(0) {
+            register.register
+        } else {
+            unreachable!()
         };
 
-        let source_one = match self.operands.remove(0) {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let source_one = if let Token::Register(register) = self.operands.remove(0) {
+            register.register
+        } else {
+            unreachable!()
         };
 
-        let source_two = match self.operands.remove(0) {
-            Token::Immediate(imm) => imm.value & 0x3F,
-            _ => unreachable!(),
-        } as u16;
+        let source_two = if let Token::Immediate(immediate) = self.operands.remove(0) {
+            (immediate.value & 0x3F) as u16
+        } else {
+            unreachable!()
+        };
 
         let instruction: u16 = 0x6000 | destination_register << 9 | source_one << 6 | source_two;
 

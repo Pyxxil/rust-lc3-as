@@ -22,16 +22,15 @@ impl Assemble for Not {
     ) -> Listings {
         *program_counter += 1;
 
-        let destination_register = match self.operands.remove(0) {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let destination_register = if let Token::Register(register) = self.operands.remove(0) {
+            register.register
+        } else {
+            unreachable!()
         };
 
         let source_register = match self.operands.first() {
-            Some(token) => match token {
-                Token::Register(register) => register.register,
-                _ => unreachable!(),
-            },
+            Some(Token::Register(register)) => register.register,
+            Some(_) => unreachable!(),
             None => destination_register,
         };
 

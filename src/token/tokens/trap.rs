@@ -22,11 +22,11 @@ impl Assemble for Trap {
     ) -> Listings {
         *program_counter += 1;
 
-        let instruction = 0xF000
-            | (match self.operands.first().unwrap() {
-                Token::Immediate(imm) => imm.value,
-                _ => unreachable!(),
-            } & 0xFF) as u16;
+        let instruction = if let Token::Immediate(immediate) = self.operands.first().unwrap() {
+            0xF000 | (immediate.value as u16 & 0xFF)
+        } else {
+            unreachable!()
+        };
 
         vec![(
             instruction,

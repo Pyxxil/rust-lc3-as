@@ -22,9 +22,10 @@ impl Assemble for Jmp {
     ) -> Listings {
         *program_counter += 1;
 
-        let register = match self.operands.first().unwrap() {
-            Token::Register(register) => register.register,
-            _ => unreachable!(),
+        let register = if let Token::Register(register) = self.operands.first().unwrap() {
+            register.register
+        } else {
+            unreachable!()
         };
 
         let instruction = 0xC000 | register << 6;

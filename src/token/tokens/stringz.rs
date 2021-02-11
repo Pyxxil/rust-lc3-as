@@ -22,41 +22,40 @@ impl Assemble for Stringz {
     ) -> Listings {
         let mut assembled = Vec::new();
 
-        match self.operands.first().unwrap() {
-            Token::String(string) => {
-                if let Some(character) = string.token().chars().next() {
-                    assembled.push((
-                        character as u16,
-                        format!(
-                            "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} .FILL #{1}",
-                            *program_counter, character as u16, self.line, symbol
-                        ),
-                    ));
-                }
-                string.token().chars().skip(1).for_each(|c| {
-                    *program_counter += 1;
-                    assembled.push((
-                        c as u16,
-                        format!(
-                            "({0:04X}) {1:04X} {1:016b} ({2: >4})                      .FILL #{1}",
-                            *program_counter, c as u16, self.line
-                        ),
-                    ));
-                });
+        if let Token::String(string) = self.operands.first().unwrap() {
+            if let Some(character) = string.token().chars().next() {
+                assembled.push((
+                    character as u16,
+                    format!(
+                        "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} .FILL #{1}",
+                        *program_counter, character as u16, self.line, symbol
+                    ),
+                ));
+            }
+            string.token().chars().skip(1).for_each(|c| {
                 *program_counter += 1;
                 assembled.push((
-                    0,
+                    c as u16,
                     format!(
-                        "({0:04X}) 0000 0000000000000000 ({1: >4})                      .FILL #0",
-                        *program_counter, self.line
+                        "({0:04X}) {1:04X} {1:016b} ({2: >4})                      .FILL #{1}",
+                        *program_counter, c as u16, self.line
                     ),
-                ))
-            }
-            _ => unreachable!(),
+                ));
+            });
+            *program_counter += 1;
+            assembled.push((
+                0,
+                format!(
+                    "({0:04X}) 0000 0000000000000000 ({1: >4})                      .FILL #0",
+                    *program_counter, self.line
+                ),
+            ))
+        } else {
+            unreachable!()
         }
 
-        self.operands.iter().skip(1).for_each(|token| match token {
-            Token::String(string) => {
+        self.operands.iter().skip(1).for_each(|token| {
+            if let Token::String(string) = token {
                 string.token().chars().for_each(|c| {
                     *program_counter += 1;
                     assembled.push((
@@ -74,8 +73,9 @@ impl Assemble for Stringz {
                         *program_counter, self.line
                     ),
                 ))
+            } else {
+                unreachable!()
             }
-            _ => unreachable!(),
         });
 
         *program_counter += 1;
@@ -90,9 +90,13 @@ impl Requirements for Stringz {
     }
 
     fn memory_requirement(&self) -> u16 {
-        self.operands.iter().fold(0_u16, |acc, token| match token {
-            Token::String(string) => acc + string.token().len() as u16 + 1, // Don't forget the '\0'
-            _ => unreachable!(),
+        self.operands.iter().fold(0_u16, |acc, token| {
+            if let Token::String(string) = token {
+                // Don't forget the '\0'
+                acc + string.token().len() as u16 + 1
+            } else {
+                unreachable!()
+            }
         })
     }
 
