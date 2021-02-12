@@ -46,8 +46,8 @@ pub fn parse(mut tokens: Vec<Token>) -> Option<(Vec<Token>, SymbolTable)> {
                     );
                 }
             }
-            Token::Include(ref token) => match token.operands().first().unwrap() {
-                Token::String(string) => {
+            Token::Include(ref token) => {
+                if let Token::String(string) = token.operands().first().unwrap() {
                     let file = string
                         .file()
                         .chars()
@@ -65,9 +65,10 @@ pub fn parse(mut tokens: Vec<Token>) -> Option<(Vec<Token>, SymbolTable)> {
                             })
                         })
                         .unwrap();
+                } else {
+                    unreachable!()
                 }
-                _ => unreachable!(),
-            },
+            }
             Token::Orig(ref tok) => {
                 address = tok.memory_requirement();
             }
@@ -79,9 +80,5 @@ pub fn parse(mut tokens: Vec<Token>) -> Option<(Vec<Token>, SymbolTable)> {
         tokens.push(token);
     }
 
-    if notifier::error_count() == 0 {
-        Some((tokens, symbols))
-    } else {
-        None
-    }
+    (notifier::error_count() == 0).then(|| (tokens, symbols))
 }

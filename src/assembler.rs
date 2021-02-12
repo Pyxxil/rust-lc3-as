@@ -126,11 +126,7 @@ impl Assembler {
             })
             .collect();
 
-        if notifier::error_count() == 0 {
-            Some((symbols, listings))
-        } else {
-            None
-        }
+        (notifier::error_count() == 0).then(|| (symbols, listings))
     }
 }
 

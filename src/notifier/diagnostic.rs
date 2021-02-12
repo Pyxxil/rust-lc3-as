@@ -218,3 +218,23 @@ impl Type for Diagnostic {
         }
     }
 }
+
+impl Colour for Diagnostic {
+    fn coloured(&self) -> String {
+        match self {
+            Self::Note(ref n) => n.coloured(),
+            Self::Pointer(ref p) => p.coloured(),
+            Self::Highlight(ref h) => h.coloured(),
+        }
+    }
+}
+
+impl NoColour for Diagnostic {
+    fn uncoloured(&self) -> String {
+        match self {
+            Self::Note(ref n) => n.uncoloured(),
+            Self::Pointer(ref p) => p.uncoloured(),
+            Self::Highlight(ref h) => h.uncoloured(),
+        }
+    }
+}

@@ -19,7 +19,7 @@ use crate::{
 };
 
 macro_rules! token {
-    ($ty:ident, $token:expr, $file:expr, $column:expr, $line:expr) => {
+    ( $ty:ident, $token:expr, $file:expr, $column:expr, $line:expr ) => {
         Token::$ty($ty::new($token, $file, $column, $line))
     };
 }
@@ -137,7 +137,8 @@ impl<'a> Tokenizer<'a> {
         let mut previous = '\0';
         let token_start = self.column;
 
-        self.next(); // As we used self.peek to get here, we want to skip the current character which is a '"'
+        // As we used self.peek to get here, we want to skip the current character which is a '"'
+        self.next();
 
         while let Some(ch) = self.next() {
             if previous == '\\' {
