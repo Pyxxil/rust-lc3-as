@@ -185,7 +185,7 @@ impl<'a> Tokenizer<'a> {
                 token_start,
                 self.line_number,
                 token.len() + 1,
-                "Unterminated string literal".to_owned()
+                String::from("Unterminated string literal")
             );
             None
         }
@@ -228,37 +228,40 @@ impl<'a> Tokenizer<'a> {
             } else if ch != '\\' {
                 character.push(ch);
             }
+
             previous_character = ch;
         }
 
-        if !terminated {
-            err!(
-                Highlight,
-                self.file.to_string(),
-                token_start,
-                self.line_number,
-                character.len(),
-                "Unterminated character literal".to_owned()
-            );
-            None
-        } else if character.len() > 1 {
-            err!(
-                Highlight,
-                self.file.to_string(),
-                token_start,
-                self.line_number,
-                character.len(),
-                "Invalid character literal".to_owned()
-            );
-            None
+        if terminated {
+            if character.len() == 1 {
+                Some(token!(
+                    Character,
+                    character,
+                    self.file.to_string(),
+                    token_start,
+                    self.line_number
+                ))
+            } else {
+                err!(
+                    Highlight,
+                    self.file.to_string(),
+                    token_start,
+                    self.line_number,
+                    character.len(),
+                    String::from("Invalid character literal")
+                );
+                None
+            }
         } else {
-            Some(token!(
-                Character,
-                character,
+            err!(
+                Highlight,
                 self.file.to_string(),
                 token_start,
-                self.line_number
-            ))
+                self.line_number,
+                character.len(),
+                String::from("Unterminated character literal")
+            );
+            None
         }
     }
 
@@ -328,10 +331,8 @@ impl<'a> Tokenizer<'a> {
         line: u64,
     ) -> Option<Token> {
         if token.is_empty() {
-            return None;
-        }
-
-        if Self::is_valid_decimal(&token) {
+            None
+        } else if Self::is_valid_decimal(&token) {
             Some(Token::Immediate(Immediate::from_decimal(
                 token,
                 self.file.to_string(),
@@ -375,19 +376,8 @@ impl<'a> Tokenizer<'a> {
 
     fn tokenize_directive(&mut self, token: String, column: u64, line: u64) -> Option<Token> {
         match token.to_ascii_uppercase().as_ref() {
-            ".ORIG" => Some(Token::Orig(Orig::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-                0,
-            ))),
-            ".END" => Some(Token::End(End::new(
-                token,
-                self.file.to_string(),
-                column,
-                line,
-            ))),
+            ".ORIG" => Some(token!(Orig, token, self.file.to_string(), column, line)),
+            ".END" => Some(token!(End, token, self.file.to_string(), column, line)),
             ".STRINGZ" => Some(token!(Stringz, token, self.file.to_string(), column, line)),
             ".BLKW" => Some(token!(Blkw, token, self.file.to_string(), column, line)),
             ".FILL" => Some(token!(Fill, token, self.file.to_string(), column, line)),
@@ -436,8 +426,9 @@ impl<'a> Tokenizer<'a> {
                             self.file.to_string(),
                             token_start,
                             self.line_number,
-                            "Expected another '/' here. Treating it as a comment anyways"
-                                .to_owned()
+                            String::from(
+                                "Expected another '/' here. Treating it as a comment anyways"
+                            )
                         );
                         Some(Token::Eol)
                     }

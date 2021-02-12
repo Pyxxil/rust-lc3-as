@@ -1,6 +1,9 @@
 use crate::{
     listing,
-    token::tokens::traits::{Assemble, Requirements},
+    token::tokens::{
+        traits::{Assemble, Requirements},
+        Token,
+    },
     types::{Listings, SymbolTable},
 };
 
@@ -24,3 +27,5 @@ impl Assemble for Ret {
         )]
     }
 }
+
+impl Requirements for Ret {}

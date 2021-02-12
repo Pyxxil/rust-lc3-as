@@ -13,7 +13,7 @@ use crate::{
     types::{Listings, SymbolTable},
 };
 
-token!(Ld, 2);
+token!(Ld);
 
 impl Assemble for Ld {
     fn assembled(self, program_counter: &mut i16, symbols: &SymbolTable, symbol: &str) -> Listings {

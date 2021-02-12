@@ -9,7 +9,7 @@ pub fn lex(file: &str, content: &str) -> Option<Vec<Token>> {
     let tokens = content
         .lines()
         .enumerate()
-        .flat_map(|(line_number, line)| Tokenizer::new(file, &line, (line_number + 1) as u64))
+        .flat_map(|(line_number, line)| Tokenizer::new(file, &line, line_number as u64 + 1))
         .collect();
 
     if notifier::error_count() == 0 {

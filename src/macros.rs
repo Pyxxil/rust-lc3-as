@@ -1,6 +1,6 @@
 #[macro_export]
 macro_rules! err {
-    ($ty:ident, $file:expr, $column:expr, $line:expr, $width:expr, $message:expr) => {
+    ( $ty:ident, $file:expr, $column:expr, $line:expr, $width:expr, $message:expr ) => {
         notifier::add_diagnostic(Diagnostic::$ty($ty::new(
             DiagType::Error,
             $file,
@@ -10,7 +10,8 @@ macro_rules! err {
             $message,
         )));
     };
-    ($ty:ident, $file:expr, $column:expr, $line:expr, $message:expr) => {
+
+    ( $ty:ident, $file:expr, $column:expr, $line:expr, $message:expr ) => {
         notifier::add_diagnostic(Diagnostic::$ty($ty::new(
             DiagType::Error,
             $file,
@@ -23,7 +24,7 @@ macro_rules! err {
 
 #[macro_export]
 macro_rules! warn {
-    ($ty:ident, $file:expr, $column:expr, $line:expr, $width:expr, $message:expr) => {
+    ( $ty:ident, $file:expr, $column:expr, $line:expr, $width:expr, $message:expr ) => {
         notifier::add_diagnostic(Diagnostic::$ty($ty::new(
             DiagType::Warning,
             $file,
@@ -33,7 +34,8 @@ macro_rules! warn {
             $message,
         )));
     };
-    ($ty:ident, $file:expr, $column:expr, $line:expr, $message:expr) => {
+
+    ( $ty:ident, $file:expr, $column:expr, $line:expr, $message:expr ) => {
         notifier::add_diagnostic(Diagnostic::$ty($ty::new(
             DiagType::Warning,
             $file,
@@ -46,7 +48,7 @@ macro_rules! warn {
 
 #[macro_export]
 macro_rules! listing {
-    ($instruction:expr, $program_counter:expr, $line:expr, $symbol:expr, $instr:expr, $destination:expr, $source:expr, $source_two:expr) => {
+    ( $instruction:expr, $program_counter:expr, $line:expr, $symbol:expr, $instr:expr, $destination:expr, $source:expr, $source_two:expr ) => {
         (
             $instruction,
             format!(
@@ -63,7 +65,7 @@ macro_rules! listing {
         )
     };
 
-    ($instruction:expr, $program_counter:expr, $line:expr, $symbol:expr, $instr:expr, $destination:expr, $source:expr) => {
+    ( $instruction:expr, $program_counter:expr, $line:expr, $symbol:expr, $instr:expr, $destination:expr, $source:expr ) => {
         (
             $instruction,
             format!(
@@ -73,7 +75,7 @@ macro_rules! listing {
         )
     };
 
-    ($instruction:expr, $program_counter:expr, $line:expr, $symbol:expr, $instr:expr, $source:expr) => {
+    ( $instruction:expr, $program_counter:expr, $line:expr, $symbol:expr, $instr:expr, $source:expr ) => {
         (
             $instruction,
             format!(
@@ -83,7 +85,7 @@ macro_rules! listing {
         )
     };
 
-    ($instruction:expr, $program_counter:expr, $line:expr, $symbol:expr, $instr:expr) => {
+    ( $instruction:expr, $program_counter:expr, $line:expr, $symbol:expr, $instr:expr ) => {
         (
             $instruction,
             format!(

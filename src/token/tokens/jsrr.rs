@@ -12,7 +12,7 @@ use crate::{
     types::{Listings, SymbolTable},
 };
 
-token!(Jsrr, 1);
+token!(Jsrr);
 
 impl Assemble for Jsrr {
     fn assembled(

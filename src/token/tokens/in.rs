@@ -1,3 +1,4 @@
+use crate::token::tokens::Token;
 use crate::{
     listing,
     token::tokens::traits::{Assemble, Requirements},
@@ -24,3 +25,5 @@ impl Assemble for In {
         )]
     }
 }
+
+impl Requirements for In {}

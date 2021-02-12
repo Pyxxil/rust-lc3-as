@@ -12,7 +12,7 @@ use crate::{
     types::{Listings, SymbolTable},
 };
 
-token!(Lshift, 2);
+token!(Lshift);
 
 impl Assemble for Lshift {
     fn assembled(

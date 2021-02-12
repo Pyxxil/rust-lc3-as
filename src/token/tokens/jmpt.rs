@@ -12,7 +12,7 @@ use crate::{
     types::{Listings, SymbolTable},
 };
 
-token!(Jmpt, 1);
+token!(Jmpt);
 
 impl Assemble for Jmpt {
     fn assembled(

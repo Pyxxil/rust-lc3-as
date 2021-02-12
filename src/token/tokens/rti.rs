@@ -1,10 +1,11 @@
 use crate::{
     listing,
-    token::tokens::traits::Assemble,
+    token::{
+        tokens::{traits::Assemble, Token},
+        traits::Requirements,
+    },
     types::{Listings, SymbolTable},
 };
-
-use super::traits::Requirements;
 
 token!(Rti);
 
@@ -26,3 +27,5 @@ impl Assemble for Rti {
         )]
     }
 }
+
+impl Requirements for Rti {}

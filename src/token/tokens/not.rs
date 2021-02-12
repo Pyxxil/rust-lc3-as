@@ -12,7 +12,7 @@ use crate::{
     types::{Listings, SymbolTable},
 };
 
-token!(Not, 2);
+token!(Not);
 
 impl Assemble for Not {
     fn assembled(

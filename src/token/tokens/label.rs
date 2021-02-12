@@ -1,3 +1,3 @@
-use crate::token::tokens::traits::Requirements;
+use crate::token::tokens::Token;
 
 token!(Label);

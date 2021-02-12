@@ -12,7 +12,7 @@ use crate::{
     types::{Listings, SymbolTable},
 };
 
-token!(Orig, 1, starting_address: u16);
+token!(Orig);
 
 impl Assemble for Orig {
     fn assembled(

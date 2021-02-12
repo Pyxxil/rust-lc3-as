@@ -1,10 +1,10 @@
 use crate::{
     err,
     notifier::{self, DiagType, Diagnostic, Highlight},
-    token::Token,
+    token::tokens::Token,
 };
 
-token!(Immediate, 0, value: i16);
+token!(Immediate, value: i16);
 
 fn too_large(file: String, column: u64, line: u64, length: usize, value: &str) {
     err!(

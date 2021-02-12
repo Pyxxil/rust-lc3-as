@@ -10,7 +10,7 @@ use crate::{
     types::{Listings, SymbolTable},
 };
 
-token!(Sub, 3);
+token!(Sub);
 
 impl Assemble for Sub {
     fn assembled(

@@ -13,7 +13,7 @@ use crate::{
     types::{Listings, SymbolTable},
 };
 
-token!(Br, 1, n: bool, z: bool, p: bool);
+token!(Br, n: bool, z: bool, p: bool);
 
 impl Br {
     #[must_use]

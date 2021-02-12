@@ -1,5 +1,5 @@
 macro_rules! token {
-    ( $name:ident, $capacity:expr, $( $field:ident: $type:ty ),* ) => {
+    ( $name:ident, $( $field:ident: $type:ty ),* ) => {
         #[derive(Debug, PartialEq, Clone)]
         pub struct $name {
             token: String,
@@ -19,7 +19,7 @@ macro_rules! token {
                     line,
                     file,
                     $( $field, )*
-                    operands: Vec::with_capacity($capacity),
+                    operands: Vec::new(),
                 }
             }
 
@@ -48,56 +48,6 @@ macro_rules! token {
                 &self.operands
             }
         }
-    };
-
-    ( $name:ident, $capacity:expr ) => {
-        token!{$name, $capacity, }
-    };
-
-    ( $name:ident, $( $field:ident: $type: ty),* ) => {
-        #[derive(Debug, PartialEq, Clone)]
-        pub struct $name {
-            token: String,
-            column: u64,
-            line: u64,
-            file: String,
-            $( pub $field : $type, )*
-        }
-
-        impl $name {
-            #[must_use]
-            pub fn new(token: String, file: String, column: u64, line: u64, $( $field: $type, )* ) -> Self {
-                Self {
-                    token,
-                    column,
-                    line,
-                    file,
-                    $( $field, )*
-                }
-            }
-
-            #[must_use]
-            pub fn token(&self) -> &String {
-                &self.token
-            }
-
-            #[must_use]
-            pub fn column(&self) -> u64 {
-                self.column
-            }
-
-            #[must_use]
-            pub fn line(&self) -> u64 {
-                self.line
-            }
-
-            #[must_use]
-            pub fn file(&self) -> &String {
-                &self.file
-            }
-        }
-
-        impl Requirements for $name {}
     };
 
     ( $name:ident ) => {
