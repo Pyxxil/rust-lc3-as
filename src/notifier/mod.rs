@@ -21,34 +21,19 @@ pub enum Notifier {
     Stringify(Vec<String>),
 }
 
-/**
- * The `Standard` will simply push the diagnostic to stdout, with
- * optional colouring.
- *
- * The 'Stringifiy' will simply collect each into a vector for later
- */
-
+/// `Standard` will simply push the diagnostic to stdout, with
+/// optional colouring.
+///
+/// `Stringifiy` will simply collect each into a vector for later
 impl Notify for Notifier {
     fn notify(&mut self, diagnostic: &Diagnostic) {
         match *self {
             Self::Standard(ref stdout) => match stdout {
-                Stdout::NoColour => match *diagnostic {
-                    Diagnostic::Note(ref d) => println!("{}", d.no_colour()),
-                    Diagnostic::Highlight(ref d) => println!("{}", d.no_colour()),
-                    Diagnostic::Pointer(ref d) => println!("{}", d.no_colour()),
-                },
-                Stdout::Colour => match *diagnostic {
-                    Diagnostic::Note(ref d) => println!("{}", d.colour()),
-                    Diagnostic::Highlight(ref d) => println!("{}", d.colour()),
-                    Diagnostic::Pointer(ref d) => println!("{}", d.colour()),
-                },
+                Stdout::NoColour => println!("{}", diagnostic.uncoloured()),
+                Stdout::Colour => println!("{}", diagnostic.coloured()),
                 Stdout::Quiet => {}
             },
-            Self::Stringify(ref mut strings) => match *diagnostic {
-                Diagnostic::Note(ref d) => strings.push(d.no_colour()),
-                Diagnostic::Highlight(ref d) => strings.push(d.no_colour()),
-                Diagnostic::Pointer(ref d) => strings.push(d.no_colour()),
-            },
+            Self::Stringify(ref mut strings) => strings.push(diagnostic.uncoloured()),
         }
     }
 }
@@ -115,8 +100,8 @@ pub fn notifications() -> Vec<String> {
     let guard = NOTIFICATION_CONTROLLER.lock().unwrap();
     guard
         .notifiers
-        .iter()
-        .find_map(|(_, notifier)| match notifier {
+        .values()
+        .find_map(|notifier| match notifier {
             Notifier::Stringify(_) => Some(notifier.inner()),
             _ => None,
         })
@@ -142,8 +127,8 @@ impl NotificationController {
     fn notify(&mut self) {
         if let Some(diagnostic) = self.diagnostics.last() {
             self.notifiers
-                .iter_mut()
-                .for_each(|(_, notifier)| notifier.notify(diagnostic))
+                .values_mut()
+                .for_each(|notifier| notifier.notify(diagnostic))
         }
     }
 }

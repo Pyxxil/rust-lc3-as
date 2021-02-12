@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
+    listing,
     notifier::{self, DiagType, Diagnostic, Highlight},
     token::{
         tokens::{
@@ -12,7 +13,7 @@ use crate::{
     types::{Listings, SymbolTable},
 };
 
-token!(Fill, 1);
+token!(Fill);
 
 impl Assemble for Fill {
     fn assembled(self, program_counter: &mut i16, symbols: &SymbolTable, symbol: &str) -> Listings {
@@ -35,15 +36,13 @@ impl Assemble for Fill {
             _ => unreachable!(),
         };
 
-        vec![(
+        vec![listing!(
             value,
-            format!(
-                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} .FILL #{1}",
-                *program_counter - 1,
-                value as i16,
-                self.line,
-                symbol
-            ),
+            *program_counter - 1,
+            self.line,
+            symbol,
+            ".FILL",
+            format!("#{}", value as i16)
         )]
     }
 }

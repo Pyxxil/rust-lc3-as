@@ -1,9 +1,11 @@
 use crate::{
-    token::tokens::traits::Assemble,
+    listing,
+    token::{
+        tokens::{traits::Assemble, Token},
+        traits::Requirements,
+    },
     types::{Listings, SymbolTable},
 };
-
-use super::traits::Requirements;
 
 token!(Rti);
 
@@ -16,15 +18,14 @@ impl Assemble for Rti {
     ) -> Listings {
         *program_counter += 1;
 
-        vec![(
+        vec![listing!(
             0x8000,
-            format!(
-                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} RTI",
-                *program_counter - 1,
-                0x8000,
-                self.line,
-                symbol
-            ),
+            *program_counter - 1,
+            self.line,
+            symbol,
+            "RTI"
         )]
     }
 }
+
+impl Requirements for Rti {}

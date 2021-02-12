@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
+    listing,
     token::{
         tokens::{
             expected, too_few_operands,
@@ -11,7 +12,7 @@ use crate::{
     types::{Listings, SymbolTable},
 };
 
-token!(Stringz, 1);
+token!(Stringz);
 
 impl Assemble for Stringz {
     fn assembled(
@@ -24,32 +25,28 @@ impl Assemble for Stringz {
 
         if let Token::String(string) = self.operands.first().unwrap() {
             if let Some(character) = string.token().chars().next() {
-                assembled.push((
+                assembled.push(listing!(
                     character as u16,
-                    format!(
-                        "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} .FILL #{1}",
-                        *program_counter, character as u16, self.line, symbol
-                    ),
+                    *program_counter,
+                    self.line,
+                    symbol,
+                    ".FILL",
+                    format!("#{}", character as u16)
                 ));
             }
             string.token().chars().skip(1).for_each(|c| {
                 *program_counter += 1;
-                assembled.push((
+                assembled.push(listing!(
                     c as u16,
-                    format!(
-                        "({0:04X}) {1:04X} {1:016b} ({2: >4})                      .FILL #{1}",
-                        *program_counter, c as u16, self.line
-                    ),
+                    *program_counter,
+                    self.line,
+                    "",
+                    ".FILL",
+                    format!("#{}", c as u16)
                 ));
             });
             *program_counter += 1;
-            assembled.push((
-                0,
-                format!(
-                    "({0:04X}) 0000 0000000000000000 ({1: >4})                      .FILL #0",
-                    *program_counter, self.line
-                ),
-            ))
+            assembled.push(listing!(0, *program_counter, self.line, "", ".FILL", "#0"))
         } else {
             unreachable!()
         }
@@ -58,21 +55,16 @@ impl Assemble for Stringz {
             if let Token::String(string) = token {
                 string.token().chars().for_each(|c| {
                     *program_counter += 1;
-                    assembled.push((
+                    assembled.push(listing!(
                         c as u16,
-                        format!(
-                            "({0:04X}) {1:04X} {1:016b} ({2: >4})                      .FILL #{1}",
-                            *program_counter, c as u16, self.line
-                        ),
+                        *program_counter,
+                        self.line,
+                        "",
+                        ".FILL",
+                        format!("#{}", c as u16)
                     ))
                 });
-                assembled.push((
-                    0,
-                    format!(
-                        "({0:04X}) 0000 0000000000000000 ({1: >4})                      .FILL #0",
-                        *program_counter, self.line
-                    ),
-                ))
+                assembled.push(listing!(0, *program_counter, self.line, "", ".FILL", "#0"))
             } else {
                 unreachable!()
             }

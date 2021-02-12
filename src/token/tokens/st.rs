@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
+    listing,
     notifier::{self, DiagType, Diagnostic, Highlight},
     token::{
         tokens::{
@@ -12,7 +13,7 @@ use crate::{
     types::{Listings, SymbolTable},
 };
 
-token!(St, 2);
+token!(St);
 
 impl Assemble for St {
     fn assembled(self, program_counter: &mut i16, symbols: &SymbolTable, symbol: &str) -> Listings {
@@ -39,21 +40,18 @@ impl Assemble for St {
 
         let instruction = 0x3000 | source_register << 9 | offset & 0x1FF;
 
-        vec![(
+        vec![listing!(
             instruction,
-            format!(
-                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} ST R{4} {5}",
-                *program_counter - 1,
-                instruction,
-                self.line,
-                symbol,
-                source_register,
-                match self.operands.last().unwrap() {
-                    Token::Immediate(imm) => format!("#{}", imm.value),
-                    Token::Label(label) => label.token().to_string(),
-                    _ => unreachable!(),
-                }
-            ),
+            *program_counter - 1,
+            self.line,
+            symbol,
+            "ST",
+            format!("R{}", source_register),
+            match self.operands.last().unwrap() {
+                Token::Immediate(imm) => format!("#{}", imm.value),
+                Token::Label(label) => label.token().to_string(),
+                _ => unreachable!(),
+            }
         )]
     }
 }

@@ -1,8 +1,8 @@
 use std::convert::TryInto;
 
-use crate::token::{tokens::traits::Requirements, Token};
+use crate::token::tokens::Token;
 
-token!(Register, 0, register: u16);
+token!(Register, register: u16);
 
 impl Register {
     #[must_use]
@@ -12,5 +12,3 @@ impl Register {
         Self::new(token, file, column, line, register.try_into().unwrap())
     }
 }
-
-impl Requirements for Register {}

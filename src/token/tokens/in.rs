@@ -1,4 +1,6 @@
+use crate::token::tokens::Token;
 use crate::{
+    listing,
     token::tokens::traits::{Assemble, Requirements},
     types::{Listings, SymbolTable},
 };
@@ -14,14 +16,14 @@ impl Assemble for In {
     ) -> Listings {
         *program_counter += 1;
 
-        vec![(
+        vec![listing!(
             0xF023,
-            format!(
-                "({:04X}) F023 1111000000100011 ({: >4}) {: <20} IN",
-                *program_counter - 1,
-                self.line,
-                symbol
-            ),
+            *program_counter - 1,
+            self.line,
+            symbol,
+            "IN"
         )]
     }
 }
+
+impl Requirements for In {}

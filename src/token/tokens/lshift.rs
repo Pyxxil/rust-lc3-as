@@ -1,6 +1,7 @@
 use std::{collections::VecDeque, iter};
 
 use crate::{
+    listing,
     token::{
         tokens::{
             expected, too_few_operands,
@@ -11,7 +12,7 @@ use crate::{
     types::{Listings, SymbolTable},
 };
 
-token!(Lshift, 2);
+token!(Lshift);
 
 impl Assemble for Lshift {
     fn assembled(
@@ -33,26 +34,24 @@ impl Assemble for Lshift {
         };
 
         let instruction = 0x1000 | register << 9 | register << 6 | register;
+        let reg = format!("R{}", register);
 
-        let mut assembled = vec![(
+        let mut assembled = vec![listing!(
             instruction,
-            format!(
-                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} ADD R{4} R{4} R{4}",
-                *program_counter, instruction, self.line, symbol, register,
-            ),
+            *program_counter,
+            self.line,
+            symbol,
+            "ADD",
+            reg,
+            reg,
+            reg
         )];
 
         iter::repeat(instruction)
             .take(count as usize - 1)
             .map(|val| {
                 *program_counter += 1;
-                (
-                    val,
-                    format!(
-                        "({0:04X}) {1:04X} {1:016b} ({2: >4})                      ADD R{3} R{3} R{3}",
-                        *program_counter, val as i16, self.line, register,
-                    ),
-                )
+                listing!(val, *program_counter, self.line, "", "ADD", reg, reg, reg)
             })
             .for_each(|line| assembled.push(line));
 
@@ -68,9 +67,10 @@ impl Requirements for Lshift {
     }
 
     fn memory_requirement(&self) -> u16 {
-        match self.operands.last().unwrap() {
-            Token::Immediate(imm) => imm.value as u16,
-            _ => unreachable!(),
+        if let Token::Immediate(immediate) = self.operands.last().unwrap() {
+            immediate.value as u16
+        } else {
+            unreachable!()
         }
     }
 

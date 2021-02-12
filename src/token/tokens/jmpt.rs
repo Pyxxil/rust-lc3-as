@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
+    listing,
     token::{
         tokens::{
             expected, too_few_operands,
@@ -11,7 +12,7 @@ use crate::{
     types::{Listings, SymbolTable},
 };
 
-token!(Jmpt, 1);
+token!(Jmpt);
 
 impl Assemble for Jmpt {
     fn assembled(
@@ -30,16 +31,14 @@ impl Assemble for Jmpt {
 
         let instruction = 0xC001 | register << 6;
 
-        vec![(
+        vec![listing!(
             instruction,
-            format!(
-                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} JMPT R{4}",
-                *program_counter - 1,
-                instruction,
-                self.line,
-                symbol,
-                register,
-            ),
+            *program_counter - 1,
+            instruction,
+            self.line,
+            symbol,
+            "JMPT",
+            format!("R{}", register)
         )]
     }
 }

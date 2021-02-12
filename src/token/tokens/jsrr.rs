@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
+    listing,
     token::{
         tokens::{
             expected, too_few_operands,
@@ -11,7 +12,7 @@ use crate::{
     types::{Listings, SymbolTable},
 };
 
-token!(Jsrr, 1);
+token!(Jsrr);
 
 impl Assemble for Jsrr {
     fn assembled(
@@ -30,16 +31,14 @@ impl Assemble for Jsrr {
 
         let instruction = 0x4000 | register << 6;
 
-        vec![(
+        vec![listing!(
             instruction,
-            format!(
-                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} JSRR R{4}",
-                *program_counter - 1,
-                instruction,
-                self.line,
-                symbol,
-                register,
-            ),
+            *program_counter - 1,
+            instruction,
+            self.line,
+            symbol,
+            "JSRR",
+            format!("R{}", register)
         )]
     }
 }

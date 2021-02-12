@@ -5,7 +5,7 @@ use crate::token::{
     Token,
 };
 
-token!(Include, 1);
+token!(Include);
 
 impl Requirements for Include {
     fn memory_requirement(&self) -> u16 {

@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
+    listing,
     token::{
         tokens::{
             expected, too_few_operands,
@@ -11,7 +12,7 @@ use crate::{
     types::{Listings, SymbolTable},
 };
 
-token!(Orig, 1, starting_address: u16);
+token!(Orig);
 
 impl Assemble for Orig {
     fn assembled(
@@ -28,12 +29,13 @@ impl Assemble for Orig {
 
         *program_counter = instruction as i16;
 
-        vec![(
+        vec![listing!(
             instruction,
-            format!(
-                "(0000) {0:4X} {0:016b} ({1: >4}) {2: <20} .ORIG {0:#4X}",
-                instruction, self.line, symbol
-            ),
+            0,
+            self.line,
+            symbol,
+            ".ORIG",
+            format!("0x{:04X}", instruction)
         )]
     }
 }

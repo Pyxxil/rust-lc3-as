@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
+    listing,
     notifier::{self, DiagType, Diagnostic, Highlight},
     token::{
         tokens::{
@@ -12,12 +13,13 @@ use crate::{
     types::{Listings, SymbolTable},
 };
 
-token!(Br, 1, n: bool, z: bool, p: bool);
+token!(Br, n: bool, z: bool, p: bool);
 
 impl Br {
     #[must_use]
     pub fn from_str(token: String, file: String, column: u64, line: u64) -> Self {
         let (n, z, p) = if token.len() == 2 {
+            // A simple 'BR' is equivalent to 'BRnzp'
             (true, true, true)
         } else {
             (
@@ -51,23 +53,22 @@ impl Assemble for Br {
         let instruction =
             (self.n as u16) << 11 | (self.z as u16) << 10 | (self.p as u16) << 9 | value & 0x1FF;
 
-        vec![(
+        vec![listing!(
             instruction,
+            *program_counter - 1,
+            self.line,
+            symbol,
             format!(
-                "({0:04X}) {1:04X} {1:016b} ({2: >4}) {3: <20} BR{4}{5}{6} {7}",
-                *program_counter - 1,
-                instruction,
-                self.line,
-                symbol,
+                "BR{}{}{}",
                 if self.n { "n" } else { "" },
                 if self.z { "z" } else { "" },
-                if self.p { "p" } else { "" },
-                match self.operands.first().unwrap() {
-                    Token::Immediate(imm) => format!("#{}", imm.value),
-                    Token::Label(label) => label.token().to_string(),
-                    _ => unreachable!(),
-                }
+                if self.p { "p" } else { "" }
             ),
+            match self.operands.first().unwrap() {
+                Token::Immediate(imm) => format!("#{}", imm.value),
+                Token::Label(label) => label.token().to_string(),
+                _ => unreachable!(),
+            }
         )]
     }
 }
