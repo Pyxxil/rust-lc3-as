@@ -2,9 +2,11 @@ use std::collections::{HashMap, VecDeque};
 
 use crate::{
     assembler::Assembler,
+    err,
     notifier::{self, DiagType, Diagnostic, Highlight},
     token::{traits::Requirements, Symbol, Token},
     types::SymbolTable,
+    warn,
 };
 
 #[must_use]
@@ -20,23 +22,23 @@ pub fn parse(mut tokens: Vec<Token>) -> Option<(Vec<Token>, SymbolTable)> {
         match &token {
             Token::Label(ref tok) => {
                 if symbols.contains_key(tok.token()) {
-                    notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                        DiagType::Error,
+                    err!(
+                        Highlight,
                         (*tok.file()).clone(),
                         tok.column(),
                         tok.line(),
                         tok.token().len(),
-                        format!("Duplicate symbol found {}", tok.token()),
-                    )));
+                        format!("Duplicate symbol found {}", tok.token())
+                    );
                 } else if symbols.values().any(|symbol| symbol.address() == address) {
-                    notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-                        DiagType::Warning,
+                    warn!(
+                        Highlight,
                         (*tok.file()).clone(),
                         tok.column(),
                         tok.line(),
                         tok.token().len(),
-                        format!("Multiple symbols found for address {:#X}", address),
-                    )));
+                        format!("Multiple symbols found for address {:#X}", address)
+                    );
                 } else {
                     symbols.insert(
                         tok.token().to_string(),

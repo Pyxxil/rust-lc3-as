@@ -1,4 +1,5 @@
 use crate::{
+    err,
     notifier::{self, DiagType, Diagnostic, Highlight},
     token::r#type::Token,
 };
@@ -9,8 +10,8 @@ pub mod traits;
 
 pub fn expected(file: &str, expect: &[&str], found: Option<&Token>, at: (u64, u64, usize)) {
     if let Some(found) = found {
-        notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-            DiagType::Error,
+        err!(
+            Highlight,
             (*file).to_string(),
             at.0,
             at.1,
@@ -19,11 +20,11 @@ pub fn expected(file: &str, expect: &[&str], found: Option<&Token>, at: (u64, u6
                 "Expected to find argument of type {}, but found\n{:#?}",
                 expect.to_vec().join(", "),
                 found
-            ),
-        )))
+            )
+        )
     } else {
-        notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-            DiagType::Error,
+        err!(
+            Highlight,
             (*file).to_string(),
             at.0,
             at.1,
@@ -31,14 +32,14 @@ pub fn expected(file: &str, expect: &[&str], found: Option<&Token>, at: (u64, u6
             format!(
                 "Expected to find argument of type {}, but found end of input instead",
                 expect.to_vec().join(", ")
-            ),
-        )));
+            )
+        );
     };
 }
 
 pub fn too_few_operands(file: &str, required: u64, found: u64, token: &str, at: (u64, u64, usize)) {
-    notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-        DiagType::Error,
+    err!(
+        Highlight,
         (*file).to_string(),
         at.0,
         at.1,
@@ -51,8 +52,8 @@ pub fn too_few_operands(file: &str, required: u64, found: u64, token: &str, at: 
             if found == 0 { "" } else { "only " },
             found,
             if found == 1 { "was" } else { "were" }
-        ),
-    )));
+        )
+    );
 }
 
 // Instructions

@@ -161,13 +161,13 @@ macro_rules! operands_check {
 
 macro_rules! undefined {
     ( $label:expr ) => {
-        notifier::add_diagnostic(Diagnostic::Highlight(Highlight::new(
-            DiagType::Error,
+        crate::err!(
+            Highlight,
             $label.file().to_string(),
             $label.column(),
             $label.line(),
             $label.token().len(),
-            String::from("Undefined reference to label"),
-        )));
+            String::from("Undefined reference to label")
+        );
     };
 }
